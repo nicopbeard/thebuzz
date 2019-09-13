@@ -1,0 +1,8 @@
+*/*/.classpath
+*/*/.project
+*/*/.vscode/*
+*/*/.settings/*
+*/*/.DS_Store
+*/*/.DS_Store/*
+.DS_Store
+.gitignore~
