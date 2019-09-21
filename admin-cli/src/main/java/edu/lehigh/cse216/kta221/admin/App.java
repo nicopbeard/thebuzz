@@ -113,7 +113,7 @@ public class App {
         String port = env.get("POSTGRES_PORT");
         String user = env.get("POSTGRES_USER");
         String pass = env.get("POSTGRES_PASS");
-
+        
         // Get a fully-configured connection to the database, or exit 
         // immediately
         Database db = Database.getDatabase(ip, port, user, pass);

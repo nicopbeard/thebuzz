@@ -1,6 +1,7 @@
 package edu.lehigh.cse216.kta221.admin;
-// package edu.lehigh.cse216.kta221.admin;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -8,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 public class Database {
     /**
@@ -106,10 +108,18 @@ public class Database {
     static Database getDatabase(String ip, String port, String user, String pass) {
         // Create an un-configured Database object
         Database db = new Database();
+        Map<String, String> env = System.getenv();
+        String db_url = env.get("DATABASE_URL");
 
         // Give the Database object a connection, fail if we cannot get one
+        // Give the Database object a connection, fail if we cannot get one
         try {
-            Connection conn = DriverManager.getConnection("jdbc:postgresql://" + ip + ":" + port + "/", user, pass);
+            Class.forName("org.postgresql.Driver");
+            URI dbUri = new URI(db_url);
+            String username = dbUri.getUserInfo().split(":")[0];
+            String password = dbUri.getUserInfo().split(":")[1];
+            String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + ':' + dbUri.getPort() + dbUri.getPath();
+            Connection conn = DriverManager.getConnection(dbUrl, username, password);
             if (conn == null) {
                 System.err.println("Error: DriverManager.getConnection() returned a null object");
                 return null;
@@ -118,6 +128,12 @@ public class Database {
         } catch (SQLException e) {
             System.err.println("Error: DriverManager.getConnection() threw a SQLException");
             e.printStackTrace();
+            return null;
+        } catch (ClassNotFoundException cnfe) {
+            System.out.println("Unable to find postgresql driver");
+            return null;
+        } catch (URISyntaxException s) {
+            System.out.println("URI Syntax Error");
             return null;
         }
 
