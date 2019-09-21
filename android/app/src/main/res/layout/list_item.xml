@@ -1,16 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+    android:orientation="horizontal" android:layout_width="match_parent"
     android:layout_height="match_parent">
+
     <TextView
-        android:id="@+id/listItemIndex"
+        android:id="@+id/listMsgNum"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="" />
 
     <TextView
-        android:id="@+id/listItemText"
+        android:id="@+id/listSender"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="" />
+
+    <TextView
+        android:id="@+id/listMsg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="" />
+
+    <Button
+        android:id="@+id/listUpvotesButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Upvotes"
+        android:onClick="listClickHandler"
+        />
+
+    <Button
+        android:id="@+id/listDownvotesButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Downvotes"
+        android:onClick="listClickHandler"
+        />
+
 </LinearLayout>
