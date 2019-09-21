@@ -10,18 +10,24 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHolder> {
 
     private ArrayList<DataFromVolley> dataFromVolley;
     private LayoutInflater mLayoutInflater;
 
-    static class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder  implements View.OnClickListener {
+        private final int INDEX_NOT_SET = -1;
+
         private final TextView msgNum;
         private final TextView sender;
         private final TextView msg;
         private final Button numUpvotes;
         private final Button numDownvotes;
+
+        int indexInDataFromVolley = INDEX_NOT_SET;
 
         ViewHolder(View itemView) {
             super(itemView);
@@ -30,6 +36,33 @@ class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHolder> {
             this.msg = (TextView) itemView.findViewById(R.id.listMsg);
             this.numUpvotes = (Button) itemView.findViewById(R.id.listUpvotesButton);
             this.numDownvotes = (Button) itemView.findViewById(R.id.listDownvotesButton);
+
+            numUpvotes.setOnClickListener(this);
+            numDownvotes.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View view) {
+            Button button = (Button) view;
+            switch (button.getId()){
+                case R.id.listUpvotesButton:
+                    //TODO call server
+                    //Increase upvotes
+                    if(indexInDataFromVolley == INDEX_NOT_SET) {
+                        throw new RuntimeException("Index not set in ItemListAdapter");
+                    }
+                    dataFromVolley.get(indexInDataFromVolley).addUpvote();
+                    ItemListAdapterHelper.incrementButtonCount(button);
+                    break;
+                case R.id.listDownvotesButton:
+                    //TODO call server
+                    if(indexInDataFromVolley == INDEX_NOT_SET) {
+                        throw new RuntimeException("Index not set in ItemListAdapter");
+                    }
+                    dataFromVolley.get(indexInDataFromVolley).addDownvote();
+                    ItemListAdapterHelper.incrementButtonCount(button);
+                    break;
+            }
         }
     }
 
@@ -59,4 +92,7 @@ class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHolder> {
         holder.msg.setText(dataFromVolley.msg());
         holder.numUpvotes.setText(Integer.toString(dataFromVolley.numUpVotes()));
         holder.numDownvotes.setText(Integer.toString(dataFromVolley.numDownvotes()));
+
+        holder.indexInDataFromVolley = position;
     }
+}
