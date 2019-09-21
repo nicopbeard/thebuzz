@@ -5,8 +5,8 @@ class DataFromVolley {
     private final int msgNum;
     private final String sender;
     private final String msg;
-    private final int numUpvotes;
-    private final int numDownvotes;
+    private int numUpvotes;
+    private int numDownvotes;
 
     DataFromVolley(int msgNum, String sender, String msg, int numUpvotes, int numDownvotes) {
         this.msgNum = msgNum;
@@ -14,6 +14,19 @@ class DataFromVolley {
         this.msg = msg;
         this.numUpvotes = numUpvotes;
         this.numDownvotes = numDownvotes;
+    }
+
+    public void addUpvote() {
+        numUpvotes++;
+    }
+    public void remUpvote() {
+        numUpvotes--;
+    }
+    public void addDownvote() {
+        numDownvotes++;
+    }
+    public void remDownvote() {
+        numDownvotes--;
     }
 
     public int msgNum() { return msgNum; }

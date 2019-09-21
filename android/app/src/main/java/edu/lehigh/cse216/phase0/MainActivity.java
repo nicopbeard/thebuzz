@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,6 +21,7 @@ import com.android.volley.toolbox.StringRequest;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -40,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * mData holds the data we get from Volley
      */
-    ArrayList<Datum> mData = new ArrayList<>();
+    private final ArrayList<DataFromVolley> dataFromVolley = new ArrayList<>();
 
 
 
@@ -58,35 +60,6 @@ public class MainActivity extends AppCompatActivity {
         RequestQueue queue = VolleySingleton.getInstance(this).getRequestQueue();
         String url = "http://www.cse.lehigh.edu/~spear/5k.json";
         // Request a string response from the provided URL.
-                StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                        new Response.Listener<String>() {
-                            @Override
-                            public void onResponse(String response) {
-//                                final ArrayList<String> myList = new ArrayList<>();
-//                                try {
-//                                    JSONArray jStringArray = new JSONArray(response);
-//                                    for (int i = 0; i < jStringArray.length(); ++i) {
-//                                        myList.add(jStringArray.getString(i));
-//                                    }
-//                                } catch (final JSONException e) {
-//                                    Log.d("kta221", "Error parsing JSON file..." + e.getMessage());
-//                                }
-//                                ListView mListView = (ListView) findViewById(R.id.datum_list_view);
-//                                ArrayAdapter adapter = new ArrayAdapter<>(MainActivity.this,
-//                                        android.R.layout.simple_list_item_1,
-//                                        myList);
-//                                mListView.setAdapter(adapter);
-                                populateListFromVolley(response);
-                            }
-                        }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.e("kta221", "That didn't work!");
-                    }
-                });
-
-        // Add the request to the RequestQueue.
-        queue.add(stringRequest);
 
     }
 
@@ -130,29 +103,28 @@ public class MainActivity extends AppCompatActivity {
 
     private void populateListFromVolley(String response){
         try {
-            JSONArray json= new JSONArray(response);
-            for (int i = 0; i < json.length(); ++i) {
-                int num = json.getJSONObject(i).getInt("num");
-                String str = json.getJSONObject(i).getString("str");
-                mData.add(new Datum(num, str));
+            JSONArray jsonArr = new JSONArray(response);
+            for (int i = 0; i < jsonArr.length(); i++) {
+                /*JSONObject jsonObj = jsonArr.getJSONObject(i);
+                int msgNum = jsonObj.getInt("num");
+                String sender = jsonObj.getString("str");
+                String msg = jsonObj.getString("msg");
+                int numUpvotes = jsonObj.getInt("numUpvotes");
+                int numDownvotes = jsonObj.getInt("numDownvotes");
+
+                dataFromVolley.add(new DataFromVolley(msgNum, sender, msg, numUpvotes, numDownvotes));*/
+
+                dataFromVolley.add(new DataFromVolley(i, "Chad", "Hello Darling", 5, 2));
             }
         } catch (final JSONException e) {
-            Log.d("kta221", "Error parsing JSON file: " + e.getMessage());
+            Log.d("ERROR", "Error parsing JSON file: " + e.getMessage());
             return;
         }
-        Log.d("kta221", "Successfully parsed JSON file.");
-        RecyclerView rv = (RecyclerView) findViewById(R.id.datum_list_view);
+        Log.d("ERROR", "Successfully parsed JSON file.");
+        RecyclerView rv = (RecyclerView) findViewById(R.id.recyclerViewMsgs);
         rv.setLayoutManager(new LinearLayoutManager(this));
-        ItemListAdapter adapter = new ItemListAdapter(this, mData);
+        ItemListAdapter adapter = new ItemListAdapter(this, dataFromVolley);
         rv.setAdapter(adapter);
-
-        adapter.setClickListener(new ItemListAdapter.ClickListener() {
-            @Override
-            public void onClick(Datum d) {
-                Toast.makeText(MainActivity.this, d.mIndex + " --> " + d.mText, Toast.LENGTH_LONG).show();
-            }
-        });
-
     }
 
 
