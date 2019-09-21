@@ -2,7 +2,9 @@ package edu.lehigh.cse216.phase0;
 
 
 class DataFromVolley {
-    private final int msgNum;
+    private final static int NOT_SET = -1;
+
+    private int msgNum;
     private final String sender;
     private final String msg;
     private int numUpvotes;
@@ -14,6 +16,11 @@ class DataFromVolley {
         this.msg = msg;
         this.numUpvotes = numUpvotes;
         this.numDownvotes = numDownvotes;
+    }
+
+    //Constructor for creating object for msgs user sent so you don't have to go to server
+    DataFromVolley(String sender, String msg) {
+        this(NOT_SET, sender, msg, 0, 0);
     }
 
     public void addUpvote() {
@@ -34,4 +41,8 @@ class DataFromVolley {
     public String msg() { return msg; }
     public int numUpVotes() { return numUpvotes; }
     public int numDownvotes() { return numDownvotes; }
+
+    public void msgNum(int num) {
+        this.msgNum = num;
+    }
 }

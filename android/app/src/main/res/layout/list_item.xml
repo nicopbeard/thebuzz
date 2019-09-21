@@ -6,35 +6,41 @@
     <TextView
         android:id="@+id/listMsgNum"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="" />
+        android:layout_height="match_parent"
+        />
 
     <TextView
         android:id="@+id/listSender"
-        android:layout_width="match_parent"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:text="" />
+        android:textColor="@color/colorPink"
+        android:textColorHighlight="@color/colorGreen"
+        android:layout_marginLeft="5dp"
+        />
 
     <TextView
         android:id="@+id/listMsg"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="" />
+        android:layout_width="220dp"
+        android:layout_height="match_parent"
+        android:textColor="@color/colorPurple"
+        />
 
     <Button
         android:id="@+id/listUpvotesButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         android:text="Upvotes"
-        android:onClick="listClickHandler"
+        android:background="@color/colorGreen"
         />
 
     <Button
         android:id="@+id/listDownvotesButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         android:text="Downvotes"
-        android:onClick="listClickHandler"
+        android:background="@color/colorRed"
+        android:layout_marginLeft="10dp"
+
         />
 
 </LinearLayout>
