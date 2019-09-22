@@ -3,10 +3,10 @@
     "version": "1.0.0",
     "description": "Web Front-End",
     "dependencies": {
-        "@types/jest": "^24.0.18",
         "@types/jquery": "^3.3.31",
-        "jasmine-core": "^3.4.0",
+        "bootstrap": "^3.4.1",
+        "handlebars": "^4.2.1",
         "jquery": "^3.4.1",
-        "typescript": "^3.6.2"
+        "typescript": "^3.0.3"
     }
 }
