@@ -1,6 +1,7 @@
 package edu.lehigh.cse216.phase0;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +9,14 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -45,19 +54,19 @@ class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHolder> {
             Button button = (Button) view;
             switch (button.getId()){
                 case R.id.listUpvotesButton:
-                    //TODO call server
-                    //Increase upvotes
                     if(indexInDataFromVolley == INDEX_NOT_SET) {
                         throw new RuntimeException("Index not set in ItemListAdapter");
                     }
+                    likeMessage(Integer.parseInt(dataFromVolley.get(indexInDataFromVolley).sender()), dataFromVolley.get(indexInDataFromVolley).msgNum(), true);
+                    //check if already liked message -- if so, then it becomes a -1 like
                     dataFromVolley.get(indexInDataFromVolley).addUpvote();
                     ItemListAdapterHelper.incrementButtonCount(button);
                     break;
                 case R.id.listDownvotesButton:
-                    //TODO call server
                     if(indexInDataFromVolley == INDEX_NOT_SET) {
                         throw new RuntimeException("Index not set in ItemListAdapter");
                     }
+                    likeMessage(Integer.parseInt(dataFromVolley.get(indexInDataFromVolley).sender()), dataFromVolley.get(indexInDataFromVolley).msgNum(), false);
                     dataFromVolley.get(indexInDataFromVolley).addDownvote();
                     ItemListAdapterHelper.incrementButtonCount(button);
                     break;
@@ -99,7 +108,36 @@ class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHolder> {
     public void addMessage(MessageInfo data) {
         //sets message number as the last message number + 1. Assumes all messages are in the array
         //And they're sorted. This assumption might not hold true in the future.
-        data.msgNum(dataFromVolley.get(dataFromVolley.size() - 1).msgNum());
-        dataFromVolley.add( data);
+        data.msgNum(dataFromVolley.get(dataFromVolley.size() - 1).msgNum() + 1);
+        dataFromVolley.add(data);
+    }
+
+    private void likeMessage(int userId, int msgId, boolean like) {
+        RequestQueue serverQueue = VolleySingleton.mRequestQueue;
+
+        String sendMsgServerURL = "https://clowns-who-code.herokuapp.com/like";
+
+        JSONObject postparams = new JSONObject();
+        try{
+            postparams.put("userId", userId);
+            postparams.put("msgId", msgId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        JsonObjectRequest jsonObjReq = new JsonObjectRequest(Request.Method.PUT,
+                sendMsgServerURL, postparams,
+                new Response.Listener() {
+                    @Override
+                    public void onResponse(Object response) {
+                        Log.d("SUCCESS", "SUCCESS IN PUT REQ");
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d("ERROR", "ERROR IN POST REQUEST: " + error.toString() );
+                    }
+                });
+        serverQueue.add(jsonObjReq);
     }
 }

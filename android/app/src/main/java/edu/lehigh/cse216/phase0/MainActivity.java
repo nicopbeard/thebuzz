@@ -1,7 +1,6 @@
 package edu.lehigh.cse216.phase0;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -9,7 +8,6 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -20,12 +18,15 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
+
 
 
 public class MainActivity extends AppCompatActivity {
@@ -46,10 +47,10 @@ public class MainActivity extends AppCompatActivity {
         msgToSend = findViewById(R.id.messageToSend);
 
         RequestQueue serverQueue = VolleySingleton.getInstance(this).getRequestQueue();
-        String url = "http://www.cse.lehigh.edu/~spear/5k.json"; //TODO update once backend is up
+        String getMsgsServerURL = "https://clowns-who-code.herokuapp.com/messages";
         // Request a string response from the provided URL.
 
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, getMsgsServerURL,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -84,26 +85,17 @@ public class MainActivity extends AppCompatActivity {
 
     private void populateListFromVolley(String response){
         try {
-            JSONArray jsonArr = new JSONArray(response);
+            String mData = getMdata(response);
+            JSONArray jsonArr = new JSONArray(mData);
             for (int i = 0; i < jsonArr.length() && i < 10; i++) {
-                /*JSONObject jsonObj = jsonArr.getJSONObject(i);
-                int msgNum = jsonObj.getInt("num");
-                String sender = jsonObj.getString("str");
-                String msg = jsonObj.getString("msg");
-                int numUpvotes = jsonObj.getInt("numUpvotes");
-                int numDownvotes = jsonObj.getInt("numDownvotes");
+                JSONObject jsonObj = jsonArr.getJSONObject(i);
+                int msgNum = jsonObj.getInt("id");
+                String sender = Integer.toString(jsonObj.getInt("senderId"));
+                String msg = jsonObj.getString("text");
+                int numUpvotes = jsonObj.getInt("nUpVotes");
+                int numDownvotes = jsonObj.getInt("nDownVotes");
 
-                dataFromVolley.add(new DataFromVolley(msgNum, sender, msg, numUpvotes, numDownvotes));*/
-
-                if(i % 5 == 0){
-                    dataFromVolley.add(new MessageInfo(i, "ChadChadChadChadChadChadChadChadChadChadChadChadChadChadChad" +
-                            "", "Hello Darling", 5, 2));
-                } else if (i % 6 == 0) {
-                    dataFromVolley.add(new MessageInfo(i, "ChadChadChadChadChadChadChadChadChadChadChadChadChadChadChad" +
-                            "", "Hello DarlingDarlingDarlingDarlingDarlingDarlingDarlingDarling", 5, 2));
-                }
-
-                dataFromVolley.add(new MessageInfo(i, "Chad", "Hello Darling", 5, 2));
+                dataFromVolley.add(new MessageInfo(msgNum, sender, msg, numUpvotes, numDownvotes));
             }
         } catch (final JSONException e) {
             Log.d("ERROR", "Error parsing JSON file: " + e.getMessage());
@@ -122,6 +114,7 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
                 adapter.addMessage(new MessageInfo("User has no name", msgToSend.getText().toString()));
+                sendMessageToServer(msgToSend.getText().toString(), 55);
                 msgToSend.setText("");
 
                 //takes you out of editText interface
@@ -129,4 +122,41 @@ public class MainActivity extends AppCompatActivity {
                 imm.hideSoftInputFromWindow(msgToSend.getWindowToken(), 0);
             }
         });
-    }}
+    }
+
+    private String getMdata(String str){
+        String[] data = str.split("mData\":");
+        return data[1];
+    }
+
+    private void sendMessageToServer(final String msg, final int name) {
+        RequestQueue serverQueue = VolleySingleton.getInstance(this).getRequestQueue();
+
+        String sendMsgServerURL = "https://clowns-who-code.herokuapp.com/messages";
+
+        JSONObject postparams = new JSONObject();
+        try{
+            postparams.put("senderId", name);
+            postparams.put("text", msg);
+            postparams.put("nUpVotes", 0);
+            postparams.put("nDownVotes", 0);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        JsonObjectRequest jsonObjReq = new JsonObjectRequest(Request.Method.POST,
+                sendMsgServerURL, postparams,
+                new Response.Listener() {
+                    @Override
+                    public void onResponse(Object response) {
+                        Log.d("SUCCESS", "SUCCESS IN POST REQ");
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d("ERROR", "ERROR IN POST REQUEST: " + error.toString() );
+                    }
+                });
+        serverQueue.add(jsonObjReq);
+    }
+}
