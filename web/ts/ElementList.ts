@@ -34,7 +34,7 @@ class ElementList {
         // Issue a GET, and then pass the result to update()
         $.ajax({
             type: "GET",
-            url: "/messages",
+            url: "https://clowns-who-code.herokuapp.com/messages/",
             dataType: "json",
             success: ElementList.update
         });
@@ -77,7 +77,7 @@ class ElementList {
         let id = $(this).data("value");
         $.ajax({
             type: "POST",
-            url: "/upvote/",
+            url: "https://clowns-who-code.herokuapp.com/messages/",
             dataType: "json",
             data: JSON.stringify({ mId: id }),
             success: ElementList.refresh
@@ -94,7 +94,7 @@ class ElementList {
     let id = $(this).data("value");
     $.ajax({
         type: "POST",
-        url: "/downvote/",
+        url: "https://clowns-who-code.herokuapp.com/messages/",
         dataType: "json",
         data: JSON.stringify({ mId: id }),
         success: ElementList.refresh
