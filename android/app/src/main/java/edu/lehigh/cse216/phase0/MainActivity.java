@@ -114,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
                 adapter.addMessage(new MessageInfo("User has no name", msgToSend.getText().toString()));
-                sendMessageToServer(msgToSend.getText().toString(), 55);
+                sendMessageToServer(msgToSend.getText().toString(), 56);
                 msgToSend.setText("");
 
                 //takes you out of editText interface

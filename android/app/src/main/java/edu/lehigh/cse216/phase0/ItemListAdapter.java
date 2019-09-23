@@ -66,7 +66,10 @@ class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHolder> {
                     if(indexInDataFromVolley == INDEX_NOT_SET) {
                         throw new RuntimeException("Index not set in ItemListAdapter");
                     }
-                    likeMessage(Integer.parseInt(dataFromVolley.get(indexInDataFromVolley).sender()), dataFromVolley.get(indexInDataFromVolley).msgNum(), false);
+
+                    //likeMessage(Integer.parseInt(dataFromVolley.get(indexInDataFromVolley).sender()), dataFromVolley.get(indexInDataFromVolley).msgNum(), false);
+                    //Waiting on backend to allow for above line
+                    
                     dataFromVolley.get(indexInDataFromVolley).addDownvote();
                     ItemListAdapterHelper.incrementButtonCount(button);
                     break;
