@@ -83,7 +83,7 @@ class NewEntryForm {
         // onSubmitResponse
         $.ajax({
             type: "POST",
-            url: "/newMessage",
+            url: "https://clowns-who-code.herokuapp.com/messages/",
             dataType: "json",
             data: JSON.stringify({ 'message': msg }),
             success: NewEntryForm.onSubmitResponse
