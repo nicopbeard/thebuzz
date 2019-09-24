@@ -11,6 +11,8 @@ import java.sql.SQLException;
 // Import Google's JSON library
 import com.google.gson.*;
 import java.util.ArrayList;
+import java.sql.DriverManager;
+
 
 
 /**
@@ -47,6 +49,7 @@ public class App {
         System.out.println(ip + " " + port + " " + user + " " + pass);
         Database db = Database.getDatabase(ip, port, user, pass);
         db.createTable();
+        db.createMessageTable();
 
         // db.createTable(); 
 
@@ -86,17 +89,21 @@ public class App {
         Spark.get("/messages", (request, response) -> {
             // ensure status 200 OK, with a MIME type of JSON
             System.out.println(request);
-            ArrayList<Database.RowData> result = db.selectAll();
+            ArrayList<Database.MessageRow> result = db.messageAll();
             System.out.println(result);
 
             System.out.println("GET RESULT LENGTH: " + result.size());
 
 
 
-            for(Database.RowData item : result) {
-                System.out.println("MESSAGE: " + item.mMessage);
-                System.out.println("SUBJECT: " + item.mSubject);
-                System.out.println("ID: " + item.mId);
+            for(Database.MessageRow item : result) {
+                System.out.println("ID: " + item.id);
+                System.out.println("SENDER_ID: " + item.senderId);
+                System.out.println("TEXT: "+ item.text);
+                System.out.println("TIMESTAMP: "+ item.tStamp);
+                System.out.println("UP_VOTES: "+ item.nUpVotes);
+                System.out.println("UP_VOTES: "+ item.nDownVotes);
+                System.out.println("Request Body: "+ item.toString());
             }
 
 
@@ -130,6 +137,25 @@ public class App {
             }
         });
 
+
+        Spark.post("/user", (request, response) -> {
+            System.out.println(request);
+            UserRequest req = gson.fromJson(request.body(), UserRequest.class);
+            System.out.println("NAME"+ req.name);
+            System.out.println("PASSWORD: "+ req.password);
+
+            response.status(200);
+            response.type("application/json");
+
+            int userId = db.insertUser(req.name, req.password);
+            if (userId == -1) {
+                return gson.toJson(new StructuredUserResponse("error", userId, req.name));
+            } else {
+                return gson.toJson(new StructuredUserResponse("ok", userId, req.name));
+            }
+
+        });
+
         // POST route for adding a new element to the DataStore.  This will read
         // JSON from the body of the request, turn it into a SimpleRequest 
         // object, extract the title and message, insert them, and return the 
@@ -137,9 +163,11 @@ public class App {
         Spark.post("/messages", (request, response) -> {
             // NB: if gson.Json fails, Spark will reply with status 500 Internal 
             // Server Error
-            SimpleRequest req = gson.fromJson(request.body(), SimpleRequest.class);
-            System.out.println("SUBJECT: " + req.mTitle);
-            System.out.println("MESSAGE: "+ req.mMessage);
+            MessageRequest req = gson.fromJson(request.body(), MessageRequest.class);
+            System.out.println("SENDER_ID: " + req.senderId);
+            System.out.println("TEXT: "+ req.text);
+            System.out.println("UP_VOTES: "+ req.nUpVotes);
+            System.out.println("UP_VOTES: "+ req.nDownVotes);
             System.out.println("Request Body: "+ req.toString());
 
             // ensure status 200 OK, with a MIME type of JSON
@@ -148,14 +176,49 @@ public class App {
             response.status(200);
             response.type("application/json");
 
-            db.insertRow(req.mTitle, req.mMessage);
+            // db.insertRow(req.mTitle, req.mMessage);
+            // db.insertMessage(123, "THIS IS TEST TEXT", 5, 1);
+            int newId = db.insertMessage(req.senderId, req.text, req.nUpVotes, req.nDownVotes);
 
-            // NB: createEntry checks for null title and message
-            int newId = dataStore.createEntry(req.mTitle, req.mMessage);
+            //NB: createEntry checks for null title and message
             if (newId == -1) {
-                return gson.toJson(new StructuredResponse("error", "error performing insertion", null));
+                return gson.toJson(new StructuredMessageResponse("error", newId));
             } else {
-                return gson.toJson(new StructuredResponse("ok", "" + newId, null));
+                return gson.toJson(new StructuredMessageResponse("ok", newId));
+            }
+        });
+
+        // PUT route for updating a row in the DataStore.  This is almost 
+        // exactly the same as POST
+        Spark.put("/like", (request, response) -> {
+            // int idx = Integer.parseInt(request.params("id"));
+            VoteRequest req = gson.fromJson(request.body(), VoteRequest.class);
+            // ensure status 200 OK, with a MIME type of JSON
+            response.status(200);
+            response.type("application/json");
+            // DataRow result = dataStore.updateOne(idx, req.mTitle, req.mMessage);
+            int result = db.insertLike(req.userId, req.msgId);
+            if (result == -1) {
+                return gson.toJson(new StructuredResponse("error", "Element Already Added: ", result));
+            } else {
+                return gson.toJson(new StructuredResponse("ok", "Created Element: ", result));
+            }
+        });
+
+        // PUT route for updating a row in the DataStore.  This is almost 
+        // exactly the same as POST
+        Spark.put("/dislike", (request, response) -> {
+            // int idx = Integer.parseInt(request.params("id"));
+            VoteRequest req = gson.fromJson(request.body(), VoteRequest.class);
+            // ensure status 200 OK, with a MIME type of JSON
+            response.status(200);
+            response.type("application/json");
+            // DataRow result = dataStore.updateOne(idx, req.mTitle, req.mMessage);
+            int result = db.insertDislike(req.userId, req.msgId);
+            if (result == -1) {
+                return gson.toJson(new StructuredResponse("error", "Element Already Added: ", result));
+            } else {
+                return gson.toJson(new StructuredResponse("ok", "Created Element: ", result));
             }
         });
 
@@ -192,6 +255,42 @@ public class App {
             boolean result = dataStore.deleteOne(idx);
             if (res <= 0) {
                 return gson.toJson(new StructuredResponse("error", "unable to delete row " + idx, null));
+            } else {
+                return gson.toJson(new StructuredResponse("ok", null, null));
+            }
+        });
+
+        // DELETE route for removing a row from the DataStore
+        Spark.delete("/like", (request, response) -> {
+           
+            VoteRequest req = gson.fromJson(request.body(), VoteRequest.class);
+
+            System.out.println("Attempting to delete like with userId: " + req.userId + " msgId: " + req.msgId);
+            response.status(200);
+            response.type("application/json");
+            int res = db.deleteLike(req.userId, req.msgId);
+            // NB: we won't concern ourselves too much with the quality of the 
+            //     message sent on a successful delete
+            if (res <= 0) {
+                return gson.toJson(new StructuredResponse("error", "Element not in table, cannot delete userID: " + req.userId + " msgID: " + req.msgId, null));
+            } else {
+                return gson.toJson(new StructuredResponse("ok", null, null));
+            }
+        });
+
+        // DELETE route for removing a row from the DataStore
+        Spark.delete("/dislike", (request, response) -> {
+    
+            VoteRequest req = gson.fromJson(request.body(), VoteRequest.class);
+
+            System.out.println("Attempting to delete like with userId: " + req.userId + " msgId: " + req.msgId);
+            response.status(200);
+            response.type("application/json");
+            int res = db.deleteDislike(req.userId, req.msgId);
+            // NB: we won't concern ourselves too much with the quality of the 
+            //     message sent on a successful delete
+            if (res <= 0) {
+                return gson.toJson(new StructuredResponse("error", "Element not in table, cannot delete userID: " + req.userId + " msgID: " + req.msgId, null));
             } else {
                 return gson.toJson(new StructuredResponse("ok", null, null));
             }
