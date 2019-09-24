@@ -6,10 +6,15 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.*;
+import java.net.*;
+import java.time.*;
+import java.sql.Timestamp;
 
 import java.util.ArrayList;
 
 public class Database {
+   
     /**
      * The connection to the database.  When there is no connection, it should
      * be null.  Otherwise, there is a valid open connection
@@ -42,14 +47,98 @@ public class Database {
     private PreparedStatement mUpdateOne;
 
     /**
-     * A prepared statement for creating the table in our database
+     * A prepared statement for creating the message table in our database
      */
     private PreparedStatement mCreateTable;
+
+        /**
+     * A prepared statemebnet for creating the likes table in our database
+     */
+    private PreparedStatement mCreateMessageTable;
+
+    /**
+     * A prepared statement for adding a message to the msgData in our database
+     */
+    private PreparedStatement mInsertOneMessage;
+
+    /**
+     * A prepared statemebnet for creating the likes table in our database
+     */
+    private PreparedStatement mCreateLikeTable;
+
+    /**
+     * A prepared statemebnet for creating the dislikes table in our database
+     */
+    private PreparedStatement mCreateDislikesTable;
+
+        /**
+     * A prepared statemebnet for creating the user table in our database
+     */
+    private PreparedStatement mCreateUserTable;
+
+
+
+        /**
+     * A prepared statemebnet for getting the messages table in our database
+     */
+    private PreparedStatement mSelectAllMessages;
 
     /**
      * A prepared statement for dropping the table in our database
      */
     private PreparedStatement mDropTable;
+
+    /**
+     *  A prepared statement for adding a user to the userData table and returning the unique userID
+     */
+    private PreparedStatement getUserId;
+
+    /**
+     * A prepared statment for adding the userID and messageID 
+     * of a like to track who liked what message
+     */
+    private PreparedStatement likeMessage;
+
+        /**
+     * A prepared statment for adding the userID and messageID 
+     * of a like to track who disliked what message
+     */
+    private PreparedStatement dislikeMessage;
+
+    /**
+     * A prepared statment for deleting a like on a message
+     */
+    private PreparedStatement deleteMessageLike;
+
+    /**
+     * A prepared statment for releting a like on a message
+     */
+    private PreparedStatement deleteMessageDislike;
+
+
+    /**
+     * A prepared statment for incrementing up a like on a message
+     */
+    private PreparedStatement addLikeToMessage;
+    /**
+     * A prepared statment for incrementing down a like on a message
+     */
+    private PreparedStatement removeLikeToMessage;
+
+    /**
+     * A prepared statment for incrementing up a dislike on a message
+     */
+
+    private PreparedStatement addDislikeToMessage;
+
+    /**
+     * A prepared statment for incrementing down a dislike on a message
+     */
+
+    private PreparedStatement removeDislikeToMessage;
+
+
+    
 
     /**
      * RowData is like a struct in C: we use it to hold data, and we allow 
@@ -85,6 +174,59 @@ public class Database {
         }
     }
 
+    public static class MessageRow {
+        /**
+         * The ID of this row of the database
+         */
+        int id;
+        /**
+         * The subject stored in this row
+         */
+        int senderId;
+        /**
+         * The message stored in this row
+         */
+        
+        String text;
+
+        String tStamp;
+
+        int nUpVotes;
+
+        int nDownVotes;
+
+        /**
+         * Construct a MessageRow object by providing values for its fields
+         */
+        public MessageRow(int id, int senderId, String text, String tStamp, int nUpVotes, int nDownVotes) {
+            this.id = id; 
+            this.senderId = senderId;
+            this.text = text;
+            this.tStamp = tStamp;
+            this.nUpVotes = nUpVotes;
+            this.nDownVotes = nDownVotes;
+        }
+    }
+
+    public static class UserRow {
+
+        int userId;
+
+        String name;
+
+        String password;
+
+
+        /**
+         * Construct a MessageRow object by providing values for its fields
+         */
+        public UserRow(int userId, String name, String password) {
+            this.userId = userId;
+            this.name = name;
+            this.password = password;
+        }
+    }
+
     /**
      * The Database constructor is private: we only create Database objects 
      * through the getDatabase() method.
@@ -105,11 +247,18 @@ public class Database {
      */
     static Database getDatabase(String ip, String port, String user, String pass) {
         // Create an un-configured Database object
+        Map<String, String> env = System.getenv();
+        String db_url = env.get("DATABASE_URL");
         Database db = new Database();
 
         // Give the Database object a connection, fail if we cannot get one
         try {
-            Connection conn = DriverManager.getConnection("jdbc:postgresql://" + ip + ":" + port + "/", user, pass);
+            Class.forName("org.postgresql.Driver");
+            URI dbUri = new URI(db_url);
+            String username = dbUri.getUserInfo().split(":")[0];
+            String password = dbUri.getUserInfo().split(":")[1];
+            String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + ':' + dbUri.getPort() + dbUri.getPath();
+            Connection conn = DriverManager.getConnection(dbUrl, username, password);
             if (conn == null) {
                 System.err.println("Error: DriverManager.getConnection() returned a null object");
                 return null;
@@ -118,6 +267,12 @@ public class Database {
         } catch (SQLException e) {
             System.err.println("Error: DriverManager.getConnection() threw a SQLException");
             e.printStackTrace();
+            return null;
+        } catch (ClassNotFoundException cnfe) {
+            System.out.println("Unable to find postgresql driver");
+            return null;
+        } catch (URISyntaxException s) {
+            System.out.println("URI Syntax Error");
             return null;
         }
 
@@ -134,7 +289,47 @@ public class Database {
             db.mCreateTable = db.mConnection.prepareStatement(
                     "CREATE TABLE tblData (id SERIAL PRIMARY KEY, subject VARCHAR(50) "
                     + "NOT NULL, message VARCHAR(500) NOT NULL)");
+
+            db.mCreateMessageTable = db.mConnection.prepareStatement(
+                    "CREATE TABLE msgData (id SERIAL PRIMARY KEY, senderID int NOT NULL, "
+                    + "text VARCHAR(50) NOT NULL,"
+                    + "tStamp timestamp NOT NULL, "
+                    + "numUpVotes int NOT NULL, "
+                    + "numDownVotes int NOT NULL)");
+
+            db.mInsertOneMessage = db.mConnection.prepareStatement(
+                "INSERT INTO msgData (id, senderID, text, tStamp, numUpVotes, numDownVotes) VALUES (default, ?, ?, ?, ?, ?) RETURNING *");
+
+            
+            db.mSelectAllMessages = db.mConnection.prepareStatement("SELECT id, senderID, text, tStamp, numUpVotes, numDownVotes FROM msgData");
+            
+            // db.mLastAdded = db.mConnection.prepareStatement("SELECT LAST (id) FROM msgData");
+
+            db.getUserId = db.mConnection.prepareStatement("INSERT INTO userData (id, name, password) VALUES (default, ?, ?) RETURNING *");
+
             db.mDropTable = db.mConnection.prepareStatement("DROP TABLE tblData");
+
+
+            db.likeMessage = db.mConnection.prepareStatement(
+                "INSERT INTO likeData (userId, msgId)"
+                + " VALUES ( (SELECT id from userData WHERE id=?), (SELECT id from msgData WHERE id=?) )");
+
+
+            db.dislikeMessage = db.mConnection.prepareStatement(
+                "INSERT INTO dislikeData (userId, msgId)"
+                + " VALUES ( (SELECT id from userData WHERE id=?), (SELECT id from msgData WHERE id=?) )");
+
+
+            db.deleteMessageLike = db.mConnection.prepareStatement("DELETE FROM likeData WHERE userId = ? and msgId = ?");
+
+            db.deleteMessageDislike = db.mConnection.prepareStatement("DELETE FROM dislikeData WHERE userId = ? and msgId = ?");
+
+            
+            db.addLikeToMessage = db.mConnection.prepareStatement("UPDATE msgData SET numupvotes = numupvotes + 1 WHERE id = ?");
+            db.removeLikeToMessage = db.mConnection.prepareStatement("UPDATE msgData SET numupvotes = numupvotes - 1 WHERE id = ?");
+            db.addDislikeToMessage = db.mConnection.prepareStatement("UPDATE msgData SET numdownvotes = numdownvotes + 1 WHERE id = ?");
+            db.removeDislikeToMessage = db.mConnection.prepareStatement("UPDATE msgData SET numdownvotes = numdownvotes - 1 WHERE id = ?");
+
 
             // Standard CRUD operations
             db.mDeleteOne = db.mConnection.prepareStatement("DELETE FROM tblData WHERE id = ?");
@@ -176,6 +371,85 @@ public class Database {
         return true;
     }
 
+
+        /**
+     * THIS WILL NEED TO BE CHANGED ONCE WE GET USERNAME/PASSWORD
+     * @return A unique user id for the current session 
+     */
+    int insertUser(String name, String password) {
+        int userId = -1; 
+
+        try {
+            getUserId.setString(1, name);
+            getUserId.setString(2, password);
+            ResultSet rs = getUserId.executeQuery();
+            // MessageRow returnRow = new MessageRow(rs.getInt("id"), rs.getInt("senderID"), rs.getString("text"), rs.getString("tStamp"), rs.getInt("numUpVotes"), rs.getInt("numDownVotes"));
+            while (rs.next()){
+                userId = rs.getInt("id");
+            };
+            rs.close();
+            return userId;
+            // System.out.println("Database output: "+ subject + ":" + message);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return userId;
+    }
+
+    /**
+     * 
+     * @param userId userId which liked the message
+     * @param msgId messageId of the message whitch the user liked
+     * @return Int value of the number of rows which were updated 
+     */
+    int insertLike(int userId, int msgId){
+        int res = -1;
+        try {
+            System.out.println("Searching for: " + userId + "and: "+ msgId);
+            likeMessage.setInt(1, userId);
+            likeMessage.setInt(2, msgId);
+            res = likeMessage.executeUpdate();
+            if(res == 1) {
+                addLikeToMessage.setInt(1, msgId);
+                addLikeToMessage.executeUpdate();
+            } else {
+                System.out.println("Could not like message");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return res;
+    }
+
+    /**
+     * 
+     * @param userId userId which liked the message
+     * @param msgId messageId of the message whitch the user liked
+     * @return Int value of the number of rows which were updated 
+     */
+    int insertDislike(int userId, int msgId){
+        int res = -1;
+        try {
+            System.out.println("Searching for: " + userId + "and: "+ msgId);
+            dislikeMessage.setInt(1, userId);
+            dislikeMessage.setInt(2, msgId);
+            res = dislikeMessage.executeUpdate();
+            if(res == 1) {
+                addDislikeToMessage.setInt(1, msgId);
+                addDislikeToMessage.executeUpdate();
+            } else {
+                System.out.println("Could not dislike message");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return res;
+    }
+
+
+
     /**
      * Insert a row into the database
      * 
@@ -197,6 +471,41 @@ public class Database {
         return count;
     }
 
+
+        /**
+     * Insert a row into the database
+     * 
+     * @param text The text for the message 
+     * @param nUpvotes The message body for this new row
+     * @param nDownvotes
+     * 
+     * @return The number of rows that were inserted
+     */
+    int insertMessage(int senderID, String text, int nUpVotes, int nDownVotes) {
+        //LocalDateTime currTime = LocalDateTime.now();
+        Date date = new Date();
+        Timestamp currTime = new Timestamp(date.getTime());
+        int id = -1;
+        try {
+            mInsertOneMessage.setInt(1, senderID);
+            mInsertOneMessage.setString(2, text);
+            mInsertOneMessage.setTimestamp(3, currTime);
+            mInsertOneMessage.setInt(4, nUpVotes);
+            mInsertOneMessage.setInt(5, nDownVotes);
+            ResultSet rs = mInsertOneMessage.executeQuery();
+            // MessageRow returnRow = new MessageRow(rs.getInt("id"), rs.getInt("senderID"), rs.getString("text"), rs.getString("tStamp"), rs.getInt("numUpVotes"), rs.getInt("numDownVotes"));
+            while (rs.next()){
+                id = rs.getInt("id");
+            };
+            rs.close();
+            return id;
+            // System.out.println("Database output: "+ subject + ":" + message);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return id;
+    }
+
     /**
      * Query the database for a list of all subjects and their IDs
      * 
@@ -216,6 +525,33 @@ public class Database {
             return null;
         }
     }
+
+        /**
+     * Query the database for a list of all subjects and their IDs
+     * 
+     * @return All rows, as an ArrayList
+     */
+    ArrayList<MessageRow> messageAll() {
+        ArrayList<MessageRow> res = new ArrayList<MessageRow>();
+        try {
+            ResultSet rs = mSelectAllMessages.executeQuery();
+            while (rs.next()) {
+                res.add(new MessageRow(rs.getInt("id"), rs.getInt("senderID"), rs.getString("text"), rs.getString("tStamp"), rs.getInt("numUpVotes"), rs.getInt("numDownVotes") ));
+            }
+            rs.close();
+            return res;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
+
+
+
+
+
 
     /**
      * Get all data for a specific row, by ID
@@ -258,6 +594,49 @@ public class Database {
         return res;
     }
 
+    int deleteLike(int userId, int msgId) {
+        System.out.println("Deleting index: " + userId + " " + msgId);
+        int res = -1;
+        try {
+            deleteMessageLike.setInt(1, userId);
+            deleteMessageLike.setInt(2, msgId);
+            res = deleteMessageLike.executeUpdate();
+            System.out.println("Delete Like Result: " + res);
+            if(res==1) {
+                removeLikeToMessage.setInt(1, msgId);
+                removeLikeToMessage.executeUpdate();
+            } else {
+                System.out.println("Could not un-like message");
+            }
+        
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return res;
+    }
+
+    int deleteDislike(int userId, int msgId) {
+        System.out.println("Deleting index: " + userId + " " + msgId);
+        int res = -1;
+        try {
+            deleteMessageDislike.setInt(1, userId);
+            deleteMessageDislike.setInt(2, msgId);
+            res = deleteMessageDislike.executeUpdate();
+            System.out.println("Delete Dislike Result: " + res);
+            if(res==1) {
+                removeDislikeToMessage.setInt(1, msgId);
+                removeDislikeToMessage.executeUpdate();
+            } else {
+                System.out.println("Could not un-dislike message");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return res;
+    }
+
     /**
      * Update the message for a row in the database
      * 
@@ -287,6 +666,14 @@ public class Database {
     void createTable() {
         try {
             mCreateTable.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    void createMessageTable() {
+        try {
+            mCreateMessageTable.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
