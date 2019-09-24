@@ -176,7 +176,7 @@ public class Database {
 
             //message table
             db.mCreateMessageTable = db.mConnection.prepareStatement(
-                    "CREATE TABLE msgData (msgID SERIAL PRIMARY KEY, usrID int NOT NULL, "
+                    "CREATE TABLE msgData (msgID SERIAL PRIMARY KEY, userID int NOT NULL, "
                     + "text VARCHAR(50) NOT NULL,"
                     + "tStamp timestamp NOT NULL, "
                     + "numUpVotes int NOT NULL, "
@@ -184,15 +184,15 @@ public class Database {
 
             //user table        
             db.mCreateUserTable = db.mConnection.prepareStatement(
-                    "CREATE TABLE usrData (usrID SERIAL PRIMARY KEY, name VARCHAR(50) NOT NULL, "
+                    "CREATE TABLE userData (userID SERIAL PRIMARY KEY, name VARCHAR(50) NOT NULL, "
                     + "password VARCHAR(50) NOT NULL");
 
             //dislikeData         
             db.mCreateLikeTable = db.mConnection.prepareStatement(
-                    "CREATE TABLE likeData (usrID SERIAL PRIMARY KEY, msgID int NOT NULL)");
+                "CREATE TABLE likeData (userID int REFERENCES userdata(msgID), msgID int REFERENCES msgdata(userID), PRIMARY KEY (userID, msgID)");
             //likeData
             db.mCreateDislikesTable = db.mConnection.prepareStatement(
-                    "CREATE TABLE dislikeData (usrID SERIAL PRIMARY KEY, msgID int NOT NULL");
+                "CREATE TABLE dislikedata (userID int REFERENCES userdata(msgID), msgID int REFERENCES msgdata(userID), PRIMARY KEY (userID, msgID)");
 
             // Standard CRUD operations
             db.mDeleteOne = db.mConnection.prepareStatement("DELETE FROM tblData WHERE id = ?");
