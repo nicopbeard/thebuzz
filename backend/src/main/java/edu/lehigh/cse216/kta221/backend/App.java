@@ -48,8 +48,8 @@ public class App {
         final DataStore dataStore = new DataStore();
         System.out.println(ip + " " + port + " " + user + " " + pass);
         Database db = Database.getDatabase(ip, port, user, pass);
-        db.createTable();
-        db.createMessageTable();
+        // db.createTable();
+        // db.createMessageTable();
 
         // db.createTable(); 
 

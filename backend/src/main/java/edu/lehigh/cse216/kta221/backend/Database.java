@@ -286,38 +286,38 @@ public class Database {
 
             // Note: no "IF NOT EXISTS" or "IF EXISTS" checks on table 
             // creation/deletion, so multiple executions will cause an exception
-            db.mCreateTable = db.mConnection.prepareStatement(
-                    "CREATE TABLE tblData (id SERIAL PRIMARY KEY, subject VARCHAR(50) "
-                    + "NOT NULL, message VARCHAR(500) NOT NULL)");
+            // db.mCreateTable = db.mConnection.prepareStatement(
+            //         "CREATE TABLE tblData (id SERIAL PRIMARY KEY, subject VARCHAR(50) "
+            //         + "NOT NULL, message VARCHAR(500) NOT NULL)");
 
-            db.mCreateMessageTable = db.mConnection.prepareStatement(
-                    "CREATE TABLE msgData (id SERIAL PRIMARY KEY, senderID int NOT NULL, "
-                    + "text VARCHAR(50) NOT NULL,"
-                    + "tStamp timestamp NOT NULL, "
-                    + "numUpVotes int NOT NULL, "
-                    + "numDownVotes int NOT NULL)");
+            // db.mCreateMessageTable = db.mConnection.prepareStatement(
+            //         "CREATE TABLE msgData (id SERIAL PRIMARY KEY, senderID int NOT NULL, "
+            //         + "text VARCHAR(50) NOT NULL,"
+            //         + "tStamp timestamp NOT NULL, "
+            //         + "numUpVotes int NOT NULL, "
+            //         + "numDownVotes int NOT NULL)");
 
             db.mInsertOneMessage = db.mConnection.prepareStatement(
-                "INSERT INTO msgData (id, senderID, text, tStamp, numUpVotes, numDownVotes) VALUES (default, ?, ?, ?, ?, ?) RETURNING *");
+                "INSERT INTO msgData (msgId, userId, text, tStamp, numUpVotes, numDownVotes) VALUES (default, ?, ?, ?, ?, ?) RETURNING *");
 
             
-            db.mSelectAllMessages = db.mConnection.prepareStatement("SELECT id, senderID, text, tStamp, numUpVotes, numDownVotes FROM msgData");
+            db.mSelectAllMessages = db.mConnection.prepareStatement("SELECT msgId, userId, text, tStamp, numUpVotes, numDownVotes FROM msgData");
             
             // db.mLastAdded = db.mConnection.prepareStatement("SELECT LAST (id) FROM msgData");
 
-            db.getUserId = db.mConnection.prepareStatement("INSERT INTO userData (id, name, password) VALUES (default, ?, ?) RETURNING *");
+            db.getUserId = db.mConnection.prepareStatement("INSERT INTO userData (userId, name, password) VALUES (default, ?, ?) RETURNING *");
 
             db.mDropTable = db.mConnection.prepareStatement("DROP TABLE tblData");
 
 
             db.likeMessage = db.mConnection.prepareStatement(
                 "INSERT INTO likeData (userId, msgId)"
-                + " VALUES ( (SELECT id from userData WHERE id=?), (SELECT id from msgData WHERE id=?) )");
+                + " VALUES ( (SELECT userId from userData WHERE userId=?), (SELECT msgId from msgData WHERE msgId=?) )");
 
 
             db.dislikeMessage = db.mConnection.prepareStatement(
                 "INSERT INTO dislikeData (userId, msgId)"
-                + " VALUES ( (SELECT id from userData WHERE id=?), (SELECT id from msgData WHERE id=?) )");
+                + " VALUES ( (SELECT userId from userData WHERE userId=?), (SELECT msgId from msgData WHERE msgId=?) )");
 
 
             db.deleteMessageLike = db.mConnection.prepareStatement("DELETE FROM likeData WHERE userId = ? and msgId = ?");
@@ -325,10 +325,10 @@ public class Database {
             db.deleteMessageDislike = db.mConnection.prepareStatement("DELETE FROM dislikeData WHERE userId = ? and msgId = ?");
 
             
-            db.addLikeToMessage = db.mConnection.prepareStatement("UPDATE msgData SET numupvotes = numupvotes + 1 WHERE id = ?");
-            db.removeLikeToMessage = db.mConnection.prepareStatement("UPDATE msgData SET numupvotes = numupvotes - 1 WHERE id = ?");
-            db.addDislikeToMessage = db.mConnection.prepareStatement("UPDATE msgData SET numdownvotes = numdownvotes + 1 WHERE id = ?");
-            db.removeDislikeToMessage = db.mConnection.prepareStatement("UPDATE msgData SET numdownvotes = numdownvotes - 1 WHERE id = ?");
+            db.addLikeToMessage = db.mConnection.prepareStatement("UPDATE msgData SET numupvotes = numupvotes + 1 WHERE msgId = ?");
+            db.removeLikeToMessage = db.mConnection.prepareStatement("UPDATE msgData SET numupvotes = numupvotes - 1 WHERE msgId = ?");
+            db.addDislikeToMessage = db.mConnection.prepareStatement("UPDATE msgData SET numdownvotes = numdownvotes + 1 WHERE msgId = ?");
+            db.removeDislikeToMessage = db.mConnection.prepareStatement("UPDATE msgData SET numdownvotes = numdownvotes - 1 WHERE msgId = ?");
 
 
             // Standard CRUD operations
@@ -385,7 +385,7 @@ public class Database {
             ResultSet rs = getUserId.executeQuery();
             // MessageRow returnRow = new MessageRow(rs.getInt("id"), rs.getInt("senderID"), rs.getString("text"), rs.getString("tStamp"), rs.getInt("numUpVotes"), rs.getInt("numDownVotes"));
             while (rs.next()){
-                userId = rs.getInt("id");
+                userId = rs.getInt("userId");
             };
             rs.close();
             return userId;
@@ -495,7 +495,7 @@ public class Database {
             ResultSet rs = mInsertOneMessage.executeQuery();
             // MessageRow returnRow = new MessageRow(rs.getInt("id"), rs.getInt("senderID"), rs.getString("text"), rs.getString("tStamp"), rs.getInt("numUpVotes"), rs.getInt("numDownVotes"));
             while (rs.next()){
-                id = rs.getInt("id");
+                id = rs.getInt("msgID");
             };
             rs.close();
             return id;
@@ -536,7 +536,7 @@ public class Database {
         try {
             ResultSet rs = mSelectAllMessages.executeQuery();
             while (rs.next()) {
-                res.add(new MessageRow(rs.getInt("id"), rs.getInt("senderID"), rs.getString("text"), rs.getString("tStamp"), rs.getInt("numUpVotes"), rs.getInt("numDownVotes") ));
+                res.add(new MessageRow(rs.getInt("msgid"), rs.getInt("userid"), rs.getString("text"), rs.getString("tStamp"), rs.getInt("numUpVotes"), rs.getInt("numDownVotes") ));
             }
             rs.close();
             return res;
@@ -663,21 +663,21 @@ public class Database {
     /**
      * Create tblData.  If it already exists, this will print an error
      */
-    void createTable() {
-        try {
-            mCreateTable.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
+    // void createTable() {
+    //     try {
+    //         mCreateTable.execute();
+    //     } catch (SQLException e) {
+    //         e.printStackTrace();
+    //     }
+    // }
 
-    void createMessageTable() {
-        try {
-            mCreateMessageTable.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
+    // void createMessageTable() {
+    //     try {
+    //         mCreateMessageTable.execute();
+    //     } catch (SQLException e) {
+    //         e.printStackTrace();
+    //     }
+    // }
 
     /**
      * Remove tblData from the database.  If it does not exist, this will print
