@@ -147,10 +147,26 @@ public class Database {
 
             // Note: no "IF NOT EXISTS" or "IF EXISTS" checks on table 
             // creation/deletion, so multiple executions will cause an exception
-            db.mCreateTable = db.mConnection.prepareStatement(
-                    "CREATE TABLE tblData (id SERIAL PRIMARY KEY, subject VARCHAR(50) "
-                    + "NOT NULL, message VARCHAR(500) NOT NULL)");
-            db.mDropTable = db.mConnection.prepareStatement("DROP TABLE tblData");
+
+            //message table
+            db.mCreateMessageTable = db.mConnection.prepareStatement(
+                    "CREATE TABLE msgData (msgID SERIAL PRIMARY KEY, usrID int NOT NULL, "
+                    + "text VARCHAR(50) NOT NULL,"
+                    + "tStamp timestamp NOT NULL, "
+                    + "numUpVotes int NOT NULL, "
+                    + "numDownVotes int NOT NULL)");
+
+            //user table        
+            db.mCreateMessageTable = db.mConnection.prepareStatement(
+                    "CREATE TABLE usrData (usrID SERIAL PRIMARY KEY, name VARCHAR(50) NOT NULL, "
+                    + "password VARCHAR(50) NOT NULL");
+
+            //dislikeData         
+            db.mCreateMessageTable = db.mConnection.prepareStatement(
+                    "CREATE TABLE likeData (usrID SERIAL PRIMARY KEY, msgID int NOT NULL)");
+            //likeData
+            db.mCreateMessageTable = db.mConnection.prepareStatement(
+                    "CREATE TABLE dislikeData (usrID SERIAL PRIMARY KEY, msgID int NOT NULL");
 
             // Standard CRUD operations
             db.mDeleteOne = db.mConnection.prepareStatement("DELETE FROM tblData WHERE id = ?");
