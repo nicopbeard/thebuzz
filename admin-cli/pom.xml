@@ -44,7 +44,7 @@
             <jdkVersion>1.8</jdkVersion>
             <appName>clowns-who-code</appName>
             <processTypes>
-              <web>java -jar ./target/backend-1.0-SNAPSHOT.jar</web>
+              <web>java -jar ./target/admin-cli-1.0-SNAPSHOT.jar</web>
             </processTypes>
           </configuration>
         </plugin>    

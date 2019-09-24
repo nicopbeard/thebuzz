@@ -286,16 +286,6 @@ public class Database {
 
             // Note: no "IF NOT EXISTS" or "IF EXISTS" checks on table 
             // creation/deletion, so multiple executions will cause an exception
-            db.mCreateTable = db.mConnection.prepareStatement(
-                    "CREATE TABLE tblData (id SERIAL PRIMARY KEY, subject VARCHAR(50) "
-                    + "NOT NULL, message VARCHAR(500) NOT NULL)");
-
-            db.mCreateMessageTable = db.mConnection.prepareStatement(
-                    "CREATE TABLE msgData (id SERIAL PRIMARY KEY, senderID int NOT NULL, "
-                    + "text VARCHAR(50) NOT NULL,"
-                    + "tStamp timestamp NOT NULL, "
-                    + "numUpVotes int NOT NULL, "
-                    + "numDownVotes int NOT NULL)");
 
             db.mInsertOneMessage = db.mConnection.prepareStatement(
                 "INSERT INTO msgData (id, senderID, text, tStamp, numUpVotes, numDownVotes) VALUES (default, ?, ?, ?, ?, ?) RETURNING *");
