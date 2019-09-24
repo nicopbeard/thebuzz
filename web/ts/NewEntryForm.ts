@@ -1,9 +1,3 @@
-// The 'this' keyword does not behave in JavaScript/TypeScript like it does in
-// Java.  Since there is only one NewEntryForm, we will save it to a global, so
-// that we can reference it from methods of the NewEntryForm in situations where
-// 'this' won't work correctly.
-var newEntryForm: NewEntryForm;
-
 /**
  * NewEntryForm encapsulates all of the code for the form for adding an entry
  */
@@ -72,9 +66,9 @@ class NewEntryForm {
     private static submitForm() {
         // get the values of the two fields, force them to be strings, and check 
         // that neither is empty
-        //let title = "" + $("#" + NewEntryForm.NAME + "-title").val();
+        let title = "" + $("#" + NewEntryForm.NAME + "-title").val();
         let msg = "" + $("#" + NewEntryForm.NAME + "-message").val();
-        if (msg === "") {
+        if (title === "" || msg === "") {
             window.alert("Error: title or message is not valid");
             return;
         }
@@ -83,9 +77,9 @@ class NewEntryForm {
         // onSubmitResponse
         $.ajax({
             type: "POST",
-            url: "https://clowns-who-code.herokuapp.com/messages/",
+            url: "/messages",
             dataType: "json",
-            data: JSON.stringify({ 'message': msg }),
+            data: JSON.stringify({ mTitle: title, mMessage: msg }),
             success: NewEntryForm.onSubmitResponse
         });
     }

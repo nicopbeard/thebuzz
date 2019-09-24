@@ -23,7 +23,7 @@ textarea {
 }
 
 /* put some left space before form elements */
-input, textarea, #addButton, #editButton {
+label, input, textarea, #addButton, #editButton {
     margin-left: 15px;
 }
 

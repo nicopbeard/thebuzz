@@ -1,4 +1,3 @@
-
 /**
  * The ElementList Singleton provides a way of displaying all of the data 
  * stored on the server as an HTML table.
@@ -25,7 +24,7 @@ class ElementList {
         }
     }
 
-    /**
+        /**
      * refresh() is the public method for updating the ElementList
      */
     public static refresh() {
@@ -34,7 +33,7 @@ class ElementList {
         // Issue a GET, and then pass the result to update()
         $.ajax({
             type: "GET",
-            url: "https://clowns-who-code.herokuapp.com/messages/",
+            url: "/messages",
             dataType: "json",
             success: ElementList.update
         });
@@ -55,9 +54,8 @@ class ElementList {
         $("." + ElementList.NAME + "-downvotebtn").click(ElementList.clickDownVote);
     }
 
-
     /**
-     * buttons() creates 'upvote' and 'downvote' buttons for an id, and puts them in
+     * buttons() creates 'edit' and 'delete' buttons for an id, and puts them in
      * a TD
      */
     private static buttons(id: string): string {
@@ -77,7 +75,7 @@ class ElementList {
         let id = $(this).data("value");
         $.ajax({
             type: "POST",
-            url: "https://clowns-who-code.herokuapp.com/messages/",
+            url: "/messages/" + id,
             dataType: "json",
             data: JSON.stringify({ mId: id }),
             success: ElementList.refresh
@@ -94,12 +92,10 @@ class ElementList {
     let id = $(this).data("value");
     $.ajax({
         type: "POST",
-        url: "https://clowns-who-code.herokuapp.com/messages/",
+        url: "/messages/" + id,
         dataType: "json",
         data: JSON.stringify({ mId: id }),
         success: ElementList.refresh
     });
-}
-    
-
+    }
 }

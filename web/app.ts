@@ -5,7 +5,7 @@
 // Prevent compiler errors when using jQuery.  "$" will be given a type of 
 // "any", so that we can use it anywhere, and assume it has any fields or
 // methods, without the compiler producing an error.
-var $: any;
+let $: any;
 
 // Prevent compiler errors when using Handlebars
 let Handlebars: any;
@@ -16,4 +16,3 @@ $(document).ready(function () {
     NewEntryForm.refresh();
     ElementList.refresh();
 });
-

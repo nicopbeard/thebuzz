@@ -10,7 +10,7 @@
               <span class="icon-bar"></span>
             </button>
             <!-- Clicking the brand refreshes the page -->
-            <a class="navbar-brand" href="/">The BUZZ</a>
+            <a class="navbar-brand" href="/">The Buzz</a>
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
@@ -18,7 +18,7 @@
             <ul class="nav navbar-nav">
                 <li>
                     <a class="btn btn-link" id="Navbar-add">
-                        Add Message
+                        Add Entry
                         <span class="glyphicon glyphicon-plus"></span><span class="sr-only">Show Trending Posts</span>
                     </a>
                 </li>
