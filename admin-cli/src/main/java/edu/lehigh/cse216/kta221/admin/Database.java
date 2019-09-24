@@ -44,14 +44,39 @@ public class Database {
     private PreparedStatement mUpdateOne;
 
     /**
+     * A prepared statement for dropping the table in our database
+     */
+    private PreparedStatement mDropTable;
+
+    /**
      * A prepared statement for creating the table in our database
      */
     private PreparedStatement mCreateTable;
 
-    /**
-     * A prepared statement for dropping the table in our database
+        /**
+     * A prepared statemebnet for creating the likes table in our database
      */
-    private PreparedStatement mDropTable;
+    private PreparedStatement mCreateMessageTable;
+
+    /**
+     * A prepared statement for adding a message to the msgData in our database
+     */
+    private PreparedStatement mInsertOneMessage;
+
+    /**
+     * A prepared statemebnet for creating the likes table in our database
+     */
+    private PreparedStatement mCreateLikeTable;
+
+    /**
+     * A prepared statemebnet for creating the dislikes table in our database
+     */
+    private PreparedStatement mCreateDislikesTable;
+
+        /**
+     * A prepared statemebnet for creating the user table in our database
+     */
+    private PreparedStatement mCreateUserTable;
 
     /**
      * RowData is like a struct in C: we use it to hold data, and we allow 
@@ -157,15 +182,15 @@ public class Database {
                     + "numDownVotes int NOT NULL)");
 
             //user table        
-            db.mCreateMessageTable = db.mConnection.prepareStatement(
+            db.mCreateUserTable = db.mConnection.prepareStatement(
                     "CREATE TABLE usrData (usrID SERIAL PRIMARY KEY, name VARCHAR(50) NOT NULL, "
                     + "password VARCHAR(50) NOT NULL");
 
             //dislikeData         
-            db.mCreateMessageTable = db.mConnection.prepareStatement(
+            db.mCreateLikeTable = db.mConnection.prepareStatement(
                     "CREATE TABLE likeData (usrID SERIAL PRIMARY KEY, msgID int NOT NULL)");
             //likeData
-            db.mCreateMessageTable = db.mConnection.prepareStatement(
+            db.mCreateDislikesTable = db.mConnection.prepareStatement(
                     "CREATE TABLE dislikeData (usrID SERIAL PRIMARY KEY, msgID int NOT NULL");
 
             // Standard CRUD operations
