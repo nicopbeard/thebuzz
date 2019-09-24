@@ -177,7 +177,7 @@ public class Database {
             //message table
             db.mCreateMessageTable = db.mConnection.prepareStatement(
                     "CREATE TABLE msgData (msgID SERIAL PRIMARY KEY, userID int NOT NULL, "
-                    + "text VARCHAR(50) NOT NULL,"
+                    + "text VARCHAR(500) NOT NULL,"
                     + "tStamp timestamp NOT NULL, "
                     + "numUpVotes int NOT NULL, "
                     + "numDownVotes int NOT NULL)");
