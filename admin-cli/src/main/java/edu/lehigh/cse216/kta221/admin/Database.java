@@ -135,6 +135,7 @@ public class Database {
         Database db = new Database();
         Map<String, String> env = System.getenv();
         String db_url = env.get("DATABASE_URL");
+        db.createTable();
 
         // Give the Database object a connection, fail if we cannot get one
         // Give the Database object a connection, fail if we cannot get one
@@ -337,7 +338,10 @@ public class Database {
      */
     void createTable() {
         try {
-            mCreateTable.execute();
+            mCreateUserTable.execute();
+            mCreateMessageTable.execute();
+            mCreateLikeTable.execute();
+            mCreateDislikesTable.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
