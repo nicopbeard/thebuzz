@@ -106,12 +106,12 @@ public class Database {
     /**
      * A prepared statemebnet for creating the likes table in our database
      */
-    private PreparedStatement mCreateLikeTable;
+    private PreparedStatement mCreateLikeData;
 
     /**
      * A prepared statemebnet for creating the dislikes table in our database
      */
-    private PreparedStatement mCreateDislikeTable;
+    private PreparedStatement mCreateDislikeData;
 
     /**
      * A prepared statemebnet for creating the user table in our database
@@ -299,10 +299,10 @@ public class Database {
                     + "password VARCHAR(50) NOT NULL");
 
             //dislikeData         
-            db.mCreateLikeTable = db.mConnection.prepareStatement(
+            db.mCreateLikeData = db.mConnection.prepareStatement(
                 "CREATE TABLE likeData (userID int REFERENCES userdata(msgID), msgID int REFERENCES msgdata(userID), PRIMARY KEY (userID, msgID)");
             //likeData
-            db.mCreateDislikeTable = db.mConnection.prepareStatement(
+            db.mCreateDislikeData = db.mConnection.prepareStatement(
                 "CREATE TABLE dislikedata (userID int REFERENCES userdata(msgID), msgID int REFERENCES msgdata(userID), PRIMARY KEY (userID, msgID)");
             
             db.mInsertOneMessage = db.mConnection.prepareStatement("INSERT INTO msgData VALUES (?, ? ,?, ?, ?, ?)");
@@ -772,17 +772,17 @@ public class Database {
         }
     }
 
-    void createLikeTable() {
+    void createLikeData() {
         try {
-            mCreateLikeTable.execute();
+            mCreateLikeData.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    void createMsgTable() {
+    void createDislikeData() {
         try {
-            mCreateDislikeTable.execute();
+            mCreateDislikeData.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }

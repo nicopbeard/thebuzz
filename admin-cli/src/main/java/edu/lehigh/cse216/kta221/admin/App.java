@@ -18,15 +18,21 @@ public class App {
      */
     static void menu() {
         System.out.println("Main Menu");
-        System.out.println("  [T] Create tblData");
-        System.out.println("  [D] Drop tblData");
-        System.out.println("  [1] Query for a specific row");
+        System.out.println("  [T] Create a table");
+        System.out.println("  [D] Drop a table");
+        System.out.println("  [U] Query for a specific user");
+        System.out.println("  [M] Query for a specific message");
         System.out.println("  [*] Query for all rows");
         System.out.println("  [-] Delete a row");
         System.out.println("  [+] Insert a new row");
         System.out.println("  [~] Update a row");
         System.out.println("  [q] Quit Program");
         System.out.println("  [?] Help (this message)");
+
+        System.out.println("  [T] Create a table");
+
+        
+
     }
 
     /**
@@ -133,9 +139,43 @@ public class App {
             } else if (action == 'q') {
                 break;
             } else if (action == 'T') {
-                db.createTable();
+                String id = "";
+                while (!(id.equals("U") && !(id.equals("M") && !(id.equals("L") && !(id.equals("D"))))))
+                {
+                    id = getString(in, "Enter the table you would like to make (U for user, M for msg, L for likes, D for dislikes");
+                }
+                if (id.equals("U")) {
+                    db.createUserTable();
+                } else if (id.equals("M")) {
+                    db.createMessageTable();
+                } else if (id.equals("L")) {
+                    db.createLikeData();
+                } else if (id.equals("D")) {
+                    db.createDislikeData();
+                }
             } else if (action == 'D') {
-                db.dropTable();
+                String id = "";
+                while (!(id.equals("U") && !(id.equals("M") && !(id.equals("L") && !(id.equals("D"))))))
+                {
+                    id = getString(in, "Enter the table you would like to drop (U for user, M for msg, L for likes, D for dislikes");
+                }
+                if (id.equals("U")) {
+                    db.dropUserTable();
+                } else if (id.equals("M")) {
+                    db.dropMessageTable();
+                } else if (id.equals("L")) {
+                    db.dropLikeData();
+                } else if (id.equals("D")) {
+                    db.mDropDislikeData();
+                }
+            } else if (action == 'U') {
+                int id = getInt(in, "Enter the user ID");
+                if (id == -1)
+                    continue;
+                Database.UserData res = db.selectOneUser(id);
+                if (res != null) {
+                    System.out.println(" [" + res.mUserID + "] " + res.mName + " " + res.mPassword);
+                }
             } else if (action == '1') {
                 int id = getInt(in, "Enter the row ID");
                 if (id == -1)
