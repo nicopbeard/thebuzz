@@ -22,17 +22,12 @@ public class App {
         System.out.println("  [D] Drop a table");
         System.out.println("  [U] Query for a specific user");
         System.out.println("  [M] Query for a specific message");
-        System.out.println("  [*] Query for all rows");
+        System.out.println("  [*] Query for all rows of a table");
         System.out.println("  [-] Delete a row");
         System.out.println("  [+] Insert a new row");
         System.out.println("  [~] Update a row");
         System.out.println("  [q] Quit Program");
         System.out.println("  [?] Help (this message)");
-
-        System.out.println("  [T] Create a table");
-
-        
-
     }
 
     /**
@@ -176,6 +171,15 @@ public class App {
                 if (res != null) {
                     System.out.println(" [" + res.mUserID + "] " + res.mName + " " + res.mPassword);
                 }
+            } else if (action == 'M') {
+                int id = getInt(in, "Enter the message ID");
+                if (id == -1)
+                    continue;
+                Database.MsgData res = db.selectOneMsg(id);
+                if (res != null) {
+                    System.out.println(" [" + res.mMsgID + "] " + res.mText + " " + res.mTstamp + " " + res.mNumUpvotes + " "
+                     + res.mNumDownvotes);
+                }
             } else if (action == '1') {
                 int id = getInt(in, "Enter the row ID");
                 if (id == -1)
@@ -184,6 +188,50 @@ public class App {
                 if (res != null) {
                     System.out.println("  [" + res.mId + "] " + res.mSubject);
                     System.out.println("  --> " + res.mMessage);
+                }
+            } else if (action == '*') {
+                String id = "";
+                while (!(id.equals("U") && !(id.equals("M") && !(id.equals("L") && !(id.equals("D"))))))
+                {
+                    id = getString(in, "Enter the table you would like to query (U for user, M for msg, L for likes, D for dislikes");
+                }
+                if (id.equals("U")) {
+                    ArrayList<Database.UserData> res = db.selectAllUsers();
+                    if (res == null)
+                        continue;
+                    System.out.println(" Current User Contents");
+                    System.out.println(" ---------------------");
+                    for (Database.UserData rd : res) {
+                        System.out.println(" [" + rd.mUserID + "] " + rd.mName + " " + rd.mPassword);
+                    }
+                } else if (id.equals("M")) {
+                    ArrayList<Database.MsgData> res = db.selectAllMsg();
+                    if (res == null)
+                        continue;
+                    System.out.println(" Current Message Contents");
+                    System.out.println(" ------------------------");
+                    for (Database.MsgData rd : res) {
+                        System.out.println(" [" + rd.mMsgID + "] " + rd.mUserID + " " + rd.mText + " " + rd.mTstamp + " " + 
+                            rd.mNumUpvotes + " " + rd.mNumDownvotes);
+                    }
+                } else if (id.equals("L")) {
+                    ArrayList<Database.LikeData> res = db.selectAllLikes();
+                    if (res == null)
+                        continue;
+                    System.out.println(" Current Upvote Contents");
+                    System.out.println(" -----------------------");
+                    for (Database.LikeData rd : res) {
+                        System.out.println(" [" + rd.mUserID + "] " + rd.mMsgID);
+                    }
+                } else if (id.equals("D")) {
+                    ArrayList<Database.DislikeData> res = db.selectAllDislikes();
+                    if (res == null)
+                        continue;
+                    System.out.println(" Current Downvote Contents");
+                    System.out.println(" -------------------------");
+                    for (Database.DislikeData rd : res) {
+                        System.out.println(" [" + rd.mUserID + "] " + rd.mMsgID);
+                    }
                 }
             } else if (action == '*') {
                 ArrayList<Database.RowData> res = db.selectAll();
