@@ -66,9 +66,9 @@ class NewEntryForm {
     private static submitForm() {
         // get the values of the two fields, force them to be strings, and check 
         // that neither is empty
-        let title = "" + $("#" + NewEntryForm.NAME + "-title").val();
         let msg = "" + $("#" + NewEntryForm.NAME + "-message").val();
-        if (title === "" || msg === "") {
+        let id = $(this).data("value");
+        if (msg === "") {
             window.alert("Error: title or message is not valid");
             return;
         }
@@ -77,9 +77,14 @@ class NewEntryForm {
         // onSubmitResponse
         $.ajax({
             type: "POST",
-            url: "/messages",
+            url: backendUrl + "/messages",
             dataType: "json",
-            data: JSON.stringify({ mTitle: title, mMessage: msg }),
+            data: JSON.stringify({ 
+                                    senderId: id, 
+                                    text: msg, 
+                                    nUpVotes: 0,
+                                    nDownVotes: 0}
+                                ),
             success: NewEntryForm.onSubmitResponse
         });
     }
