@@ -245,7 +245,7 @@ public class Database {
         // Create an un-configured Database object
         Database db = new Database();
         Map<String, String> env = System.getenv();
-        String db_url = env.get("DATABASE_URL");
+        String db_url = env.get("postgres://qnwrtcuewzcdpe:a8bc2fbf3637a0fcded45cb4a148de56a37dd37cc3c694145d863374f2ee77a0@ec2-174-129-220-12.compute-1.amazonaws.com:5432/dcl2b7tskpghar");
         db.createTable();
 
         // Give the Database object a connection, fail if we cannot get one
