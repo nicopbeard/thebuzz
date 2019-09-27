@@ -246,9 +246,7 @@ public class Database {
         Database db = new Database();
         Map<String, String> env = System.getenv();
         String db_url = env.get("postgres://qnwrtcuewzcdpe:a8bc2fbf3637a0fcded45cb4a148de56a37dd37cc3c694145d863374f2ee77a0@ec2-174-129-220-12.compute-1.amazonaws.com:5432/dcl2b7tskpghar");
-        db.createTable();
-
-        // Give the Database object a connection, fail if we cannot get one
+        
         // Give the Database object a connection, fail if we cannot get one
         try {
             Class.forName("org.postgresql.Driver");
@@ -748,13 +746,6 @@ public class Database {
     /**
      * Create tblData.  If it already exists, this will print an error
      */
-    void createTable() {
-        try {
-            mCreateTable.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 
     void createUserTable() {
         try {
