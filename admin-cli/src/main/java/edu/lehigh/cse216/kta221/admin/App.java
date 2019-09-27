@@ -23,8 +23,8 @@ public class App {
         System.out.println("  [U] Query for a specific user");
         System.out.println("  [M] Query for a specific message");
         System.out.println("  [*] Query for all rows of a table");
-        System.out.println("  [-] Delete a row");
-        System.out.println("  [+] Insert a new row");
+        System.out.println("  [-] Delete a row from a table");
+        System.out.println("  [+] Insert a new row to a table");
         System.out.println("  [~] Update a row");
         System.out.println("  [q] Quit Program");
         System.out.println("  [?] Help (this message)");
@@ -122,6 +122,7 @@ public class App {
             return;
 
         // Start our basic command-line interpreter:
+        java.util.Date today = new java.util.Date();
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         while (true) {
             // Get the user's request, and do it
@@ -135,7 +136,7 @@ public class App {
                 break;
             } else if (action == 'T') {
                 String id = "";
-                while (!(id.equals("U") && !(id.equals("M") && !(id.equals("L") && !(id.equals("D"))))))
+                while (!(id.equals("U")) && !(id.equals("M")) && !(id.equals("L")) && !(id.equals("D")))
                 {
                     id = getString(in, "Enter the table you would like to make (U for user, M for msg, L for likes, D for dislikes");
                 }
@@ -150,7 +151,7 @@ public class App {
                 }
             } else if (action == 'D') {
                 String id = "";
-                while (!(id.equals("U") && !(id.equals("M") && !(id.equals("L") && !(id.equals("D"))))))
+                while (!(id.equals("U")) && !(id.equals("M")) && !(id.equals("L")) && !(id.equals("D")))
                 {
                     id = getString(in, "Enter the table you would like to drop (U for user, M for msg, L for likes, D for dislikes");
                 }
@@ -191,7 +192,7 @@ public class App {
                 }
             } else if (action == '*') {
                 String id = "";
-                while (!(id.equals("U") && !(id.equals("M") && !(id.equals("L") && !(id.equals("D"))))))
+                while (!(id.equals("U")) && !(id.equals("M")) && !(id.equals("L")) && !(id.equals("D")))
                 {
                     id = getString(in, "Enter the table you would like to query (U for user, M for msg, L for likes, D for dislikes");
                 }
@@ -243,20 +244,58 @@ public class App {
                     System.out.println("  [" + rd.mId + "] " + rd.mSubject);
                 }
             } else if (action == '-') {
-                int id = getInt(in, "Enter the row ID");
-                if (id == -1)
-                    continue;
-                int res = db.deleteRow(id);
-                if (res == -1)
-                    continue;
-                System.out.println("  " + res + " rows deleted");
+                String id = "";
+                while (!(id.equals("U")) && !(id.equals("M")))
+                {
+                    id = getString(in, "Enter the table you would like to delete a row from (U for user, M for msg)");
+                }
+                if (id.equals("U")) {
+                    int userID = getInt(in, "Enter the user ID");
+                    if (userID == -1)
+                        continue;
+                    int res = db.deleteUserRow(userID);
+                    if (res == -1)
+                        continue;
+                    System.out.println("  " + res + " rows deleted");                    
+                } else if (id.equals("M")) {
+                    int msgID = getInt(in, "Enter the message ID");
+                    if (msgID == -1)
+                        continue;
+                    int res = db.deleteMsgRow(msgID);
+                    if (res == -1)
+                        continue;
+                    System.out.println("  " + res + " rows deleted");
+                }
             } else if (action == '+') {
-                String subject = getString(in, "Enter the subject");
-                String message = getString(in, "Enter the message");
-                if (subject.equals("") || message.equals(""))
-                    continue;
-                int res = db.insertRow(subject, message);
-                System.out.println(res + " rows added");
+                String id = "";
+                while (!(id.equals("U")) && !(id.equals("M")))
+                {
+                    id = getString(in, "Enter the table you would like to add a row to (U for user, M for msg)");
+                }
+                if (id.equals("U")) {
+                    int userID = getInt(in, "Enter the user ID");
+                    if (userID == -1)
+                        continue;
+                    String userName = getString(in, "Enter the user name");
+                    String userPW = getString(in, "Enter the user password");
+                    int res = db.insertUserRow(userID, userName, userPW);
+                    if (res == -1)
+                        continue;
+                    System.out.println("  " + res + " rows added");                    
+                } else if (id.equals("M")) {
+                    int msgID = getInt(in, "Enter the message ID");
+                    if (msgID == -1)
+                        continue;
+                    int userID = getInt(in, "Enter the user ID");
+                    String text = getString(in, "Enter the text");
+                    java.sql.Timestamp tStamp = new java.sql.Timestamp(today.getTime());
+                    int numUpvotes = getInt(in, "Enter the number of upvotes");
+                    int numDownvotes = getInt(in, "Enter the number of downvotes");                    
+                    int res = db.insertMsgRow(msgID, userID, text, tStamp, numUpvotes, numDownvotes);
+                    if (res == -1)
+                        continue;
+                    System.out.println("  " + res + " rows added");
+                }
             } else if (action == '~') {
                 int id = getInt(in, "Enter the row ID :> ");
                 if (id == -1)
