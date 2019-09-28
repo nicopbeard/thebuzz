@@ -274,6 +274,8 @@ public class Database {
         } catch (URISyntaxException s) {
             System.out.println("URI Syntax Error");
             return null;
+        } catch (Exception e) {
+            System.out.println(String.format("Unknown exception in Database.java: %s", e.getMessage()));
         }
 
         // Attempt to create all of our prepared statements.  If any of these 
@@ -472,15 +474,6 @@ public class Database {
     }
 
 
-        /**
-     * Insert a row into the database
-     * 
-     * @param text The text for the message 
-     * @param nUpvotes The message body for this new row
-     * @param nDownvotes
-     * 
-     * @return The number of rows that were inserted
-     */
     int insertMessage(int senderID, String text, int nUpVotes, int nDownVotes) {
         //LocalDateTime currTime = LocalDateTime.now();
         Date date = new Date();
@@ -637,14 +630,6 @@ public class Database {
         return res;
     }
 
-    /**
-     * Update the message for a row in the database
-     * 
-     * @param id The id of the row to update
-     * @param message The new message contents
-     * @param title The new title contents
-     * @return The number of rows that were updated.  -1 indicates an error.
-     */
     int updateOne(int id, String message, String subject) {
         int res = -1;
         try {
