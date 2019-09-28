@@ -111,10 +111,17 @@ public class App {
     public static void main(String[] argv) {
         // get the Postgres configuration from the environment
         Map<String, String> env = System.getenv();
-        String ip = env.get("POSTGRES_IP");
+
+        String ip = "ec2-174-129-220-12.compute-1.amazonaws.com";
+        String port = "5432";
+        String user = "qnwrtcuewzcdpe";
+        String pass = "a8bc2fbf3637a0fcded45cb4a148de56a37dd37cc3c694145d863374f2ee77a0";
+
+        /**String ip = env.get("POSTGRES_IP");
         String port = env.get("POSTGRES_PORT");
         String user = env.get("POSTGRES_USER");
         String pass = env.get("POSTGRES_PASS");
+        **/
         System.out.println(ip + " " + port + " " + user + " " + pass);
         // Get a fully-configured connection to the database, or exit 
         // immediately
