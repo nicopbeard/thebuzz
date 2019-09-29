@@ -1,56 +1,114 @@
 "use strict";
-// Prevent compiler errors when using jQuery.  "$" will be given a type of 
-// "any", so that we can use it anywhere, and assume it has any fields or
-// methods, without the compiler producing an error.
-var $;
-// The 'this' keyword does not behave in JavaScript/TypeScript like it does in
-// Java.  Since there is only one NewEntryForm, we will save it to a global, so
-// that we can reference it from methods of the NewEntryForm in situations where
-// 'this' won't work correctly.
-var newEntryForm;
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
 /**
  * NewEntryForm encapsulates all of the code for the form for adding an entry
  */
 var NewEntryForm = /** @class */ (function () {
-    /**
-     * To initialize the object, we say what method of NewEntryForm should be
-     * run in response to each of the form's buttons being clicked.
-     */
     function NewEntryForm() {
-        $("#addCancel").click(this.clearForm);
-        $("#addButton").click(this.submitForm);
     }
     /**
-     * Clear the form's input fields
+     * Initialize the NewEntryForm by creating its element in the DOM and
+     * configuring its buttons.  This needs to be called from any public static
+     * method, to ensure that the Singleton is initialized before use
      */
-    NewEntryForm.prototype.clearForm = function () {
-        $("#newTitle").val("");
-        $("#newMessage").val("");
-        // reset the UI
-        $("#addElement").hide();
-        $("#editElement").hide();
-        $("#showElements").show();
+    NewEntryForm.init = function () {
+        if (!NewEntryForm.isInit) {
+            $("body").append(Handlebars.templates[NewEntryForm.NAME + ".hb"]());
+            $("#" + NewEntryForm.NAME + "-OK").click(NewEntryForm.submitForm);
+            $("#" + NewEntryForm.NAME + "-Close").click(NewEntryForm.hide);
+            NewEntryForm.isInit = true;
+        }
     };
     /**
-     * Check if the input fields are both valid, and if so, do an AJAX call.
+     * Refresh() doesn't really have much meaning, but just like in sNavbar, we
+     * have a refresh() method so that we don't have front-end code calling
+     * init().
      */
-    NewEntryForm.prototype.submitForm = function () {
+    NewEntryForm.refresh = function () {
+        NewEntryForm.init();
+    };
+    /**
+     * Hide the NewEntryForm.  Be sure to clear its fields first
+     */
+    NewEntryForm.hide = function () {
+        $("#" + NewEntryForm.NAME + "-title").val("");
+        $("#" + NewEntryForm.NAME + "-message").val("");
+        $("#" + NewEntryForm.NAME).modal("hide");
+    };
+    /**
+     * Show the NewEntryForm.  Be sure to clear its fields, because there are
+     * ways of making a Bootstrap modal disapper without clicking Close, and
+     * we haven't set up the hooks to clear the fields on the events associated
+     * with those ways of making the modal disappear.
+     */
+    NewEntryForm.show = function () {
+        $("#" + NewEntryForm.NAME + "-title").val("");
+        $("#" + NewEntryForm.NAME + "-message").val("");
+        $("#" + NewEntryForm.NAME).modal("show");
+    };
+    /**
+     * Send data to submit the form only if the fields are both valid.
+     * Immediately hide the form when we send data, so that the user knows that
+     * their click was received.
+     */
+    NewEntryForm.submitForm = function () {
         // get the values of the two fields, force them to be strings, and check 
         // that neither is empty
-        var title = "" + $("#newTitle").val();
-        var msg = "" + $("#newMessage").val();
-        if (title === "" || msg === "") {
+        var msg = "" + $("#" + NewEntryForm.NAME + "-message").val();
+        var id = $(this).data("value");
+        if (msg === "") {
             window.alert("Error: title or message is not valid");
             return;
         }
+        NewEntryForm.hide();
         // set up an AJAX post.  When the server replies, the result will go to
         // onSubmitResponse
         $.ajax({
             type: "POST",
-            url: "/messages",
+            url: backendUrl + "/messages",
             dataType: "json",
-            data: JSON.stringify({ mTitle: title, mMessage: msg }),
-            success: newEntryForm.onSubmitResponse
+            data: JSON.stringify({
+                senderId: id,
+                text: msg,
+                nUpVotes: 0,
+                nDownVotes: 0
+            }),
+            success: NewEntryForm.onSubmitResponse
         });
     };
     /**
@@ -59,11 +117,11 @@ var NewEntryForm = /** @class */ (function () {
      *
      * @param data The object returned by the server
      */
-    NewEntryForm.prototype.onSubmitResponse = function (data) {
-        // If we get an "ok" message, clear the form
+    NewEntryForm.onSubmitResponse = function (data) {
+        // If we get an "ok" message, clear the form and refresh the main 
+        // listing of messages
         if (data.mStatus === "ok") {
-            newEntryForm.clearForm();
-            mainList.refresh();
+            ElementList.refresh();
         }
         // Handle explicit errors with a detailed popup message
         else if (data.mStatus === "error") {
@@ -74,201 +132,193 @@ var NewEntryForm = /** @class */ (function () {
             window.alert("Unspecified error");
         }
     };
+    /**
+     * The name of the DOM entry associated with NewEntryForm
+     */
+    NewEntryForm.NAME = "NewEntryForm";
+    /**
+     * Track if the Singleton has been initialized
+     */
+    NewEntryForm.isInit = false;
     return NewEntryForm;
-}()); // end class NewEntryForm
-// a global for the main ElementList of the program.  See newEntryForm for 
-// explanation
-var mainList;
+}());
 /**
- * ElementList provides a way of seeing all of the data stored on the server.
+ * The ElementList Singleton provides a way of displaying all of the data
+ * stored on the server as an HTML table.
  */
 var ElementList = /** @class */ (function () {
     function ElementList() {
     }
     /**
-     * refresh is the public method for updating messageList
+     * Initialize the ElementList singleton.
+     * This needs to be called from any public static method, to ensure that the
+     * Singleton is initialized before use.
      */
-    ElementList.prototype.refresh = function () {
+    ElementList.init = function () {
+        if (!ElementList.isInit) {
+            ElementList.isInit = true;
+        }
+    };
+    /**
+ * refresh() is the public method for updating the ElementList
+ */
+    ElementList.refresh = function () {
+        // Make sure the singleton is initialized
+        ElementList.init();
         // Issue a GET, and then pass the result to update()
         $.ajax({
             type: "GET",
-            url: "/messages",
+            url: backendUrl + "/messages",
             dataType: "json",
-            success: mainList.update
+            success: ElementList.update
         });
     };
     /**
-     * update is the private method used by refresh() to update messageList
+     * update() is the private method used by refresh() to update the
+     * ElementList
      */
-    ElementList.prototype.update = function (data) {
-        console.log(data);
-        console.log(data.mData.length);
-        $("#messageList").html("<table>");
-        for (var i = 0; i < data.mData.length; ++i) {
-            $("#messageList").append("<tr><td>" + data.mData[i].mSubject +
-                "</td>" + mainList.buttons(data.mData[i].mId) + "</tr>");
-        }
-        $("#messageList").append("</table>");
-        // Find all of the delete buttons, and set their behavior
-        $(".delbtn").click(mainList.clickDelete);
-        // Find all of the Edit buttons, and set their behavior
-        $(".editbtn").click(mainList.clickEdit);
+    ElementList.update = function (data) {
+        // Remove the table of data, if it exists
+        $("#" + ElementList.NAME).remove();
+        // Use a template to re-generate the table, and then insert it
+        $("body").append(Handlebars.templates[ElementList.NAME + ".hb"](data));
+        // Find all of the Upvote buttons, and set their behavior
+        $("." + ElementList.NAME + "-upvotebtn").click(ElementList.clickUpVote);
+        // Find all of the Downvote buttons, and set their behavior
+        $("." + ElementList.NAME + "-downvotebtn").click(ElementList.clickDownVote);
     };
     /**
-     * clickEdit is the code we run in response to a click of a delete button
+     * buttons() creates 'edit' and 'delete' buttons for an id, and puts them in
+     * a TD
      */
-    ElementList.prototype.clickEdit = function () {
-        // as in clickDelete, we need the ID of the row
-        var id = $(this).data("value");
-        $.ajax({
-            type: "GET",
-            url: "/messages/" + id,
-            dataType: "json",
-            success: editEntryForm.init
-        });
+    ElementList.buttons = function (id) {
+        return "<td><button class='" + ElementList.NAME +
+            "-upvotebtn' data-value='" + id + "'>Like</button></td>" +
+            "<td><button class='" + ElementList.NAME +
+            "-downvotebtn' data-value='" + id + "'>Dislike</button></td>";
     };
     /**
-     * clickDelete is the code we run in response to a click of a delete button
-     */
-    ElementList.prototype.clickDelete = function () {
-        // for now, just print the ID that goes along with the data in the row
-        // whose "delete" button was clicked
-        var id = $(this).data("value");
-        console.log("Attempting to delete message of id: " + $(this).data("value"));
-        $.ajax({
-            type: "DELETE",
-            url: "/messages/" + id,
-            dataType: "json",
-            // TODO: we should really have a function that looks at the return
-            //       value and possibly prints an error message.
-            success: mainList.refresh
-        });
-    };
-    /**
-     * buttons() adds a 'delete' button to the HTML for each row
-     */
-    ElementList.prototype.buttons = function (id) {
-        return "<td><button class='editbtn' data-value='" + id
-            + "'>Edit</button></td>"
-            + "<td><button class='delbtn' data-value='" + id
-            + "'>Delete</button></td>";
-    };
-    return ElementList;
-}()); // end class ElementList
-// a global for the EditEntryForm of the program.  See newEntryForm for 
-// explanation
-var editEntryForm;
-/**
- * EditEntryForm encapsulates all of the code for the form for editing an entry
- */
-var EditEntryForm = /** @class */ (function () {
-    /**
-     * To initialize the object, we say what method of EditEntryForm should be
-     * run in response to each of the form's buttons being clicked.
-     */
-    function EditEntryForm() {
-        $("#editCancel").click(this.clearForm);
-        $("#editButton").click(this.submitForm);
-    }
-    /**
-     * init() is called from an AJAX GET, and should populate the form if and
-     * only if the GET did not have an error
-     */
-    EditEntryForm.prototype.init = function (data) {
-        if (data.mStatus === "ok") {
-            $("#editTitle").val(data.mData.mSubject);
-            $("#editMessage").val(data.mData.mMessage);
-            $("#editId").val(data.mData.mId);
-            $("#editCreated").text(data.mData.mCreated);
-            // show the edit form
-            $("#addElement").hide();
-            $("#editElement").show();
-            $("#showElements").hide();
-        }
-        else if (data.mStatus === "error") {
-            window.alert("Error: " + data.mMessage);
-        }
-        else {
-            window.alert("An unspecified error occurred");
-        }
-    };
-    /**
-     * Clear the form's input fields
-     */
-    EditEntryForm.prototype.clearForm = function () {
-        $("#editTitle").val("");
-        $("#editMessage").val("");
-        $("#editId").val("");
-        $("#editCreated").text("");
-        // reset the UI
-        $("#addElement").hide();
-        $("#editElement").hide();
-        $("#showElements").show();
-    };
-    /**
-     * Check if the input fields are both valid, and if so, do an AJAX call.
-     */
-    EditEntryForm.prototype.submitForm = function () {
-        // get the values of the two fields, force them to be strings, and check 
-        // that neither is empty
-        var title = "" + $("#editTitle").val();
-        var msg = "" + $("#editMessage").val();
-        // NB: we assume that the user didn't modify the value of #editId
-        var id = "" + $("#editId").val();
-        if (title === "" || msg === "") {
-            window.alert("Error: title or message is not valid");
-            return;
-        }
-        // set up an AJAX post.  When the server replies, the result will go to
-        // onSubmitResponse
+     * clickUpvote is the code we run in response to a click of a upvote button
+    */
+    ElementList.clickUpVote = function () {
+        var msgId = $(this).data("value");
+        console.log(ID);
+        console.log(msgId);
         $.ajax({
             type: "PUT",
-            url: "/messages/" + id,
+            url: backendUrl + "/like",
             dataType: "json",
-            data: JSON.stringify({ mTitle: title, mMessage: msg }),
-            success: editEntryForm.onSubmitResponse
+            data: JSON.stringify({
+                userId: ID,
+                msgId: msgId
+            }),
+            success: ElementList.refresh,
+            error: function (e) {
+                console.info(e);
+            }
         });
     };
     /**
-     * onSubmitResponse runs when the AJAX call in submitForm() returns a
-     * result.
-     *
-     * @param data The object returned by the server
+     * clickDownVote is the code we run in response to a click of a downvote button
+    */
+    ElementList.clickDownVote = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var msgId;
+            return __generator(this, function (_a) {
+                msgId = $(this).data("value");
+                $.ajax({
+                    type: "PUT",
+                    url: backendUrl + "/dislike",
+                    dataType: "json",
+                    data: JSON.stringify({
+                        userId: ID,
+                        msgId: msgId
+                    }),
+                    success: ElementList.refresh,
+                    error: function (e) {
+                        console.info(e);
+                    }
+                });
+                return [2 /*return*/];
+            });
+        });
+    };
+    /**
+     * The name of the DOM entry associated with ElementList
      */
-    EditEntryForm.prototype.onSubmitResponse = function (data) {
-        // If we get an "ok" message, clear the form and refresh the main 
-        // listing of messages
-        if (data.mStatus === "ok") {
-            editEntryForm.clearForm();
-            mainList.refresh();
-        }
-        // Handle explicit errors with a detailed popup message
-        else if (data.mStatus === "error") {
-            window.alert("The server replied with an error:\n" + data.mMessage);
-        }
-        // Handle other errors with a less-detailed popup message
-        else {
-            window.alert("Unspecified error");
+    ElementList.NAME = "ElementList";
+    /**
+     * Track if the Singleton has been initialized
+     */
+    ElementList.isInit = false;
+    return ElementList;
+}());
+/**
+ * The Navbar Singleton is the navigation bar at the top of the page.  Through
+ * its HTML, it is designed so that clicking the "brand" part will refresh the
+ * page.  Apart from that, it has an "add" button, which forwards to
+ * NewEntryForm
+ */
+var Navbar = /** @class */ (function () {
+    function Navbar() {
+    }
+    /**
+     * Initialize the Navbar Singleton by creating its element in the DOM and
+     * configuring its button.  This needs to be called from any public static
+     * method, to ensure that the Singleton is initialized before use.
+     */
+    Navbar.init = function () {
+        if (!Navbar.isInit) {
+            $("body").prepend(Handlebars.templates[Navbar.NAME + ".hb"]());
+            $("#" + Navbar.NAME + "-add").click(NewEntryForm.show);
+            Navbar.isInit = true;
         }
     };
-    return EditEntryForm;
-}()); // end class EditEntryForm
+    /**
+     * Refresh() doesn't really have much meaning for the navbar, but we'd
+     * rather not have anyone call init(), so we'll have this as a stub that
+     * can be called during front-end initialization to ensure the navbar
+     * is configured.
+     */
+    Navbar.refresh = function () {
+        Navbar.init();
+    };
+    /**
+     * Track if the Singleton has been initialized
+     */
+    Navbar.isInit = false;
+    /**
+     * The name of the DOM entry associated with Navbar
+     */
+    Navbar.NAME = "Navbar";
+    return Navbar;
+}());
+/// <reference path="ts/NewEntryForm.ts"/>
+/// <reference path="ts/ElementList.ts"/>
+/// <reference path="ts/Navbar.ts"/>
+// Prevent compiler errors when using jQuery.  "$" will be given a type of 
+// "any", so that we can use it anywhere, and assume it has any fields or
+// methods, without the compiler producing an error.
+var $;
+/// This constant indicates the path to our backend server
+var backendUrl = "https://clowns-who-code.herokuapp.com";
+// Prevent compiler errors when using Handlebars
+var Handlebars;
+var ID;
+var userName;
 // Run some configuration code when the web page loads
+$.ajax({
+    type: "POST",
+    url: backendUrl + "/user",
+    dataType: "json",
+    data: JSON.stringify({ name: "Nico", password: "Beard" }),
+    success: function (data) {
+        ID = data.userId;
+        userName = data.name;
+    }
+});
 $(document).ready(function () {
-    // Create the object that controls the "New Entry" form
-    newEntryForm = new NewEntryForm();
-    // Create the object for the main data list, and populate it with data from
-    // the server
-    mainList = new ElementList();
-    mainList.refresh();
-    // Create the object that controls the "Edit Entry" form
-    editEntryForm = new EditEntryForm();
-    $("#editElement").hide();
-    $("#addElement").hide();
-    $("#showElements").show();
-    // set up the "Add Message" button
-    $("#showFormButton").click(function () {
-        $("#addElement").show();
-        $("#showElements").hide();
-    });
+    Navbar.refresh();
+    NewEntryForm.refresh();
+    ElementList.refresh();
 });

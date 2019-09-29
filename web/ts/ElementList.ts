@@ -79,7 +79,10 @@ class ElementList {
                                     userId: ID, 
                                     msgId: msgId,}
                                 ),
-            success: ElementList.refresh
+            success: ElementList.refresh,
+            error: function(e){
+                console.info(e);
+            }
         });
     }
 
@@ -97,7 +100,10 @@ class ElementList {
                                     userId: ID, 
                                     msgId: msgId,}
                                 ),
-            success: ElementList.refresh
+            success: ElementList.refresh,
+            error: function(e){
+                console.info(e);
+            }
         });
     }
 }
