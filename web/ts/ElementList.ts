@@ -33,7 +33,7 @@ class ElementList {
         // Issue a GET, and then pass the result to update()
         $.ajax({
             type: "GET",
-            url: "/messages",
+            url: backendUrl + "/messages",
             dataType: "json",
             success: ElementList.update
         });
@@ -50,7 +50,7 @@ class ElementList {
         $("body").append(Handlebars.templates[ElementList.NAME + ".hb"](data));
         // Find all of the Upvote buttons, and set their behavior
         $("." + ElementList.NAME + "-upvotebtn").click(ElementList.clickUpVote);
-        // Find all of the Upvote buttons, and set their behavior
+        // Find all of the Downvote buttons, and set their behavior
         $("." + ElementList.NAME + "-downvotebtn").click(ElementList.clickDownVote);
     }
 
@@ -70,32 +70,40 @@ class ElementList {
     */
 
     private static clickUpVote() {
-
-        // as in clickDelete, we need the ID of the row
-        let id = $(this).data("value");
+        let msgId = $(this).data("value");
         $.ajax({
-            type: "POST",
-            url: "/messages/" + id,
+            type: "PUT",
+            url: backendUrl + "/like",
             dataType: "json",
-            data: JSON.stringify({ mId: id }),
-            success: ElementList.refresh
+            data: JSON.stringify({ 
+                                    userId: ID, 
+                                    msgId: msgId,}
+                                ),
+            success: ElementList.refresh,
+            error: function(e){
+                console.info(e);
+            }
         });
     }
 
     /**
      * clickDownVote is the code we run in response to a click of a downvote button
     */
-
-    private static clickDownVote() {
-
-    // as in clickDelete, we need the ID of the row
-    let id = $(this).data("value");
-    $.ajax({
-        type: "POST",
-        url: "/messages/" + id,
-        dataType: "json",
-        data: JSON.stringify({ mId: id }),
-        success: ElementList.refresh
-    });
+    private static async clickDownVote()
+    {
+        let msgId = $(this).data("value");
+        $.ajax({
+            type: "PUT",
+            url: backendUrl + "/dislike",
+            dataType: "json",
+            data: JSON.stringify({ 
+                                    userId: ID, 
+                                    msgId: msgId,}
+                                ),
+            success: ElementList.refresh,
+            error: function(e){
+                console.info(e);
+            }
+        });
     }
 }

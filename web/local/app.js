@@ -1,6 +1,4 @@
 "use strict";
-<<<<<<< HEAD
-=======
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -37,7 +35,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
->>>>>>> 5a3617cc3e0a64e3631dd850d43ba216d3b5320b
 /**
  * NewEntryForm encapsulates all of the code for the form for adding an entry
  */
@@ -61,7 +58,6 @@ var NewEntryForm = /** @class */ (function () {
      * Refresh() doesn't really have much meaning, but just like in sNavbar, we
      * have a refresh() method so that we don't have front-end code calling
      * init().
-<<<<<<< HEAD
      */
     NewEntryForm.refresh = function () {
         NewEntryForm.init();
@@ -80,26 +76,6 @@ var NewEntryForm = /** @class */ (function () {
      * we haven't set up the hooks to clear the fields on the events associated
      * with those ways of making the modal disappear.
      */
-=======
-     */
-    NewEntryForm.refresh = function () {
-        NewEntryForm.init();
-    };
-    /**
-     * Hide the NewEntryForm.  Be sure to clear its fields first
-     */
-    NewEntryForm.hide = function () {
-        $("#" + NewEntryForm.NAME + "-title").val("");
-        $("#" + NewEntryForm.NAME + "-message").val("");
-        $("#" + NewEntryForm.NAME).modal("hide");
-    };
-    /**
-     * Show the NewEntryForm.  Be sure to clear its fields, because there are
-     * ways of making a Bootstrap modal disapper without clicking Close, and
-     * we haven't set up the hooks to clear the fields on the events associated
-     * with those ways of making the modal disappear.
-     */
->>>>>>> 5a3617cc3e0a64e3631dd850d43ba216d3b5320b
     NewEntryForm.show = function () {
         $("#" + NewEntryForm.NAME + "-title").val("");
         $("#" + NewEntryForm.NAME + "-message").val("");
@@ -113,15 +89,9 @@ var NewEntryForm = /** @class */ (function () {
     NewEntryForm.submitForm = function () {
         // get the values of the two fields, force them to be strings, and check 
         // that neither is empty
-<<<<<<< HEAD
         var title = "" + $("#" + NewEntryForm.NAME + "-title").val();
         var msg = "" + $("#" + NewEntryForm.NAME + "-message").val();
         if (title === "" || msg === "") {
-=======
-        var msg = "" + $("#" + NewEntryForm.NAME + "-message").val();
-        var id = $(this).data("value");
-        if (msg === "") {
->>>>>>> 5a3617cc3e0a64e3631dd850d43ba216d3b5320b
             window.alert("Error: title or message is not valid");
             return;
         }
@@ -132,16 +102,7 @@ var NewEntryForm = /** @class */ (function () {
             type: "POST",
             url: backendUrl + "/messages",
             dataType: "json",
-<<<<<<< HEAD
             data: JSON.stringify({ mTitle: title, mMessage: msg }),
-=======
-            data: JSON.stringify({
-                senderId: id,
-                text: msg,
-                nUpVotes: 0,
-                nDownVotes: 0
-            }),
->>>>>>> 5a3617cc3e0a64e3631dd850d43ba216d3b5320b
             success: NewEntryForm.onSubmitResponse
         });
     };
@@ -215,14 +176,11 @@ var ElementList = /** @class */ (function () {
         // Remove the table of data, if it exists
         $("#" + ElementList.NAME).remove();
         // Use a template to re-generate the table, and then insert it
+        console.log(Handlebars.templates[ElementList.NAME + ".hb"](data));
         $("body").append(Handlebars.templates[ElementList.NAME + ".hb"](data));
         // Find all of the Upvote buttons, and set their behavior
         $("." + ElementList.NAME + "-upvotebtn").click(ElementList.clickUpVote);
-<<<<<<< HEAD
-        // Find all of the Upvote buttons, and set their behavior
-=======
         // Find all of the Downvote buttons, and set their behavior
->>>>>>> 5a3617cc3e0a64e3631dd850d43ba216d3b5320b
         $("." + ElementList.NAME + "-downvotebtn").click(ElementList.clickDownVote);
     };
     /**
@@ -239,68 +197,44 @@ var ElementList = /** @class */ (function () {
      * clickUpvote is the code we run in response to a click of a upvote button
     */
     ElementList.clickUpVote = function () {
-<<<<<<< HEAD
-        // as in clickDelete, we need the ID of the row
+        var msg = "" + $("#" + ElementList.NAME + "-message").val();
         var id = $(this).data("value");
         $.ajax({
             type: "POST",
-            url: "/messages/" + id,
-            dataType: "json",
-            data: JSON.stringify({ mId: id }),
-            success: ElementList.refresh
-=======
-        var msgId = $(this).data("value");
-        console.log(ID);
-        console.log(msgId);
-        $.ajax({
-            type: "PUT",
-            url: backendUrl + "/like",
+            url: backendUrl + "/messages",
             dataType: "json",
             data: JSON.stringify({
-                userId: ID,
-                msgId: msgId
+                senderId: id,
+                text: msg,
+                nUpVotes: 0,
+                nDownVotes: 0
             }),
-            success: ElementList.refresh,
-            error: function (e) {
-                console.info(e);
-            }
->>>>>>> 5a3617cc3e0a64e3631dd850d43ba216d3b5320b
+            success: ElementList.refresh
         });
     };
     /**
      * clickDownVote is the code we run in response to a click of a downvote button
     */
     ElementList.clickDownVote = function () {
-<<<<<<< HEAD
-        // as in clickDelete, we need the ID of the row
-        var id = $(this).data("value");
-        $.ajax({
-            type: "POST",
-            url: "/messages/" + id,
-            dataType: "json",
-            data: JSON.stringify({ mId: id }),
-            success: ElementList.refresh
-=======
         return __awaiter(this, void 0, void 0, function () {
-            var msgId;
+            var msg, id;
             return __generator(this, function (_a) {
-                msgId = $(this).data("value");
+                msg = "" + $("#" + ElementList.NAME + "-message").val();
+                id = $(this).data("value");
                 $.ajax({
-                    type: "PUT",
-                    url: backendUrl + "/dislike",
+                    type: "POST",
+                    url: backendUrl + "/messages",
                     dataType: "json",
                     data: JSON.stringify({
-                        userId: ID,
-                        msgId: msgId
+                        senderId: id,
+                        text: msg,
+                        nUpVotes: 0,
+                        nDownVotes: 0
                     }),
-                    success: ElementList.refresh,
-                    error: function (e) {
-                        console.info(e);
-                    }
+                    success: ElementList.refresh
                 });
                 return [2 /*return*/];
             });
->>>>>>> 5a3617cc3e0a64e3631dd850d43ba216d3b5320b
         });
     };
     /**
@@ -360,28 +294,11 @@ var Navbar = /** @class */ (function () {
 // "any", so that we can use it anywhere, and assume it has any fields or
 // methods, without the compiler producing an error.
 var $;
-<<<<<<< HEAD
-// Prevent compiler errors when using Handlebars
-var Handlebars;
-=======
 /// This constant indicates the path to our backend server
 var backendUrl = "https://clowns-who-code.herokuapp.com";
 // Prevent compiler errors when using Handlebars
 var Handlebars;
-var ID;
-var userName;
->>>>>>> 5a3617cc3e0a64e3631dd850d43ba216d3b5320b
 // Run some configuration code when the web page loads
-$.ajax({
-    type: "POST",
-    url: backendUrl + "/user",
-    dataType: "json",
-    data: JSON.stringify({ name: "Nico", password: "Beard" }),
-    success: function (data) {
-        ID = data.userId;
-        userName = data.name;
-    }
-});
 $(document).ready(function () {
     Navbar.refresh();
     NewEntryForm.refresh();

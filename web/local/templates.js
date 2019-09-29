@@ -1,33 +1,19 @@
 (function() {
   var template = Handlebars.template, templates = Handlebars.templates = Handlebars.templates || {};
 templates['ElementList.hb'] = template({"1":function(container,depth0,helpers,partials,data) {
-<<<<<<< HEAD
-    var alias1=container.propertyIsEnumerable, alias2=container.lambda, alias3=container.escapeExpression;
-
-  return "            <tr>\n                <td>"
-    + alias3(alias2((depth0 != null ? depth0.mSubject : depth0), depth0))
-    + "</td>\n                <td>"
-    + alias3(alias2((depth0 != null ? depth0.mMessage : depth0), depth0))
-    + "</td>\n                <td><button type=\"button\" class=\"ElementList-upvotebtn btn-primary\" data-value=\""
-    + alias3(alias2((depth0 != null ? depth0.mId : depth0), depth0))
-    + "\">\n                    <span class=\"glyphicon glyphicon-thumbs-up\"></span>\n                    Like</button></td>\n                <td><button class=\"ElementList-downvotebtn btn-danger\" data-value=\""
-    + alias3(alias2((depth0 != null ? depth0.mId : depth0), depth0))
-    + "\">\n                    <span class=\"glyphicon glyphicon-thumbs-down\"></span>\n                    Dislike</button></td>\n            </tr>\n";
-},"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
-    var stack1, alias1=container.propertyIsEnumerable;
-=======
     var alias1=container.lambda, alias2=container.escapeExpression;
 
   return "            <tr>\n                <td>"
-    + alias2(alias1((depth0 != null ? depth0.text : depth0), depth0))
+    + alias2(alias1((depth0 != null ? depth0.mSubject : depth0), depth0))
+    + "</td>\n                <td>"
+    + alias2(alias1((depth0 != null ? depth0.mMessage : depth0), depth0))
     + "</td>\n                <td><button type=\"button\" class=\"ElementList-upvotebtn btn-primary\" data-value=\""
-    + alias2(alias1((depth0 != null ? depth0.id : depth0), depth0))
+    + alias2(alias1((depth0 != null ? depth0.mId : depth0), depth0))
     + "\">\n                    <span class=\"glyphicon glyphicon-thumbs-up\"></span>\n                    Like</button></td>\n                <td><button class=\"ElementList-downvotebtn btn-danger\" data-value=\""
-    + alias2(alias1((depth0 != null ? depth0.id : depth0), depth0))
+    + alias2(alias1((depth0 != null ? depth0.mId : depth0), depth0))
     + "\">\n                    <span class=\"glyphicon glyphicon-thumbs-down\"></span>\n                    Dislike</button></td>\n            </tr>\n";
 },"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
     var stack1;
->>>>>>> 5a3617cc3e0a64e3631dd850d43ba216d3b5320b
 
   return "<div class=\"panel panel-default\" id=\"ElementList\">\n    <div class=\"panel-heading\">\n        <h3 class=\"panel-title\">Messages</h3>\n    </div>\n    <table class=\"table\">\n        <tbody>\n"
     + ((stack1 = helpers.each.call(depth0 != null ? depth0 : (container.nullContext || {}),(depth0 != null ? depth0.mData : depth0),{"name":"each","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
@@ -37,11 +23,7 @@ templates['ElementList.hb'] = template({"1":function(container,depth0,helpers,pa
 (function() {
   var template = Handlebars.template, templates = Handlebars.templates = Handlebars.templates || {};
 templates['NewEntryForm.hb'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
-<<<<<<< HEAD
     return "<div id=\"NewEntryForm\" class=\"modal fade\" role=\"dialog\">\n    <div class=\"modal-dialog\">\n        <div class=\"modal-content\">\n            <div class=\"modal-header\">\n                <h4 class=\"modal-title\">Add a New Entry</h4>\n            </div>\n            <div class=\"modal-body\">\n                <label for=\"NewEntryForm-title\">Title</label>\n                <input class=\"form-control\" type=\"text\" id=\"NewEntryForm-title\" />\n                <label for=\"NewEntryForm-message\">Message</label>\n                <textarea class=\"form-control\" id=\"NewEntryForm-message\"></textarea>\n            </div>\n            <div class=\"modal-footer\">\n                <button type=\"button\" class=\"btn btn-default\" id=\"NewEntryForm-OK\">OK</button>\n                <button type=\"button\" class=\"btn btn-default\" id=\"NewEntryForm-Close\">Close</button>\n            </div>\n        </div>\n    </div>\n</div>";
-=======
-    return "<div id=\"NewEntryForm\" class=\"modal fade\" role=\"dialog\">\n    <div class=\"modal-dialog\">\n        <div class=\"modal-content\">\n            <div class=\"modal-header\">\n                <h4 class=\"modal-title\">Add a New Entry</h4>\n            </div>\n            <div class=\"modal-body\">\n                <label for=\"NewEntryForm-message\">Message</label>\n                <textarea class=\"form-control\" id=\"NewEntryForm-message\"></textarea>\n            </div>\n            <div class=\"modal-footer\">\n                <button type=\"button\" class=\"btn btn-default\" id=\"NewEntryForm-OK\">OK</button>\n                <button type=\"button\" class=\"btn btn-default\" id=\"NewEntryForm-Close\">Close</button>\n            </div>\n        </div>\n    </div>\n</div>";
->>>>>>> 5a3617cc3e0a64e3631dd850d43ba216d3b5320b
 },"useData":true});
 })();
 (function() {
