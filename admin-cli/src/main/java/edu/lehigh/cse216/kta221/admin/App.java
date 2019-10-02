@@ -146,16 +146,24 @@ public class App {
                 String id = "";
                 while (!(id.equals("U")) && !(id.equals("M")) && !(id.equals("L")) && !(id.equals("D")))
                 {
-                    id = getString(in, "Enter the table you would like to make (U for user, M for msg, L for likes, D for dislikes");
+                    id = getString(in, "Enter the table you would like to make (U = user, M = msg, L = likes, D = dislikes, C = comment");
                 }
-                if (id.equals("U")) {
-                    db.createUserTable();
-                } else if (id.equals("M")) {
-                    db.createMessageTable();
-                } else if (id.equals("L")) {
-                    db.createLikeData();
-                } else if (id.equals("D")) {
-                    db.createDislikeData();
+                switch(id){
+                    case "U":
+                        db.createUserTable();
+                        break;
+                    case "M":
+                        db.createMessageTable();
+                        break;
+                    case "L":
+                        db.createLikeData();
+                        break;
+                    case "D":
+                        db.createDislikeData();
+                        break;
+                    case "C":
+                        db.createCommentTable();
+                        break;
                 }
             } else if (action == 'D') {
                 String id = "";

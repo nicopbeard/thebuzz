@@ -113,6 +113,8 @@ public class Database {
      */
     private PreparedStatement mCreateDislikeData;
 
+    private PreparedStatement mCreateCommentTable;
+
     /**
      * A prepared statemebnet for creating the user table in our database
      */
@@ -303,7 +305,14 @@ public class Database {
             //likeData
             db.mCreateDislikeData = db.mConnection.prepareStatement(
                 "CREATE TABLE dislikedata (userID int REFERENCES userdata(msgID), msgID int REFERENCES msgdata(userID), PRIMARY KEY (userID, msgID)");
-            
+
+            //comment table
+            db.mCreateCommentTable = db.mConnection.prepareStatement(
+                    "CREATE TABLE comments (commentID SERIAL PRIMARY KEY, msgID int REFERENCES msgdata(msgId)), text VARCHAR(500) NOT NULL, " +
+                            "tStamp timestamp NOT NULL,");
+
+
+
             db.mInsertOneMessage = db.mConnection.prepareStatement("INSERT INTO msgData VALUES (?, ? ,?, ?, ?, ?)");
             db.mInsertOneUser = db.mConnection.prepareStatement("INSERT INTO userData VALUES (?, ?, ?)");
             
@@ -776,6 +785,14 @@ public class Database {
         try {
             mCreateDislikeData.execute();
         } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    void createCommentTable(){
+        try{
+            mCreateCommentTable.execute();
+        } catch (Exception e){
             e.printStackTrace();
         }
     }
