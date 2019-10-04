@@ -46,6 +46,8 @@ public class Database {
      */
     private PreparedStatement mUpdateOne;
 
+    private PreparedStatement mCreateCommentTable;
+
     /**
      * A prepared statement for creating the message table in our database
      */
@@ -264,6 +266,7 @@ public class Database {
                 return null;
             }
             db.mConnection = conn;
+
         } catch (SQLException e) {
             System.err.println("Error: DriverManager.getConnection() threw a SQLException");
             e.printStackTrace();
@@ -339,6 +342,11 @@ public class Database {
             db.mSelectAll = db.mConnection.prepareStatement("SELECT id, subject, message FROM tblData");
             db.mSelectOne = db.mConnection.prepareStatement("SELECT * from tblData WHERE id=?");
             db.mUpdateOne = db.mConnection.prepareStatement("UPDATE tblData SET message = ?, subject = ? WHERE id = ?");
+
+            db.mCreateCommentTable = db.mConnection.prepareStatement(
+                    "CREATE TABLE comments (commentID SERIAL PRIMARY KEY, msgID int REFERENCES msgdata(msgId), text VARCHAR(500) NOT NULL, " +
+                            "tStamp timestamp NOT NULL)");
+            
         } catch (SQLException e) {
             System.err.println("Error creating prepared statement");
             e.printStackTrace();
