@@ -246,10 +246,10 @@ public class Database {
      * @return A Database object, or null if we cannot connect properly
      */
     static Database getDatabase(String ip, String port, String user, String pass) {
-        // Create an un-configured Database object
-        Map<String, String> env = System.getenv();
-        String db_url = env.get("DATABASE_URL");
         Database db = new Database();
+        Map<String, String> env = System.getenv();
+        String db_url = "postgres://qnwrtcuewzcdpe:a8bc2fbf3637a0fcded45cb4a148de56a37dd37cc3c694145d863374f2ee77a0@ec2-174-129-220-12.compute-1.amazonaws.com:5432/dcl2b7tskpghar";
+        //String db_url = env.get("DATABASE_URL");
 
         // Give the Database object a connection, fail if we cannot get one
         try {
@@ -257,7 +257,7 @@ public class Database {
             URI dbUri = new URI(db_url);
             String username = dbUri.getUserInfo().split(":")[0];
             String password = dbUri.getUserInfo().split(":")[1];
-            String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + ':' + dbUri.getPort() + dbUri.getPath();
+            String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + ':' + dbUri.getPort() + dbUri.getPath() + "?sslmode=require";
             Connection conn = DriverManager.getConnection(dbUrl, username, password);
             if (conn == null) {
                 System.err.println("Error: DriverManager.getConnection() returned a null object");
