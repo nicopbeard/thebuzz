@@ -110,7 +110,7 @@ public class LoginActivity extends AppCompatActivity {
                 return false;
             }
         });
-
+    // This part lets you move from the login screen to the main message board
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
