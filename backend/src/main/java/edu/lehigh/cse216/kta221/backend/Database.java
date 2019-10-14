@@ -13,6 +13,10 @@ import java.sql.Timestamp;
 
 import java.util.ArrayList;
 
+import org.apache.commons.lang3.RandomStringUtils.*;
+import java.util.Hashtable;
+import org.springframework.security.crypto.bcrypt.BCrypt;
+ 
 public class Database {
    
     /**
@@ -140,7 +144,7 @@ public class Database {
     private PreparedStatement removeDislikeToMessage;
 
 
-    
+    Hashtable<Integer, String> cache = new Hashtable<Integer, String>();
 
     /**
      * RowData is like a struct in C: we use it to hold data, and we allow 
@@ -310,7 +314,7 @@ public class Database {
             
             // db.mLastAdded = db.mConnection.prepareStatement("SELECT LAST (id) FROM msgData");
 
-            db.getUserId = db.mConnection.prepareStatement("INSERT INTO userData (userId, name, password) VALUES (default, ?, ?) RETURNING *");
+            db.getUserId = db.mConnection.prepareStatement("INSERT INTO userData (userId, name, salt, passHash) VALUES (default, ?, ?, ?) RETURNING *");
 
             db.mDropTable = db.mConnection.prepareStatement("DROP TABLE tblData");
 
@@ -386,12 +390,14 @@ public class Database {
      * THIS WILL NEED TO BE CHANGED ONCE WE GET USERNAME/PASSWORD
      * @return A unique user id for the current session 
      */
-    int insertUser(String name, String password) {
+    int insertUser(int userID,String name, String salt, String passHash) {
         int userId = -1; 
 
         try {
-            getUserId.setString(1, name);
-            getUserId.setString(2, password);
+            getUserId.setInt(1, userID);
+            getUserId.setString(2, name);
+            getUserID.setString(3, salt);
+            getUserId.setString(4, passHash);
             ResultSet rs = getUserId.executeQuery();
             // MessageRow returnRow = new MessageRow(rs.getInt("id"), rs.getInt("senderID"), rs.getString("text"), rs.getString("tStamp"), rs.getInt("numUpVotes"), rs.getInt("numDownVotes"));
             while (rs.next()){
@@ -652,6 +658,26 @@ public class Database {
         }
         return res;
     }
+    
+    // Creates a session key that will be put in the HashTable
+     String createSessionKey()
+     {
+         String token = RandomStringUtils.randomAlphanumeric(10);
+         return token;
+     }
+
+   Boolean authorize(Integer userID)
+   {
+        return cache.contains(userID);
+   }
+
+   String passwordHasher(String plain_password)
+   {
+       String hashed_password = BCrypt.hashpw(plain_password, BCrypr.gensalt());
+       return hashed_password;
+   }
+
+
 
     /**
      * Create tblData.  If it already exists, this will print an error
