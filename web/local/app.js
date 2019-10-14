@@ -48,7 +48,7 @@ var NewEntryForm = /** @class */ (function () {
      */
     NewEntryForm.init = function () {
         if (!NewEntryForm.isInit) {
-            $("body").append(Handlebars.templates[NewEntryForm.NAME + ".hb"]());
+            $("#input-container").append(Handlebars.templates[NewEntryForm.NAME + ".hb"]());
             $("#" + NewEntryForm.NAME + "-OK").click(NewEntryForm.submitForm);
             $("#" + NewEntryForm.NAME + "-Close").click(NewEntryForm.hide);
             NewEntryForm.isInit = true;
@@ -89,9 +89,9 @@ var NewEntryForm = /** @class */ (function () {
     NewEntryForm.submitForm = function () {
         // get the values of the two fields, force them to be strings, and check 
         // that neither is empty
-        var title = "" + $("#" + NewEntryForm.NAME + "-title").val();
         var msg = "" + $("#" + NewEntryForm.NAME + "-message").val();
-        if (title === "" || msg === "") {
+        var id = $(this).data("value");
+        if (msg === "") {
             window.alert("Error: title or message is not valid");
             return;
         }
@@ -102,7 +102,12 @@ var NewEntryForm = /** @class */ (function () {
             type: "POST",
             url: backendUrl + "/messages",
             dataType: "json",
-            data: JSON.stringify({ mTitle: title, mMessage: msg }),
+            data: JSON.stringify({
+                senderId: id,
+                text: msg,
+                nUpVotes: 0,
+                nDownVotes: 0
+            }),
             success: NewEntryForm.onSubmitResponse
         });
     };
@@ -165,7 +170,9 @@ var ElementList = /** @class */ (function () {
             type: "GET",
             url: backendUrl + "/messages",
             dataType: "json",
-            success: ElementList.update
+            success: function (data) {
+                ElementList.update(data);
+            }
         });
     };
     /**
@@ -176,8 +183,7 @@ var ElementList = /** @class */ (function () {
         // Remove the table of data, if it exists
         $("#" + ElementList.NAME).remove();
         // Use a template to re-generate the table, and then insert it
-        console.log(Handlebars.templates[ElementList.NAME + ".hb"](data));
-        $("body").append(Handlebars.templates[ElementList.NAME + ".hb"](data));
+        $("#message-container").append(Handlebars.templates[ElementList.NAME + ".hb"](data));
         // Find all of the Upvote buttons, and set their behavior
         $("." + ElementList.NAME + "-upvotebtn").click(ElementList.clickUpVote);
         // Find all of the Downvote buttons, and set their behavior
@@ -197,19 +203,19 @@ var ElementList = /** @class */ (function () {
      * clickUpvote is the code we run in response to a click of a upvote button
     */
     ElementList.clickUpVote = function () {
-        var msg = "" + $("#" + ElementList.NAME + "-message").val();
-        var id = $(this).data("value");
+        var msgId = $(this).data("value");
         $.ajax({
-            type: "POST",
-            url: backendUrl + "/messages",
+            type: "PUT",
+            url: backendUrl + "/like",
             dataType: "json",
             data: JSON.stringify({
-                senderId: id,
-                text: msg,
-                nUpVotes: 0,
-                nDownVotes: 0
+                userId: ID,
+                msgId: msgId
             }),
-            success: ElementList.refresh
+            success: ElementList.refresh,
+            error: function (e) {
+                console.info(e);
+            }
         });
     };
     /**
@@ -217,21 +223,21 @@ var ElementList = /** @class */ (function () {
     */
     ElementList.clickDownVote = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var msg, id;
+            var msgId;
             return __generator(this, function (_a) {
-                msg = "" + $("#" + ElementList.NAME + "-message").val();
-                id = $(this).data("value");
+                msgId = $(this).data("value");
                 $.ajax({
-                    type: "POST",
-                    url: backendUrl + "/messages",
+                    type: "PUT",
+                    url: backendUrl + "/dislike",
                     dataType: "json",
                     data: JSON.stringify({
-                        senderId: id,
-                        text: msg,
-                        nUpVotes: 0,
-                        nDownVotes: 0
+                        userId: ID,
+                        msgId: msgId
                     }),
-                    success: ElementList.refresh
+                    success: ElementList.refresh,
+                    error: function (e) {
+                        console.info(e);
+                    }
                 });
                 return [2 /*return*/];
             });
@@ -263,7 +269,7 @@ var Navbar = /** @class */ (function () {
      */
     Navbar.init = function () {
         if (!Navbar.isInit) {
-            $("body").prepend(Handlebars.templates[Navbar.NAME + ".hb"]());
+            $("#app-container").prepend(Handlebars.templates[Navbar.NAME + ".hb"]());
             $("#" + Navbar.NAME + "-add").click(NewEntryForm.show);
             Navbar.isInit = true;
         }
@@ -298,7 +304,19 @@ var $;
 var backendUrl = "https://clowns-who-code.herokuapp.com";
 // Prevent compiler errors when using Handlebars
 var Handlebars;
+var ID;
+var userName;
 // Run some configuration code when the web page loads
+$.ajax({
+    type: "POST",
+    url: backendUrl + "/user",
+    dataType: "json",
+    data: JSON.stringify({ name: "Nico", password: "Beard" }),
+    success: function (data) {
+        ID = data.userId;
+        userName = data.name;
+    }
+});
 $(document).ready(function () {
     Navbar.refresh();
     NewEntryForm.refresh();

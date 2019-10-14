@@ -33,3 +33,9 @@ label, input, textarea, #addButton, #editButton {
     margin-bottom: 5px;
     margin-left: 15px;
 }
+
+#message-container {
+    overflow: auto;
+    height: 600px !important; 
+    margin-bottom: 20px;
+}

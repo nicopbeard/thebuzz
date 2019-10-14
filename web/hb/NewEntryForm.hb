@@ -1,17 +1,10 @@
-<div id="NewEntryForm" class="modal fade" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Add a New Entry</h4>
-            </div>
-            <div class="modal-body">
+<div id="NewEntryForm">
+            <div id = "new-entry-input-field">
                 <label for="NewEntryForm-message">Message</label>
                 <textarea class="form-control" id="NewEntryForm-message"></textarea>
             </div>
-            <div class="modal-footer">
+            <div id ="new-entry-input-footer">
                 <button type="button" class="btn btn-default" id="NewEntryForm-OK">OK</button>
                 <button type="button" class="btn btn-default" id="NewEntryForm-Close">Close</button>
             </div>
-        </div>
-    </div>
 </div>

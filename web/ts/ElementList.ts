@@ -35,7 +35,9 @@ class ElementList {
             type: "GET",
             url: backendUrl + "/messages",
             dataType: "json",
-            success: ElementList.update
+            success: function(data) {
+                ElementList.update(data);
+            }
         });
     }
 
@@ -47,7 +49,7 @@ class ElementList {
         // Remove the table of data, if it exists
         $("#" + ElementList.NAME).remove();
         // Use a template to re-generate the table, and then insert it
-        $("body").append(Handlebars.templates[ElementList.NAME + ".hb"](data));
+        $("#message-container").append(Handlebars.templates[ElementList.NAME + ".hb"](data));
         // Find all of the Upvote buttons, and set their behavior
         $("." + ElementList.NAME + "-upvotebtn").click(ElementList.clickUpVote);
         // Find all of the Downvote buttons, and set their behavior

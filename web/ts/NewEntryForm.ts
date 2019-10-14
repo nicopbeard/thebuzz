@@ -20,7 +20,7 @@ class NewEntryForm {
      */
     private static init() {
         if (!NewEntryForm.isInit) {
-            $("body").append(Handlebars.templates[NewEntryForm.NAME + ".hb"]());
+            $("#input-container").append(Handlebars.templates[NewEntryForm.NAME + ".hb"]());
             $("#" + NewEntryForm.NAME + "-OK").click(NewEntryForm.submitForm);
             $("#" + NewEntryForm.NAME + "-Close").click(NewEntryForm.hide);
             NewEntryForm.isInit = true;

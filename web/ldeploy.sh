@@ -16,6 +16,9 @@ rm -rf $TARGETFOLDER
 mkdir $TARGETFOLDER
 
 # step 3: copy jQuery, Handlebars, and Bootstrap files
+#cp app.js $TARGETFOLDER
+cp index.html $TARGETFOLDER
+cp app.css $TARGETFOLDER
 cp node_modules/jquery/dist/jquery.min.js $TARGETFOLDER/$WEBFOLDERNAME
 cp node_modules/handlebars/dist/handlebars.min.js $TARGETFOLDER/$WEBFOLDERNAME
 cp node_modules/bootstrap/dist/js/bootstrap.min.js $TARGETFOLDER/$WEBFOLDERNAME
@@ -25,6 +28,7 @@ cp -R node_modules/bootstrap/dist/fonts $TARGETFOLDER/$WEBFOLDERNAME
 # step 4: compile TypeScript files
 node_modules/.bin/tsc app.ts --strict --outFile $TARGETFOLDER/app.js
 
+
 # step 5: copy css files
 cat app.css css/ElementList.css css/NewEntryForm.css css/Navbar.css > $TARGETFOLDER/$WEBFOLDERNAME/app.css
 
@@ -32,3 +36,7 @@ cat app.css css/ElementList.css css/NewEntryForm.css css/Navbar.css > $TARGETFOL
 node_modules/handlebars/bin/handlebars hb/ElementList.hb >> $TARGETFOLDER/$WEBFOLDERNAME/templates.js
 node_modules/handlebars/bin/handlebars hb/NewEntryForm.hb >> $TARGETFOLDER/$WEBFOLDERNAME/templates.js
 node_modules/handlebars/bin/handlebars hb/Navbar.hb >> $TARGETFOLDER/$WEBFOLDERNAME/templates.js
+
+
+#SET UP SERVER
+node_modules/.bin/http-server $TARGETFOLDER -c-1
