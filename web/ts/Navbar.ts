@@ -22,8 +22,9 @@ class Navbar {
      */
     private static init() {
         if (!Navbar.isInit) {
-            $("#app-container").prepend(Handlebars.templates[Navbar.NAME + ".hb"]());
-            $("#"+Navbar.NAME+"-add").click(NewEntryForm.show);
+            $("#navbar-container").append(Handlebars.templates[Navbar.NAME + ".hb"]());
+            $("#" + Navbar.NAME + "-Profile").click(Navbar.viewProfile);
+
             Navbar.isInit = true;
         }
     }
@@ -34,7 +35,20 @@ class Navbar {
      * can be called during front-end initialization to ensure the navbar
      * is configured.
      */
+
+    private static viewProfile() {
+        MyProfile.refresh();
+        ElementList.hide();
+        NewEntryForm.hide();
+    }
+
     public static refresh() {
         Navbar.init();
+    }
+
+    public static welcomeUser(name: String) {
+        Navbar.init();
+        $("#" + Navbar.NAME + "-Name").text(name);
+
     }
 }

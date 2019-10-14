@@ -1,0 +1,11 @@
+#navbar-container {
+    background-color: grey;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+#navbar-container button {
+    background-color: lightgrey;
+    margin-left: 1%;
+}
+

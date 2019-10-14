@@ -1,0 +1,10 @@
+
+#NewEntryForm{
+    width: 100%;
+    margin-left: 5%;
+    margin-right: 5%;
+}
+
+#NewEntryForm button {
+    background-color: lightgrey;
+}

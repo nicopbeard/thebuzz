@@ -41,6 +41,15 @@ class ElementList {
         });
     }
 
+    public static hide() {
+        $("#message-container").hide();
+    }
+
+    public static show() {
+        $("#message-container").show();
+    }
+
+
     /**
      * update() is the private method used by refresh() to update the 
      * ElementList

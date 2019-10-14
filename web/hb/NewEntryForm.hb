@@ -5,6 +5,6 @@
             </div>
             <div id ="new-entry-input-footer">
                 <button type="button" class="btn btn-default" id="NewEntryForm-OK">OK</button>
-                <button type="button" class="btn btn-default" id="NewEntryForm-Close">Close</button>
+                <button type="button" class="btn btn-default" id="NewEntryForm-CLEAR">CLEAR</button>
             </div>
 </div>

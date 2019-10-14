@@ -50,7 +50,7 @@ var NewEntryForm = /** @class */ (function () {
         if (!NewEntryForm.isInit) {
             $("#input-container").append(Handlebars.templates[NewEntryForm.NAME + ".hb"]());
             $("#" + NewEntryForm.NAME + "-OK").click(NewEntryForm.submitForm);
-            $("#" + NewEntryForm.NAME + "-Close").click(NewEntryForm.hide);
+            $("#" + NewEntryForm.NAME + "-CLEAR").click(NewEntryForm.clear);
             NewEntryForm.isInit = true;
         }
     };
@@ -66,20 +66,13 @@ var NewEntryForm = /** @class */ (function () {
      * Hide the NewEntryForm.  Be sure to clear its fields first
      */
     NewEntryForm.hide = function () {
-        $("#" + NewEntryForm.NAME + "-title").val("");
-        $("#" + NewEntryForm.NAME + "-message").val("");
-        $("#" + NewEntryForm.NAME).modal("hide");
+        $("#input-container").hide();
     };
-    /**
-     * Show the NewEntryForm.  Be sure to clear its fields, because there are
-     * ways of making a Bootstrap modal disapper without clicking Close, and
-     * we haven't set up the hooks to clear the fields on the events associated
-     * with those ways of making the modal disappear.
-     */
     NewEntryForm.show = function () {
-        $("#" + NewEntryForm.NAME + "-title").val("");
-        $("#" + NewEntryForm.NAME + "-message").val("");
-        $("#" + NewEntryForm.NAME).modal("show");
+        $("#input-container").show();
+    };
+    NewEntryForm.clear = function () {
+        $("#NewEntryForm-message").val("");
     };
     /**
      * Send data to submit the form only if the fields are both valid.
@@ -175,6 +168,12 @@ var ElementList = /** @class */ (function () {
             }
         });
     };
+    ElementList.hide = function () {
+        $("#message-container").hide();
+    };
+    ElementList.show = function () {
+        $("#message-container").show();
+    };
     /**
      * update() is the private method used by refresh() to update the
      * ElementList
@@ -269,8 +268,8 @@ var Navbar = /** @class */ (function () {
      */
     Navbar.init = function () {
         if (!Navbar.isInit) {
-            $("#app-container").prepend(Handlebars.templates[Navbar.NAME + ".hb"]());
-            $("#" + Navbar.NAME + "-add").click(NewEntryForm.show);
+            $("#navbar-container").append(Handlebars.templates[Navbar.NAME + ".hb"]());
+            $("#" + Navbar.NAME + "-Profile").click(Navbar.viewProfile);
             Navbar.isInit = true;
         }
     };
@@ -280,8 +279,17 @@ var Navbar = /** @class */ (function () {
      * can be called during front-end initialization to ensure the navbar
      * is configured.
      */
+    Navbar.viewProfile = function () {
+        MyProfile.refresh();
+        ElementList.hide();
+        NewEntryForm.hide();
+    };
     Navbar.refresh = function () {
         Navbar.init();
+    };
+    Navbar.welcomeUser = function (name) {
+        Navbar.init();
+        $("#" + Navbar.NAME + "-Name").text(name);
     };
     /**
      * Track if the Singleton has been initialized
@@ -293,9 +301,237 @@ var Navbar = /** @class */ (function () {
     Navbar.NAME = "Navbar";
     return Navbar;
 }());
+/**
+ * NewEntryForm encapsulates all of the code for the form for adding an entry
+ */
+var ValidationForm = /** @class */ (function () {
+    function ValidationForm() {
+    }
+    /**
+     * Initialize the NewEntryForm by creating its element in the DOM and
+     * configuring its buttons.  This needs to be called from any public static
+     * method, to ensure that the Singleton is initialized before use
+     */
+    ValidationForm.init = function () {
+        if (!ValidationForm.isInit) {
+            $("#login-container").append(Handlebars.templates[ValidationForm.NAME + ".hb"]());
+            $("#" + ValidationForm.NAME + "-Register").click(ValidationForm.register);
+            $("#" + ValidationForm.NAME + "-Login").click(ValidationForm.login);
+            ValidationForm.isInit = true;
+        }
+    };
+    /**
+     * Refresh() doesn't really have much meaning, but just like in sNavbar, we
+     * have a refresh() method so that we don't have front-end code calling
+     * init().
+     */
+    ValidationForm.refresh = function () {
+        ValidationForm.init();
+    };
+    /**
+     * Hide the NewEntryForm.  Be sure to clear its fields first
+     */
+    ValidationForm.hide = function () {
+        $("#" + ValidationForm.NAME + "-username").val("");
+        $("#" + ValidationForm.NAME + "-password").val("");
+        $("#" + ValidationForm.NAME).hide();
+    };
+    /**
+     * Show the NewEntryForm.  Be sure to clear its fields, because there are
+     * ways of making a Bootstrap modal disapper without clicking Close, and
+     * we haven't set up the hooks to clear the fields on the events associated
+     * with those ways of making the modal disappear.
+     */
+    ValidationForm.show = function () {
+        $("#" + ValidationForm.NAME + "-username").val("");
+        $("#" + ValidationForm.NAME + "-password").val("");
+        $("#" + ValidationForm.NAME).show();
+    };
+    /**
+     * Send data to submit the form only if the fields are both valid.
+     * Immediately hide the form when we send data, so that the user knows that
+     * their click was received.
+     */
+    ValidationForm.register = function () {
+        // get the values of the two fields, force them to be strings, and check 
+        // that neither is empty
+        var username = $("#" + ValidationForm.NAME + "-username").val();
+        var password = $('#' + ValidationForm.NAME + "-password").val();
+        var name = $('#' + ValidationForm.NAME + "-name").val();
+        if (username === "" || password === "") {
+            window.alert("Error: Username or Password field incomplete");
+            return;
+        }
+        $("#" + ValidationForm.NAME + "-username").val("");
+        $("#" + ValidationForm.NAME + "-password").val("");
+        $("#" + ValidationForm.NAME + "-name").val("");
+        //ValidationForm.hide();
+        // Unknown call here, have to wait for backend 
+        // $.ajax({
+        //     type: "POST",
+        //     url: backendUrl + "/messages",
+        //     dataType: "json",
+        //     data: JSON.stringify({ 
+        //                             senderId: id, 
+        //                             text: msg, 
+        //                             nUpVotes: 0,
+        //                             nDownVotes: 0}
+        //                         ),
+        //     success: ValidationForm.onSubmitResponse
+        // });
+        var data = {
+            userid: "Test_Register123",
+            session_token: "abc123zyz"
+        };
+        ValidationForm.onSubmitResponse(data);
+    };
+    ValidationForm.login = function () {
+        // get the values of the two fields, force them to be strings, and check 
+        // that neither is empty
+        var username = $("#" + ValidationForm.NAME + "-username").val();
+        var password = $('#' + ValidationForm.NAME + "-password").val();
+        if (username === "" || password === "") {
+            window.alert("Error: Username or Password field incomplete");
+            return;
+        }
+        $("#" + ValidationForm.NAME + "-username").val("");
+        $("#" + ValidationForm.NAME + "-password").val("");
+        //ValidationForm.hide();
+        // Unknown call here, have to wait for backend 
+        // $.ajax({
+        //     type: "POST",
+        //     url: backendUrl + "/messages",
+        //     dataType: "json",
+        //     data: JSON.stringify({ 
+        //                             senderId: id, 
+        //                             text: msg, 
+        //                             nUpVotes: 0,
+        //                             nDownVotes: 0}
+        //                         ),
+        //     success: ValidationForm.onSubmitResponse
+        // });
+        var data = {
+            userid: "Test_Login123",
+            session_token: "abc123zyz"
+        };
+        ValidationForm.onSubmitResponse(data);
+    };
+    /**
+     * onSubmitResponse runs when the AJAX call in submitForm() returns a
+     * result.
+     *
+     * @param data The object returned by the server
+     */
+    ValidationForm.onSubmitResponse = function (data) {
+        var sucess = true;
+        // If we get an "ok" message, clear the form and refresh the main 
+        // listing of messages
+        // if (data.mStatus === "ok") {
+        //     ElementList.refresh();
+        // }
+        // // Handle explicit errors with a detailed popup message
+        // else if (data.mStatus === "error") {
+        //     window.alert("The server replied with an error:\n" + data.mMessage);
+        // }
+        // // Handle other errors with a less-detailed popup message
+        // else {
+        //     window.alert("Unspecified error");
+        // }
+        if (sucess) {
+            ValidationForm.hide();
+            ElementList.refresh();
+            NewEntryForm.refresh();
+            Navbar.welcomeUser("Kevin");
+            console.log("Sucessfully Verified " + data.userid + " in...\n Current Session Token: " + data.session_token + "}");
+        }
+    };
+    /**
+     * The name of the DOM entry associated with NewEntryForm
+     */
+    ValidationForm.NAME = "ValidationForm";
+    /**
+     * Track if the Singleton has been initialized
+     */
+    ValidationForm.isInit = false;
+    return ValidationForm;
+}());
+/**
+ * The ElementList Singleton provides a way of displaying all of the data
+ * stored on the server as an HTML table.
+ */
+var MyProfile = /** @class */ (function () {
+    function MyProfile() {
+    }
+    /**
+     * Initialize the ElementList singleton.
+     * This needs to be called from any public static method, to ensure that the
+     * Singleton is initialized before use.
+     */
+    MyProfile.init = function () {
+        if (!MyProfile.isInit) {
+            MyProfile.isInit = true;
+            $("#profile-container").append(Handlebars.templates[MyProfile.NAME + ".hb"]());
+            $("#Profile-Back-Button").click(MyProfile.returnToMain);
+        }
+    };
+    /**
+ * refresh() is the public method for updating the ElementList
+ */
+    MyProfile.refresh = function () {
+        // Make sure the singleton is initialized
+        MyProfile.init();
+        //AJAX CALL TO GET MY USERDATA
+        // $.ajax({
+        //     type: "GET",
+        //     url: backendUrl + "/messages",
+        //     dataType: "json",
+        //     success: function(data) {
+        //         MyProfile.update(data);
+        //     }
+        // });
+        var data = {
+            username: "Test_Username",
+            email: "Test_Email",
+            comment: "Test Comment"
+        };
+        $("#" + MyProfile.NAME).remove();
+        $("#profile-container").append(Handlebars.templates[MyProfile.NAME + ".hb"](data));
+        $("#Profile-Back-Button").click(MyProfile.returnToMain);
+    };
+    MyProfile.hide = function () {
+        $("#" + MyProfile.NAME).hide();
+    };
+    /**
+     * update() is the private method used by refresh() to update the
+     * ElementList
+     */
+    MyProfile.update = function (data) {
+        // Remove the table of data, if it exists
+        $("#" + MyProfile.NAME).remove();
+        // Use a template to re-generate the table, and then insert it
+        $("#profile-container").append(Handlebars.templates[MyProfile.NAME + ".hb"](data));
+        // Find all of the Upvote buttons, and set their behavior
+    };
+    MyProfile.returnToMain = function () {
+        MyProfile.hide();
+        ElementList.show();
+        NewEntryForm.show();
+    };
+    /**
+     * The name of the DOM entry associated with ElementList
+     */
+    MyProfile.NAME = "MyProfile";
+    /**
+     * Track if the Singleton has been initialized
+     */
+    MyProfile.isInit = false;
+    return MyProfile;
+}());
 /// <reference path="ts/NewEntryForm.ts"/>
 /// <reference path="ts/ElementList.ts"/>
 /// <reference path="ts/Navbar.ts"/>
+/// <reference path="ts/ValidationForm.ts"/>
+/// <reference path="ts/MyProfile.ts"/>
 // Prevent compiler errors when using jQuery.  "$" will be given a type of 
 // "any", so that we can use it anywhere, and assume it has any fields or
 // methods, without the compiler producing an error.
@@ -306,6 +542,7 @@ var backendUrl = "https://clowns-who-code.herokuapp.com";
 var Handlebars;
 var ID;
 var userName;
+var validated = false;
 // Run some configuration code when the web page loads
 $.ajax({
     type: "POST",
@@ -318,7 +555,5 @@ $.ajax({
     }
 });
 $(document).ready(function () {
-    Navbar.refresh();
-    NewEntryForm.refresh();
-    ElementList.refresh();
+    ValidationForm.refresh();
 });

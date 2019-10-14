@@ -1,12 +1,12 @@
 /**
  * NewEntryForm encapsulates all of the code for the form for adding an entry
  */
-class NewEntryForm {
+class Login {
 
     /**
      * The name of the DOM entry associated with NewEntryForm
      */
-    private static readonly NAME = "NewEntryForm";
+    private static readonly NAME = "Login";
 
     /**
      * Track if the Singleton has been initialized
@@ -19,11 +19,11 @@ class NewEntryForm {
      * method, to ensure that the Singleton is initialized before use
      */
     private static init() {
-        if (!NewEntryForm.isInit) {
-            $("#input-container").append(Handlebars.templates[NewEntryForm.NAME + ".hb"]());
-            $("#" + NewEntryForm.NAME + "-OK").click(NewEntryForm.submitForm);
-            $("#" + NewEntryForm.NAME + "-CLEAR").click(NewEntryForm.clear);
-            NewEntryForm.isInit = true;
+        if (!Login.isInit) {
+            $("#input-container").append(Login.templates[Login.NAME + ".hb"]());
+            $("#" + Login.NAME + "-OK").click(Login.submitForm);
+            $("#" + Login.NAME + "-Close").click(Login.hide);
+            Login.isInit = true;
         }
     }
 
@@ -33,24 +33,29 @@ class NewEntryForm {
      * init().
      */
     public static refresh() {
-        NewEntryForm.init();
+        Login.init();
     }
 
     /**
      * Hide the NewEntryForm.  Be sure to clear its fields first
      */
-    public static hide() {
-       $("#input-container").hide();
+    private static hide() {
+        $("#" + Login.NAME + "-title").val("");
+        $("#" + Login.NAME + "-message").val("");
+        $("#" + Login.NAME).modal("hide");
     }
+
+    /**
+     * Show the NewEntryForm.  Be sure to clear its fields, because there are
+     * ways of making a Bootstrap modal disapper without clicking Close, and
+     * we haven't set up the hooks to clear the fields on the events associated
+     * with those ways of making the modal disappear.
+     */
     public static show() {
-        $("#input-container").show();
-     }
-
-     private static clear() {
-         $("#NewEntryForm-message").val("");
-     }
-
-
+        $("#" + Login.NAME + "-title").val("");
+        $("#" + Login.NAME + "-message").val("");
+        $("#" + Login.NAME).modal("show");
+    }
 
 
     /**
@@ -61,13 +66,13 @@ class NewEntryForm {
     private static submitForm() {
         // get the values of the two fields, force them to be strings, and check 
         // that neither is empty
-        let msg = "" + $("#" + NewEntryForm.NAME + "-message").val();
+        let msg = "" + $("#" + Login.NAME + "-message").val();
         let id = $(this).data("value");
         if (msg === "") {
             window.alert("Error: title or message is not valid");
             return;
         }
-        $("#NewEntryForm-message").val("");
+        Login.hide();
         // set up an AJAX post.  When the server replies, the result will go to
         // onSubmitResponse
         $.ajax({
@@ -80,7 +85,7 @@ class NewEntryForm {
                                     nUpVotes: 0,
                                     nDownVotes: 0}
                                 ),
-            success: NewEntryForm.onSubmitResponse
+            success: Login.onSubmitResponse
         });
     }
 

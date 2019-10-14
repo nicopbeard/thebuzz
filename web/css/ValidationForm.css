@@ -1,0 +1,18 @@
+#ValidationForm {
+    width: 100%;
+    margin-left: 12.5%;
+    margin-right: 12.5%;
+    margin-top: 12.5%;
+    background-color: grey;
+    padding: 30px;
+    border-radius: 10px;
+}
+
+#ValidationForm label {
+    margin: 0px !important;
+    font-size: 20px;
+}
+
+#ValidationForm button {
+    background-color: lightgrey;
+}

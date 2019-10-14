@@ -2,7 +2,7 @@
     <div class="panel-heading">
         <h3 class="panel-title"></h3>
     </div>
-    <table class="table">
+    <table class="table" id = message-table>
         <tbody>
             {{#each mData}}
             <tr>
