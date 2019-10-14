@@ -64,7 +64,7 @@ class NewEntryForm {
         let msg = "" + $("#" + NewEntryForm.NAME + "-message").val();
         let id = $(this).data("value");
         if (msg === "") {
-            window.alert("Error: title or message is not valid");
+            window.alert("Error: Message is not valid");
             return;
         }
         $("#NewEntryForm-message").val("");

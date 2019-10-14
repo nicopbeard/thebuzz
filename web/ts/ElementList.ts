@@ -63,7 +63,29 @@ class ElementList {
         $("." + ElementList.NAME + "-upvotebtn").click(ElementList.clickUpVote);
         // Find all of the Downvote buttons, and set their behavior
         $("." + ElementList.NAME + "-downvotebtn").click(ElementList.clickDownVote);
+        $("." + ElementList.NAME + "-user-profile-button").click(ElementList.goToProfile);
+
     }
+
+
+
+
+    private static goToProfile(){
+        let message_user_id = $(this).data("id");
+        console.log(`Sent by: ${message_user_id}`)
+        //AJAX REQUEST TO LOOK UP USER INFORMATION
+        let data = {
+            username: "Temp_User_Name",
+            email: "Temp_User_Email", 
+            comment: "Temp_User_Comment"
+        }
+        ElementList.hide();
+        NewEntryForm.hide();
+        UserProfile.refresh(data);
+
+    }
+
+
 
     /**
      * buttons() creates 'edit' and 'delete' buttons for an id, and puts them in
@@ -82,6 +104,7 @@ class ElementList {
 
     private static clickUpVote() {
         let msgId = $(this).data("value");
+        console.log(msgId);
         $.ajax({
             type: "PUT",
             url: backendUrl + "/like",

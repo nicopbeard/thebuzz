@@ -3,6 +3,8 @@
 /// <reference path="ts/Navbar.ts"/>
 /// <reference path="ts/ValidationForm.ts"/>
 /// <reference path="ts/MyProfile.ts"/>
+/// <reference path="ts/UserProfile.ts"/>
+
 
 
 // Prevent compiler errors when using jQuery.  "$" will be given a type of 

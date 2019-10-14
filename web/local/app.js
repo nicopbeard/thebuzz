@@ -88,7 +88,7 @@ var NewEntryForm = /** @class */ (function () {
             window.alert("Error: title or message is not valid");
             return;
         }
-        NewEntryForm.hide();
+        $("#NewEntryForm-message").val("");
         // set up an AJAX post.  When the server replies, the result will go to
         // onSubmitResponse
         $.ajax({
@@ -187,6 +187,20 @@ var ElementList = /** @class */ (function () {
         $("." + ElementList.NAME + "-upvotebtn").click(ElementList.clickUpVote);
         // Find all of the Downvote buttons, and set their behavior
         $("." + ElementList.NAME + "-downvotebtn").click(ElementList.clickDownVote);
+        $("." + ElementList.NAME + "-user-profile-button").click(ElementList.goToProfile);
+    };
+    ElementList.goToProfile = function () {
+        var message_user_id = $(this).data("id");
+        console.log("Sent by: " + message_user_id);
+        //AJAX REQUEST TO LOOK UP USER INFORMATION
+        var data = {
+            username: "Temp_User_Name",
+            email: "Temp_User_Email",
+            comment: "Temp_User_Comment"
+        };
+        ElementList.hide();
+        NewEntryForm.hide();
+        UserProfile.refresh(data);
     };
     /**
      * buttons() creates 'edit' and 'delete' buttons for an id, and puts them in
@@ -203,6 +217,7 @@ var ElementList = /** @class */ (function () {
     */
     ElementList.clickUpVote = function () {
         var msgId = $(this).data("value");
+        console.log(msgId);
         $.ajax({
             type: "PUT",
             url: backendUrl + "/like",
@@ -527,11 +542,79 @@ var MyProfile = /** @class */ (function () {
     MyProfile.isInit = false;
     return MyProfile;
 }());
+/**
+ * The ElementList Singleton provides a way of displaying all of the data
+ * stored on the server as an HTML table.
+ */
+var UserProfile = /** @class */ (function () {
+    function UserProfile() {
+    }
+    /**
+     * Initialize the ElementList singleton.
+     * This needs to be called from any public static method, to ensure that the
+     * Singleton is initialized before use.
+     */
+    UserProfile.init = function () {
+        if (!UserProfile.isInit) {
+            UserProfile.isInit = true;
+            $("#profile-container").append(Handlebars.templates[UserProfile.NAME + ".hb"]());
+            $("#Profile-Back-Button").click(UserProfile.returnToMain);
+        }
+    };
+    /**
+ * refresh() is the public method for updating the ElementList
+ */
+    UserProfile.refresh = function (data) {
+        // Make sure the singleton is initialized
+        UserProfile.init();
+        //AJAX CALL TO GET MY USERDATA
+        // $.ajax({
+        //     type: "GET",
+        //     url: backendUrl + "/messages",
+        //     dataType: "json",
+        //     success: function(data) {
+        //         UserProfile.update(data);
+        //     }
+        // });
+        $("#" + UserProfile.NAME).remove();
+        $("#profile-container").append(Handlebars.templates[UserProfile.NAME + ".hb"](data));
+        $("#Profile-Back-Button").click(UserProfile.returnToMain);
+    };
+    UserProfile.hide = function () {
+        $("#" + UserProfile.NAME).hide();
+    };
+    /**
+     * update() is the private method used by refresh() to update the
+     * ElementList
+     */
+    UserProfile.update = function (data) {
+        // Remove the table of data, if it exists
+        $("#" + UserProfile.NAME).remove();
+        // Use a template to re-generate the table, and then insert it
+        $("#profile-container").append(Handlebars.templates[UserProfile.NAME + ".hb"](data));
+        // Find all of the Upvote buttons, and set their behavior
+    };
+    UserProfile.returnToMain = function () {
+        UserProfile.hide();
+        ElementList.show();
+        NewEntryForm.show();
+    };
+    /**
+     * The name of the DOM entry associated with ElementList
+     */
+    UserProfile.NAME = "UserProfile";
+    /**
+     * Track if the Singleton has been initialized
+     */
+    UserProfile.isInit = false;
+    return UserProfile;
+}());
 /// <reference path="ts/NewEntryForm.ts"/>
 /// <reference path="ts/ElementList.ts"/>
 /// <reference path="ts/Navbar.ts"/>
 /// <reference path="ts/ValidationForm.ts"/>
 /// <reference path="ts/MyProfile.ts"/>
+/// <reference path="ts/UserProfile.ts"/>
 // Prevent compiler errors when using jQuery.  "$" will be given a type of 
 // "any", so that we can use it anywhere, and assume it has any fields or
 // methods, without the compiler producing an error.

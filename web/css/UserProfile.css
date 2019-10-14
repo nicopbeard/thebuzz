@@ -1,0 +1,53 @@
+#UserProfile {
+    padding-top: 20px;
+    margin-top: 50px;
+    background-color: lightgrey;
+    border-radius: 15px;
+}
+
+#UserProfile #Profile-Back-Button{
+    background-color: white;
+    margin-bottom: 20px;
+    margin-left: 25px;
+}
+
+#username-row {
+    margin-bottom: 20px;
+    margin-left: 15px;
+
+}
+
+#username-row div{
+    display: inline-block;
+}
+
+#email-row{
+    margin-bottom: 20px;
+    margin-left: 15px;
+
+}
+
+#email-row div{
+    display: inline-block;
+}
+
+#comment-row{ 
+    margin-bottom: 20px;
+    margin-left: 15px;
+
+}
+
+#comment-row div{
+    display: inline-block;
+    
+}
+
+#password-row{ 
+    margin-bottom: 20px;
+    margin-left: 15px;
+
+}
+
+#password-confirm-field {
+    margin-top: 5px;
+}

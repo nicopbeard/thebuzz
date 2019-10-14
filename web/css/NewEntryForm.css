@@ -1,3 +1,10 @@
+#input-container {
+    background-color: grey;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+
 
 #NewEntryForm{
     width: 100%;

@@ -3,15 +3,17 @@
 templates['ElementList.hb'] = template({"1":function(container,depth0,helpers,partials,data) {
     var alias1=container.propertyIsEnumerable, alias2=container.lambda, alias3=container.escapeExpression;
 
-  return "            <tr>\n                <td>"
+  return "            <tr>\n                <td class = \"ElementList-user-profile-button\" data-id = \""
+    + alias3(alias2((depth0 != null ? depth0.senderId : depth0), depth0))
+    + "\">"
     + alias3(alias2((depth0 != null ? depth0.senderId : depth0), depth0))
     + "</td>\n                <td>"
     + alias3(alias2((depth0 != null ? depth0.text : depth0), depth0))
-    + "</td>\n                <td><button type=\"button\" class=\"ElementList-upvotebtn btn-primary\" data-value=\""
+    + "</td>\n                <td>\n                    <button type=\"button\" class=\"ElementList-upvotebtn btn-primary\" data-value=\""
     + alias3(alias2((depth0 != null ? depth0.id : depth0), depth0))
-    + "\">\n                    <span class=\"glyphicon glyphicon-thumbs-up\"></span>\n                    Like</button></td>\n                <td><button class=\"ElementList-downvotebtn btn-danger\" data-value=\""
+    + "\">\n                        <span class=\"glyphicon glyphicon-thumbs-up\"></span>\n                        Like\n                    </button>\n                </td>\n                <td>\n                    <button class=\"ElementList-downvotebtn btn-danger\" data-value=\""
     + alias3(alias2((depth0 != null ? depth0.id : depth0), depth0))
-    + "\">\n                    <span class=\"glyphicon glyphicon-thumbs-down\"></span>\n                    Dislike</button></td>\n            </tr>\n";
+    + "\">\n                        <span class=\"glyphicon glyphicon-thumbs-down\"></span>\n                        Dislike\n                    </button>\n                </td>\n            </tr>\n";
 },"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
     var stack1, alias1=container.propertyIsEnumerable;
 
@@ -44,6 +46,20 @@ templates['MyProfile.hb'] = template({"compiler":[8,">= 4.3.0"],"main":function(
     var alias1=container.propertyIsEnumerable, alias2=container.lambda, alias3=container.escapeExpression;
 
   return "<div class = \"container\" id = \"MyProfile\">\n    <button type=\"button\" class=\"btn btn-default\" id=\"Profile-Back-Button\">Back</button>\n\n    <div class = \"row\" id = \"username-row\"> \n        <div class = \"col-2\">  Username:  </div>\n        <div class = \"col-2\"> "
+    + alias3(alias2((depth0 != null ? depth0.username : depth0), depth0))
+    + " </div>\n        <div class = \"col-8\"> </div>\n    </div>\n\n    <div class = \"row\" id = \"email-row\"> \n            <div class = \"col-2\">Email:</div>\n            <div class = \"col-2\"> "
+    + alias3(alias2((depth0 != null ? depth0.email : depth0), depth0))
+    + " </div>\n            <div class = \"col-8\"> </div>\n    </div>\n\n    <div class = \"row\" id = \"comment-row\"> \n            <div class = \"col-2\">Comment:</div>\n            <div class = \"col-2\"> <input id=\"comment-field\" value = \""
+    + alias3(alias2((depth0 != null ? depth0.comment : depth0), depth0))
+    + "\"> </input> </div>\n            <div class = \"col-2\"> <button> Change Comment </button> </div>\n            <div class = \"col-6\"> </div>\n    </div>\n\n    <div class = \"row\" id = \"password-row\"> \n            <div class = \"col-2\">Password:</div>\n            <div class = \"col-2\"> \n                <input id=\"password-field\" placeholder = \"Enter new password\"> </input>\n                <input id=\"password-confirm-field\" placeholder = \"Confirm Password\"> </input>\n            \n            </div>\n            <div class = \"col-2\"> <button> Change Password </button> </div>\n            <div class = \"col-6\"> </div>\n    </div>\n\n</div>\n";
+},"useData":true});
+})();
+(function() {
+  var template = Handlebars.template, templates = Handlebars.templates = Handlebars.templates || {};
+templates['UserProfile.hb'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
+    var alias1=container.propertyIsEnumerable, alias2=container.lambda, alias3=container.escapeExpression;
+
+  return "<div class = \"container\" id = \"UserProfile\">\n    <button type=\"button\" class=\"btn btn-default\" id=\"Profile-Back-Button\">Back</button>\n\n    <div class = \"row\" id = \"username-row\"> \n        <div class = \"col-2\">  Username:  </div>\n        <div class = \"col-2\"> "
     + alias3(alias2((depth0 != null ? depth0.username : depth0), depth0))
     + " </div>\n        <div class = \"col-8\"> </div>\n    </div>\n\n    <div class = \"row\" id = \"email-row\"> \n            <div class = \"col-2\">Email:</div>\n            <div class = \"col-2\"> "
     + alias3(alias2((depth0 != null ? depth0.email : depth0), depth0))
