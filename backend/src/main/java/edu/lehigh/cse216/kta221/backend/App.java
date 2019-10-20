@@ -23,7 +23,8 @@ public class App {
     public static void main(String[] args) {
 
         Map<String, String> env = System.getenv();
-        String ip = "ec2-174-129-220-12.compute-1.amazonaws.com";
+         String ip = "ec2-174-129-220-12.compute-1.amazonaws.com";
+        //String ip = "localhost";
         String port = "5432";
         String user = "qnwrtcuewzcdpe";
         String pass = "a8bc2fbf3637a0fcded45cb4a148de56a37dd37cc3c694145d863374f2ee77a0";
@@ -88,7 +89,12 @@ public class App {
             //unsure
             String token = db.createSessionKey();
             String tester = "this is a route test";
-            return gson.toJson(new StructuredResponse("ok", null, gson.toJson(tester)));
+           
+            response.status(200);
+            // db.selectAll();
+           response.type("application/json");
+            
+           return gson.toJson(new StructuredResponse("ok", null, gson.toJson(tester)));
             });
 
 
