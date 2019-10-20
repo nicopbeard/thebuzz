@@ -80,6 +80,16 @@ public class App {
         });
 
 
+        //GET route that takes in a user name and password and responds with 
+        // a session key
+
+        Spark.get("/sessionKey", (request, response) ->{
+            SimpleRequest request = gson.fromJson(request.body(),SimpleRequest.class);
+            //unsure
+            String token = db.createSessionKey();
+            String tester = "this is a route test";
+            return gson.toJson(new StructuredResponse("ok", null, gson.toJson(tester)));
+            });
 
 
 
@@ -296,6 +306,8 @@ public class App {
                 return gson.toJson(new StructuredResponse("ok", null, null));
             }
         });
+
+
 
 
         
