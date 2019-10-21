@@ -84,18 +84,7 @@ public class App {
         //GET route that takes in a user name and password and responds with 
         // a session key
 
-        Spark.get("/sessionKey", (request, response) ->{
-            SimpleRequest request = gson.fromJson(request.body(),SimpleRequest.class);
-            //unsure
-            String token = db.createSessionKey();
-            String tester = "this is a route test";
-           
-            response.status(200);
-            // db.selectAll();
-           response.type("application/json");
-            
-           return gson.toJson(new StructuredResponse("ok", null, gson.toJson(tester)));
-            });
+      
 
 
 
@@ -155,23 +144,23 @@ public class App {
         });
 
 
-        Spark.post("/user", (request, response) -> {
-            System.out.println(request);
-            UserRequest req = gson.fromJson(request.body(), UserRequest.class);
-            System.out.println("NAME"+ req.name);
-            System.out.println("PASSWORD: "+ req.password);
+        // Spark.post("/user", (request, response) -> {
+        //     System.out.println(request);
+        //     UserRequest req = gson.fromJson(request.body(), UserRequest.class);
+        //     System.out.println("NAME"+ req.name);
+        //     System.out.println("PASSWORD: "+ req.password);
 
-            response.status(200);
-            response.type("application/json");
+        //     response.status(200);
+        //     response.type("application/json");
 
-            int userId = db.insertUser(req.name, req.password);
-            if (userId == -1) {
-                return gson.toJson(new StructuredUserResponse("error", userId, req.name));
-            } else {
-                return gson.toJson(new StructuredUserResponse("ok", userId, req.name));
-            }
+        //     int userId = db.insertUser(req.name, req.password);
+        //     if (userId == -1) {
+        //         return gson.toJson(new StructuredUserResponse("error", userId, req.name));
+        //     } else {
+        //         return gson.toJson(new StructuredUserResponse("ok", userId, req.name));
+        //     }
 
-        });
+        // });
 
         // POST route for adding a new element to the DataStore.  This will read
         // JSON from the body of the request, turn it into a SimpleRequest 
@@ -221,6 +210,49 @@ public class App {
                 return gson.toJson(new StructuredResponse("ok", "Created Element: ", result));
             }
         });
+
+        //adds a new User to the userData table and stores their 
+        //session key and ID in the hash table
+        //TAKES: Json object with fields "userID" and "plainPass"
+        Spark.put("/newUser", (request, response) ->{
+            NewUser nu = gson.fromJson(request.body(), NewUser.class);
+                
+             int newID = nu.userID;
+             String passHash = db.passwordHasher(nu.plainPass);
+             db.insertUser(newID, passHash);
+         
+            String token = db.createSessionKey(newID);
+            response.status(200);
+            // db.selectAll();
+           response.type("application/json"); 
+            return gson.toJson(new StructuredResponse("ok", null, gson.toJson(token)));
+            });
+
+             //TAKES: Json object with fields "userID" and "plainPass"
+         Spark.put("/login", (request, response) ->{
+            NewUser nu = gson.fromJson(request.body(), NewUser.class);
+            int userID = nu.userID;
+            Boolean correctPassword = db.passwordAuth(nu.plainPass);
+            Boolean correctID = db.hasKey(userID);
+
+            response.status(200);
+            response.type("applicatoin/json");
+            
+            String token = null;
+            String status = "ok";
+            String message = null;
+            if(!correctPassword || !correctID)
+            {
+                status= "error";
+                message = "userID or password was incorrect";
+            }
+            else{
+                token = db.replaceKey(userID);
+            }
+            return gson.toJson(new StructuredResponse(status,message, token));   
+         });
+
+
 
         // PUT route for updating a row in the DataStore.  This is almost 
         // exactly the same as POST

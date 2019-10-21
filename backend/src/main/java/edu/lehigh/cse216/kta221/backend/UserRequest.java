@@ -9,7 +9,7 @@ package edu.lehigh.cse216.kta221.backend;
  */
 public class UserRequest {
 
-    public String name;
+    public String userName;
 
     public String password;
 }

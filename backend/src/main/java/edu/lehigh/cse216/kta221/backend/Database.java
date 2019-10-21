@@ -13,10 +13,11 @@ import java.sql.Timestamp;
 
 import java.util.ArrayList;
 
-import org.apache.commons.lang3.RandomStringUtils.*;
+import org.apache.commons.lang3.RandomStringUtils;
 import java.util.Hashtable;
 import org.springframework.security.crypto.bcrypt.BCrypt;
- 
+//import org.mindrot.jbcrypt.BCrypt;
+//import at.favre.lib.crypto.bcrypt.*;
 public class Database {
    
     /**
@@ -314,7 +315,7 @@ public class Database {
             
             // db.mLastAdded = db.mConnection.prepareStatement("SELECT LAST (id) FROM msgData");
 
-            db.getUserId = db.mConnection.prepareStatement("INSERT INTO userData (userId, name, passHash, username, email) VALUES (default, ?, ?, ?, ?) RETURNING *");
+            db.getUserId = db.mConnection.prepareStatement("INSERT INTO userData (userid,name,passhash, username, email) VALUES (?, ?, ?,?, ?) RETURNING *");
 
             db.mDropTable = db.mConnection.prepareStatement("DROP TABLE tblData");
 
@@ -390,16 +391,17 @@ public class Database {
      * THIS WILL NEED TO BE CHANGED ONCE WE GET USERNAME/PASSWORD
      * @return A unique user id for the current session 
      */
-    int insertUser(int userID, String name, String passHash, String username, String email) {
+    int insertUser(int userID, String passHash) {
         int userId = -1; 
 
         try {
             getUserId.setInt(1, userID);
-            getUserId.setString(2, name);
+            getUserId.setString(2, "tempName");
             getUserId.setString(3, passHash);
-            getUserId.setString(4, username);
-            getUserId.setString(5, email);
-            
+            getUserId.setString(4, "tempUserName");
+            getUserId.setString(5, "tempEmail");
+
+           
             ResultSet rs = getUserId.executeQuery();
             // MessageRow returnRow = new MessageRow(rs.getInt("id"), rs.getInt("senderID"), rs.getString("text"), rs.getString("tStamp"), rs.getInt("numUpVotes"), rs.getInt("numDownVotes"));
             while (rs.next()){
@@ -662,9 +664,25 @@ public class Database {
     }
     
     // Creates a session key that will be put in the HashTable
-     String createSessionKey()
+    //Used when adding a new user
+     String createSessionKey(int userId)
      {
-         String token = RandomStringUtils.randomAlphanumeric(10);
+         RandomStringUtils a = new RandomStringUtils();
+         String token = a.randomAlphanumeric(10);
+         cache.put(userId, token);
+         System.out.println("ADDING TO THE CACHE"+cache.toString());
+         return token;
+     }
+
+     // Used during login to assign a new key to the Userid
+     // Makes sure user is only logged in on one place at a time
+     //Returns the new token if
+     String replaceKey(int userId)
+     {
+        RandomStringUtils a = new RandomStringUtils();
+         String token = a.randomAlphanumeric(10);
+         cache.replace(userId, token);
+         System.out.println("CACHE REPLACE TEST"+cache.toString());
          return token;
      }
 
@@ -678,15 +696,19 @@ public class Database {
         return (cache.contains(token) && doesMap);
    }
 
+   Boolean hasKey(Integer userId)
+   {
+       return cache.containsKey(userId);
+   }
+
    Boolean passwordAuth(String password)
    {
-       String hashed = passwordHasher(password);
-        return BCrypt.checkpw(password, hashed );
+        return BCrypt.checkpw(password, passwordHasher(password) );
    }
 
    String passwordHasher(String plain_password)
    {
-       String hashed_password = BCrypt.hashpw(plain_password, BCrypr.gensalt());
+       String hashed_password = BCrypt.hashpw(plain_password, BCrypt.gensalt());
        return hashed_password;
    }
 
