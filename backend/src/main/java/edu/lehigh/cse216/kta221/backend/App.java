@@ -1,6 +1,9 @@
 package edu.lehigh.cse216.kta221.backend;
 
 import spark.Spark;
+
+import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Map;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -52,7 +55,7 @@ public class App {
         // db.createTable();
         // db.createMessageTable();
 
-        // db.createTable(); 
+        // db.createTable();
 
         if(db == null)
             return;
@@ -79,26 +82,22 @@ public class App {
             return "";
         });
 
-
-        //GET route that takes in a user name and password and responds with 
-        // a session key
-
-      
-
-
         //GET route for all messages and associated comments
 
         Spark.get("/messages", (request, response) -> {
             // ensure status 200 OK, with a MIME type of JSON
             System.out.println(request);
             ArrayList<Database.MessageRow> result = db.messageAll();
-
+            Hashtable<Integer, ArrayList<Database.Comment>> comments = db.commentAll();
+            for(Database.MessageRow msg: result) {
+                if(comments.contains(msg)){
+                    msg.addComments(comments.get(msg.id));
+                }
+            }
 
             System.out.println(result);
 
             System.out.println("GET RESULT LENGTH: " + result.size());
-
-
 
             for(Database.MessageRow item : result) {
                 System.out.println("ID: " + item.id);
