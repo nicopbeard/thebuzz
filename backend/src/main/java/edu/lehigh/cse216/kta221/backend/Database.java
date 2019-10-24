@@ -39,9 +39,12 @@ public class Database {
     private PreparedStatement removeLikeToMessage;
     private PreparedStatement addDislikeToMessage;
     private PreparedStatement removeDislikeToMessage;
+    private PreparedStatement selectAllComments;
+
 
 
     Hashtable<Integer, String> cache = new Hashtable<Integer, String>();
+
 
     /**
      * RowData is like a struct in C: we use it to hold data, and we allow 
@@ -254,7 +257,9 @@ public class Database {
             db.mSelectAll = db.mConnection.prepareStatement("SELECT id, subject, message FROM tblData");
             db.mSelectOne = db.mConnection.prepareStatement("SELECT * from tblData WHERE id=?");
             db.mUpdateOne = db.mConnection.prepareStatement("UPDATE tblData SET message = ?, subject = ? WHERE id = ?");
-
+           
+            //getting the comments
+            db.selectAllComments = db.selectAllComments.prepareStatement("SELECT * from comments ORDER BY msgid, tstamp;");
 
         } catch (SQLException e) {
             System.err.println("Error creating prepared statement");
@@ -290,6 +295,29 @@ public class Database {
         return true;
     }
 
+    HashTable<Integer, ArrayList<Database.Comment>> commentAll()
+    {    
+        Hashtable<Integer, ArrayList<Database.Comment>> commentHash = new HashTable<Integer, ArrayList<Database.Comment>>();
+        
+        try {
+            ResultSet rs = selectAllComments.executeQuery();
+            while (rs.next()) {
+                Database.Comment c = new Database.Comment(rs.getInt("commentid"), rs.getInt("msgid"), rs.getString("text"),rs.getString("tstamp"));
+                if(commentHash.containsKey(c.msgId))
+                {
+                    commentHash.get(c.msgId).add(c);
+                }
+                else{
+                    commentHash.put(c.msgId, new ArrayList<Database.Comment>(Arrays.asList(c)));
+                }
+            }
+            rs.close();
+            return commentHash;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
         /**
      * THIS WILL NEED TO BE CHANGED ONCE WE GET USERNAME/PASSWORD
