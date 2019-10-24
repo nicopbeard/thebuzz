@@ -96,6 +96,7 @@ public class Database {
             this.tStamp = tStamp;
             this.nUpVotes = nUpVotes;
             this.nDownVotes = nDownVotes;
+            comments = new ArrayList<>();
         }
 
         public void addComments(ArrayList<Comment> comments) {
