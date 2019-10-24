@@ -1,5 +1,4 @@
 package edu.lehigh.cse216.kta221.backend;
-// package edu.lehigh.cse216.kta221.admin;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -8,7 +7,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 import java.net.*;
-import java.time.*;
 import java.sql.Timestamp;
 
 import java.util.ArrayList;
@@ -16,8 +14,7 @@ import java.util.ArrayList;
 import org.apache.commons.lang3.RandomStringUtils;
 import java.util.Hashtable;
 import org.springframework.security.crypto.bcrypt.BCrypt;
-//import org.mindrot.jbcrypt.BCrypt;
-//import at.favre.lib.crypto.bcrypt.*;
+
 public class Database {
    
     /**
@@ -25,123 +22,22 @@ public class Database {
      * be null.  Otherwise, there is a valid open connection
      */
     private Connection mConnection;
-
-    /**
-     * A prepared statement for getting all data in the database
-     */
     private PreparedStatement mSelectAll;
-
-    /**
-     * A prepared statement for getting one row from the database
-     */
     private PreparedStatement mSelectOne;
-
-    /**
-     * A prepared statement for deleting a row from the database
-     */
     private PreparedStatement mDeleteOne;
-
-    /**
-     * A prepared statement for inserting into the database
-     */
     private PreparedStatement mInsertOne;
-
-    /**
-     * A prepared statement for updating a single row in the database
-     */
     private PreparedStatement mUpdateOne;
-
-    private PreparedStatement mCreateCommentTable;
-
-    /**
-     * A prepared statement for creating the message table in our database
-     */
-    private PreparedStatement mCreateTable;
-
-        /**
-     * A prepared statemebnet for creating the likes table in our database
-     */
-    private PreparedStatement mCreateMessageTable;
-
-    /**
-     * A prepared statement for adding a message to the msgData in our database
-     */
     private PreparedStatement mInsertOneMessage;
-
-    /**
-     * A prepared statemebnet for creating the likes table in our database
-     */
-    private PreparedStatement mCreateLikeTable;
-
-    /**
-     * A prepared statemebnet for creating the dislikes table in our database
-     */
-    private PreparedStatement mCreateDislikesTable;
-
-        /**
-     * A prepared statemebnet for creating the user table in our database
-     */
-    private PreparedStatement mCreateUserTable;
-
-
-
-        /**
-     * A prepared statemebnet for getting the messages table in our database
-     */
     private PreparedStatement mSelectAllMessages;
-
-    /**
-     * A prepared statement for dropping the table in our database
-     */
     private PreparedStatement mDropTable;
-
-    /**
-     *  A prepared statement for adding a user to the userData table and returning the unique userID
-     */
     private PreparedStatement getUserId;
-
-    /**
-     * A prepared statment for adding the userID and messageID 
-     * of a like to track who liked what message
-     */
     private PreparedStatement likeMessage;
-
-        /**
-     * A prepared statment for adding the userID and messageID 
-     * of a like to track who disliked what message
-     */
     private PreparedStatement dislikeMessage;
-
-    /**
-     * A prepared statment for deleting a like on a message
-     */
     private PreparedStatement deleteMessageLike;
-
-    /**
-     * A prepared statment for releting a like on a message
-     */
     private PreparedStatement deleteMessageDislike;
-
-
-    /**
-     * A prepared statment for incrementing up a like on a message
-     */
     private PreparedStatement addLikeToMessage;
-    /**
-     * A prepared statment for incrementing down a like on a message
-     */
     private PreparedStatement removeLikeToMessage;
-
-    /**
-     * A prepared statment for incrementing up a dislike on a message
-     */
-
     private PreparedStatement addDislikeToMessage;
-
-    /**
-     * A prepared statment for incrementing down a dislike on a message
-     */
-
     private PreparedStatement removeDislikeToMessage;
 
 
@@ -182,25 +78,13 @@ public class Database {
     }
 
     public static class MessageRow {
-        /**
-         * The ID of this row of the database
-         */
         int id;
-        /**
-         * The subject stored in this row
-         */
         int senderId;
-        /**
-         * The message stored in this row
-         */
-        
         String text;
-
         String tStamp;
-
         int nUpVotes;
-
         int nDownVotes;
+        ArrayList<Comment> comments;
 
         /**
          * Construct a MessageRow object by providing values for its fields
@@ -213,7 +97,30 @@ public class Database {
             this.nUpVotes = nUpVotes;
             this.nDownVotes = nDownVotes;
         }
+
+        public void addComments(ArrayList<Comment> comments) {
+            this.comments = comments;
+        }
+
     }
+
+    public static class Comment{
+        int commentId;
+
+        int msgId;
+
+        String text;
+
+        String tStamp;
+
+        public Comment(int commentId, int msgId, String text, String tStamp) {
+            this.commentId = commentId;
+            this.msgId = msgId;
+            this.text = text;
+            this.tStamp = tStamp;
+        }
+    }
+
 
     public static class UserRow {
 
@@ -348,10 +255,7 @@ public class Database {
             db.mSelectOne = db.mConnection.prepareStatement("SELECT * from tblData WHERE id=?");
             db.mUpdateOne = db.mConnection.prepareStatement("UPDATE tblData SET message = ?, subject = ? WHERE id = ?");
 
-            db.mCreateCommentTable = db.mConnection.prepareStatement(
-                    "CREATE TABLE comments (commentID SERIAL PRIMARY KEY, msgID int REFERENCES msgdata(msgId), text VARCHAR(500) NOT NULL, " +
-                            "tStamp timestamp NOT NULL)");
-            
+
         } catch (SQLException e) {
             System.err.println("Error creating prepared statement");
             e.printStackTrace();

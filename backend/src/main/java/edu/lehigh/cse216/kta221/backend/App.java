@@ -86,15 +86,14 @@ public class App {
       
 
 
+        //GET route for all messages and associated comments
 
-        // GET route that returns all message titles and Ids.  All we do is get 
-        // the data, embed it in a StructuredResponse, turn it into JSON, and 
-        // return it.  If there's no data, we return "[]", so there's no need 
-        // for error handling.
         Spark.get("/messages", (request, response) -> {
             // ensure status 200 OK, with a MIME type of JSON
             System.out.println(request);
             ArrayList<Database.MessageRow> result = db.messageAll();
+
+
             System.out.println(result);
 
             System.out.println("GET RESULT LENGTH: " + result.size());
