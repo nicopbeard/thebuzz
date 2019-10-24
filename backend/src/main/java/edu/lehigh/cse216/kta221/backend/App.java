@@ -47,7 +47,6 @@ public class App {
         // NB: every time we shut down the server, we will lose all data, and 
         //     every time we start the server, we'll have an empty dataStore,
         //     with IDs starting over from 0.
-        final DataStore dataStore = new DataStore();
         System.out.println(ip + " " + port + " " + user + " " + pass);
         Database db = Database.getDatabase(ip, port, user, pass);
         // db.createTable();
@@ -135,7 +134,6 @@ public class App {
             response.status(200);
             response.type("application/json");
             Database.RowData data = db.selectOne(idx);
-            // DataRow data = dataStore.readOne(idx);
             if (data == null) {
                 return gson.toJson(new StructuredResponse("error", idx + " not found", null));
             } else {
@@ -202,7 +200,6 @@ public class App {
             // ensure status 200 OK, with a MIME type of JSON
             response.status(200);
             response.type("application/json");
-            // DataRow result = dataStore.updateOne(idx, req.mTitle, req.mMessage);
             int result = db.insertLike(req.userId, req.msgId);
             if (result == -1) {
                 return gson.toJson(new StructuredResponse("error", "Element Already Added: ", result));
@@ -301,7 +298,6 @@ public class App {
             System.out.println("Deleted ID: " + idx);
             // NB: we won't concern ourselves too much with the quality of the 
             //     message sent on a successful delete
-            boolean result = dataStore.deleteOne(idx);
             if (res <= 0) {
                 return gson.toJson(new StructuredResponse("error", "unable to delete row " + idx, null));
             } else {
