@@ -16,4 +16,8 @@ public class MessageRequest {
     public int nUpVotes;
 
     public int nDownVotes;
+
+    public String googleToken;
+
+    public int userId;
 }

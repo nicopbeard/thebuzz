@@ -57,22 +57,12 @@ public class Database {
      * Database are tightly coupled: if one changes, the other should too.
      */
     public static class RowData {
-        /**
-         * The ID of this row of the database
-         */
+
         int mId;
-        /**
-         * The subject stored in this row
-         */
+
         String mSubject;
-        /**
-         * The message stored in this row
-         */
         String mMessage;
 
-        /**
-         * Construct a RowData object by providing values for its fields
-         */
         public RowData(int id, String subject, String message) {
             mId = id;
             mSubject = subject;
@@ -260,7 +250,7 @@ public class Database {
             db.mUpdateOne = db.mConnection.prepareStatement("UPDATE tblData SET message = ?, subject = ? WHERE id = ?");
            
             //getting the comments
-            db.selectAllComments = db.selectAllComments.prepareStatement("SELECT * from comments ORDER BY msgid, tstamp;");
+            db.selectAllComments = db.mConnection.prepareStatement("SELECT * from comments ORDER BY msgid, tstamp;");
 
         } catch (SQLException e) {
             System.err.println("Error creating prepared statement");
@@ -296,9 +286,9 @@ public class Database {
         return true;
     }
 
-    HashTable<Integer, ArrayList<Database.Comment>> commentAll()
-    {    
-        Hashtable<Integer, ArrayList<Database.Comment>> commentHash = new HashTable<Integer, ArrayList<Database.Comment>>();
+    Hashtable<Integer, ArrayList<Comment>> commentAll()
+        {
+            Hashtable<Integer, ArrayList<Database.Comment>> commentHash = new Hashtable<Integer, ArrayList<Database.Comment>>();
         
         try {
             ResultSet rs = selectAllComments.executeQuery();
