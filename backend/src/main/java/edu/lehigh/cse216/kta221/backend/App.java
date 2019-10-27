@@ -80,15 +80,13 @@ public class App {
 
             response.status(200);
             response.type("application/json");
-            return gson.toJson(new StructuredResponse("ok", null, status.equals("ok")? messages : null));
+            return gson.toJson(new StructuredResponse(status, null, status.equals("ok")? messages : null));
         });
 
         // JSON from the body of the request, turn it into a SimpleRequest
         // object, extract the title and message, insert them, and return the 
         // ID of the newly created row.
         Spark.post("/messages", (request, response) -> {
-            // NB: if gson.Json fails, Spark will reply with status 500 Internal 
-            // Server Error
             MessageRequest req = gson.fromJson(request.body(), MessageRequest.class);
 
             // NB: even on error, we return 200, but with a JSON object that
@@ -96,10 +94,9 @@ public class App {
             response.status(200);
             response.type("application/json");
 
-            String status = "ok";
             //Validate token
             if(!validToken(req.userId, req.googleToken)) {
-                return gson.toJson(new StructuredMessageResponse("error", 1));
+                return gson.toJson(new StructuredMessageResponse("error", TOKEN_ERROR));
             }
 
             int newId = db.insertMessage(req.senderId, req.text, req.nUpVotes, req.nDownVotes);
@@ -121,7 +118,7 @@ public class App {
             response.type("application/json");
 
             if(!validToken(req.userId, req.googleToken)) {
-                return gson.toJson(new StructuredMessageResponse("error", 1));
+                return gson.toJson(new StructuredMessageResponse("error", TOKEN_ERROR));
             }
 
             int result = db.insertLike(req.userId, req.msgId);
@@ -134,23 +131,17 @@ public class App {
         //TAKES: Json object with fields "userID" and "plainPass"
         Spark.put("/newUser", (request, response) ->{
             NewUser nu = gson.fromJson(request.body(), NewUser.class);
-                
-            int newID = nu.userID;
+
             String googleToken = nu.googleToken;
 
             response.status(200);
             response.type("application/json");
 
-            String status = "ok";
-            String msg = null;
-            if(!validateGoogleToken(newID, googleToken, db)){
-                return gson.toJson(new StructuredMessageResponse("error", 1));
+            if(!validateGoogleToken(-1000000, googleToken, db)){
+                return gson.toJson(new StructuredMessageResponse("error", TOKEN_ERROR));
             }
 
-            //Insert User Isn't going to work, but it's P3 now and not my problem.
-            db.insertUser(1, "No_Password_Needed");
-
-            return gson.toJson(new StructuredResponse(status, msg, null));
+            return gson.toJson(new StructuredResponse("ok", null, null));
         });
 
              //TAKES: Json object with fields "userID" and "plainPass"
@@ -182,7 +173,7 @@ public class App {
             response.type("application/json");
 
             if(!validToken(req.userId, req.googleToken)) {
-                return gson.toJson(new StructuredMessageResponse("error", 1));
+                return gson.toJson(new StructuredMessageResponse("error", TOKEN_ERROR));
             }
 
             // DataRow result = dataStore.updateOne(idx, req.mTitle, req.mMessage);
@@ -287,7 +278,7 @@ public class App {
         return defaultVal;
     }
 
-
+    //This method also updates the database for new users
     public static boolean validateGoogleToken(int clientId, String idTokenString, Database db) {
 
         final JacksonFactory jsonFactory = new JacksonFactory();
@@ -318,10 +309,16 @@ public class App {
                 String familyName = (String) payload.get("family_name");
                 String givenName = (String) payload.get("given_name");
 
-                //Logout existing accounts or add new user if it's a new account
+                //Logout existing accounts
                 if(userIdToToken.containsKey(userId) && !userIdToToken.get(userId).equals(idTokenString)) {
                     userIdToToken.put(Integer.parseInt(userId), idTokenString);
-                    db.insertUser(Integer.parseInt(userId), "");
+                }
+                //update new account
+                else if(!userIdToToken.containsKey(userId)) {
+                    //userIds might all go to same value.
+                    int newUserId = (int) (Math.random() * Math.pow(10, 6) + Math.pow(10, 3));
+                    db.insertUser(newUserId, "No_Password_Needed");
+                    userIdToToken.put(newUserId, idTokenString);
                 }
                 return true;
             } else {
