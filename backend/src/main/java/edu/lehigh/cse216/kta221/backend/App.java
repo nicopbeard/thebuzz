@@ -66,21 +66,23 @@ public class App {
 
             String status = "ok";
 
-            if(!validToken(req.userId, req.googleToken)) {
-                status = "error";
-            }
+            // if(!validToken(req.userId, req.googleToken)) {
+            //     status = "error";
+            // }
 
             ArrayList<Database.MessageRow> messages = db.messageAll();
             Hashtable<Integer, ArrayList<Database.Comment>> comments = db.commentAll();
             for(Database.MessageRow msg: messages) {
-                if(comments.contains(msg)){
+                System.out.println("Message ID is"+ msg.id);
+                if(comments.containsKey(msg.id)){
+                    System.out.println("MAP DOES CONTAIN MESSAGE ID!");
                     msg.addComments(comments.get(msg.id));
                 }
             }
 
             response.status(200);
             response.type("application/json");
-            return gson.toJson(new StructuredResponse("ok", null, status.equals("ok")? messages : null));
+            return gson.toJson(new StructuredResponse(status, null, status.equals("ok")? messages : null));
         });
 
         // JSON from the body of the request, turn it into a SimpleRequest

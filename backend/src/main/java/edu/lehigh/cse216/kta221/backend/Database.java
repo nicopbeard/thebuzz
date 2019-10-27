@@ -294,8 +294,11 @@ public class Database {
             ResultSet rs = selectAllComments.executeQuery();
             while (rs.next()) {
                 Database.Comment c = new Database.Comment(rs.getInt("commentid"), rs.getInt("msgid"), rs.getString("text"),rs.getString("tstamp"));
+                System.out.println("Comment ID ="+ c.commentId);
+                System.out.println("Message ID ="+ c.msgId);
                 if(commentHash.containsKey(c.msgId))
                 {
+                   // System.out.println("COMMENT ALL HASH TEST 777");
                     commentHash.get(c.msgId).add(c);
                 }
                 else{
