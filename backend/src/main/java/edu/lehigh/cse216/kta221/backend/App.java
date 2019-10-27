@@ -91,17 +91,16 @@ public class App {
             // Server Error
             MessageRequest req = gson.fromJson(request.body(), MessageRequest.class);
 
-            String status = "ok";
-
-            //Validate token
-            if(!validToken(req.userId, req.googleToken)) {
-                return gson.toJson(new StructuredMessageResponse("error", newId));
-            }
-
             // NB: even on error, we return 200, but with a JSON object that
             //     describes the error.
             response.status(200);
             response.type("application/json");
+
+            String status = "ok";
+            //Validate token
+            if(!validToken(req.userId, req.googleToken)) {
+                return gson.toJson(new StructuredMessageResponse("error", 1));
+            }
 
             int newId = db.insertMessage(req.senderId, req.text, req.nUpVotes, req.nDownVotes);
 
@@ -116,12 +115,15 @@ public class App {
         Spark.put("/like", (request, response) -> {
             VoteRequest req = gson.fromJson(request.body(), VoteRequest.class);
 
-            if(!validToken(req.userId, req.googleToken)) {
-                //TODO
-            }
+
             // ensure status 200 OK, with a MIME type of JSON
             response.status(200);
             response.type("application/json");
+
+            if(!validToken(req.userId, req.googleToken)) {
+                return gson.toJson(new StructuredMessageResponse("error", 1));
+            }
+
             int result = db.insertLike(req.userId, req.msgId);
             return result == UPDATE_ERROR? gson.toJson(new StructuredResponse("error", "Element Already Added: ", result))
                     :  gson.toJson(new StructuredResponse("ok", "Created Element: ", result));
@@ -136,16 +138,18 @@ public class App {
             int newID = nu.userID;
             String googleToken = nu.googleToken;
 
+            response.status(200);
+            response.type("application/json");
+
             String status = "ok";
             String msg = null;
             if(!validateGoogleToken(newID, googleToken, db)){
-                status = "error";
-                msg = "Could not validate Google Token";
+                return gson.toJson(new StructuredMessageResponse("error", 1));
             }
 
-            response.status(200);
+            //Insert User Isn't going to work, but it's P3 now and not my problem.
+            db.insertUser(1, "No_Password_Needed");
 
-            response.type("application/json");
             return gson.toJson(new StructuredResponse(status, msg, null));
         });
 
@@ -176,6 +180,11 @@ public class App {
             // ensure status 200 OK, with a MIME type of JSON
             response.status(200);
             response.type("application/json");
+
+            if(!validToken(req.userId, req.googleToken)) {
+                return gson.toJson(new StructuredMessageResponse("error", 1));
+            }
+
             // DataRow result = dataStore.updateOne(idx, req.mTitle, req.mMessage);
             int result = db.insertDislike(req.userId, req.msgId);
             if (result == -1) {
@@ -185,8 +194,7 @@ public class App {
             }
         });
 
-        // PUT route for updating a row in the DataStore.  This is almost 
-        // exactly the same as POST
+        //No functionality for current android system as of 10/27 so not making it compatable with OAuth2
         Spark.put("/messages/:id", (request, response) -> {
             // If we can't get an ID or can't parse the JSON, Spark will send
             // a status 500
@@ -204,7 +212,7 @@ public class App {
             }
         });
 
-        // DELETE route for removing a row from the DataStore
+        //No functionality for delete in current android system as of 10/27 so not making it compatable with OAuth2
         Spark.delete("/messages/:id", (request, response) -> {
             // If we can't get an ID, Spark will send a status 500
             int idx = Integer.parseInt(request.params("id"));
@@ -230,6 +238,9 @@ public class App {
             System.out.println("Attempting to delete like with userId: " + req.userId + " msgId: " + req.msgId);
             response.status(200);
             response.type("application/json");
+
+
+
             int res = db.deleteLike(req.userId, req.msgId);
             // NB: we won't concern ourselves too much with the quality of the 
             //     message sent on a successful delete
