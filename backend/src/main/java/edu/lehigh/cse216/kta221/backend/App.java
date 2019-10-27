@@ -1,5 +1,7 @@
 package edu.lehigh.cse216.kta221.backend;
 
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import spark.Spark;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
@@ -60,8 +62,14 @@ public class App {
 
         //GET route for all messages and associated comments
         Spark.get("/messages", (request, response) -> {
-            // ensure status 200 OK, with a MIME type of JSON
-            System.out.println(request);
+            MessageRequest req = gson.fromJson(request.body(), MessageRequest.class);
+
+            String status = "ok";
+
+            if(!validToken(req.userId, req.googleToken)) {
+                status = "error";
+            }
+
             ArrayList<Database.MessageRow> messages = db.messageAll();
             Hashtable<Integer, ArrayList<Database.Comment>> comments = db.commentAll();
             for(Database.MessageRow msg: messages) {
@@ -72,29 +80,8 @@ public class App {
 
             response.status(200);
             response.type("application/json");
-            //NEED TO CONVERT STRING HERE
-            return gson.toJson(new StructuredResponse("ok", null, messages));
+            return gson.toJson(new StructuredResponse("ok", null, status.equals("ok")? messages : null));
         });
-
-
-
-        // Spark.post("/user", (request, response) -> {
-        //     System.out.println(request);
-        //     UserRequest req = gson.fromJson(request.body(), UserRequest.class);
-        //     System.out.println("NAME"+ req.name);
-        //     System.out.println("PASSWORD: "+ req.password);
-
-        //     response.status(200);
-        //     response.type("application/json");
-
-        //     int userId = db.insertUser(req.name, req.password);
-        //     if (userId == -1) {
-        //         return gson.toJson(new StructuredUserResponse("error", userId, req.name));
-        //     } else {
-        //         return gson.toJson(new StructuredUserResponse("ok", userId, req.name));
-        //     }
-
-        // });
 
         // JSON from the body of the request, turn it into a SimpleRequest
         // object, extract the title and message, insert them, and return the 
@@ -104,18 +91,13 @@ public class App {
             // Server Error
             MessageRequest req = gson.fromJson(request.body(), MessageRequest.class);
 
+            String status = "ok";
+
             //Validate token
             if(!validToken(req.userId, req.googleToken)) {
-                //Invalid request /TODO
+                return gson.toJson(new StructuredMessageResponse("error", newId));
             }
 
-            System.out.println("SENDER_ID: " + req.senderId);
-            System.out.println("TEXT: "+ req.text);
-            System.out.println("UP_VOTES: "+ req.nUpVotes);
-            System.out.println("UP_VOTES: "+ req.nDownVotes);
-            System.out.println("Request Body: "+ req.toString());
-
-            // ensure status 200 OK, with a MIME type of JSON
             // NB: even on error, we return 200, but with a JSON object that
             //     describes the error.
             response.status(200);
@@ -151,14 +133,21 @@ public class App {
         Spark.put("/newUser", (request, response) ->{
             NewUser nu = gson.fromJson(request.body(), NewUser.class);
                 
-             int newID = nu.userID;
-             String googleToken = nu.googleToken;
+            int newID = nu.userID;
+            String googleToken = nu.googleToken;
+
+            String status = "ok";
+            String msg = null;
+            if(!validateGoogleToken(newID, googleToken, db)){
+                status = "error";
+                msg = "Could not validate Google Token";
+            }
 
             response.status(200);
-            // db.selectAll();
-           response.type("application/json"); 
-            return gson.toJson(new StructuredResponse("ok", null, gson.toJson(token)));
-            });
+
+            response.type("application/json");
+            return gson.toJson(new StructuredResponse(status, msg, null));
+        });
 
              //TAKES: Json object with fields "userID" and "plainPass"
          Spark.put("/login", (request, response) ->{
@@ -175,7 +164,7 @@ public class App {
                 status= "error";
                 message = "google token has issues";
             }
-            return gson.toJson(new StructuredResponse(status, message, token));
+            return gson.toJson(new StructuredResponse(status, message, null));
          });
 
 
@@ -289,11 +278,12 @@ public class App {
 
 
     public static boolean validateGoogleToken(int clientId, String idTokenString, Database db) {
-        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
+        final JacksonFactory jsonFactory = new JacksonFactory();
+        final String CLIENT_ID = "";
+
+        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), jsonFactory)
                 // Specify the CLIENT_ID of the app that accesses the backend:
                 .setAudience(Collections.singletonList(CLIENT_ID))
-                // Or, if multiple clients access the backend:
-                //.setAudience(Arrays.asList(CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3))
                 .build();
 
     // (Receive idTokenString by HTTPS POST)
