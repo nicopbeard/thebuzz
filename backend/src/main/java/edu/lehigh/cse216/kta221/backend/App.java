@@ -17,6 +17,7 @@ import com.google.gson.*;
  */
 public class App {
 
+    final static int TOKEN_ERROR = 1;
     static final int UPDATE_ERROR = -1;
     static Map<Integer, String> userIdToToken = new HashMap<>();
 
@@ -50,7 +51,6 @@ public class App {
         } else {
             Spark.staticFiles.externalLocation(static_location_override);
         }
-
         // Set up the location for serving static files
         Spark.staticFileLocation("/web");
 
@@ -289,10 +289,12 @@ public class App {
 
 
     public static boolean validateGoogleToken(int clientId, String idTokenString, Database db) {
+
         final JacksonFactory jsonFactory = new JacksonFactory();
         final String CLIENT_ID = "";
 
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), jsonFactory)
+
                 // Specify the CLIENT_ID of the app that accesses the backend:
                 .setAudience(Collections.singletonList(CLIENT_ID))
                 .build();
