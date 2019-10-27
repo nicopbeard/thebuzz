@@ -48,7 +48,6 @@ public class App {
         } else {
             Spark.staticFiles.externalLocation(static_location_override);
         }
-
         // Set up the location for serving static files
         Spark.staticFileLocation("/web");
 
@@ -157,7 +156,7 @@ public class App {
             response.status(200);
             // db.selectAll();
            response.type("application/json"); 
-            return gson.toJson(new StructuredResponse("ok", null, gson.toJson(token)));
+            return gson.toJson(new StructuredResponse("ok", null, gson.toJson(googleToken)));
             });
 
              //TAKES: Json object with fields "userID" and "plainPass"
@@ -175,7 +174,7 @@ public class App {
                 status= "error";
                 message = "google token has issues";
             }
-            return gson.toJson(new StructuredResponse(status, message, token));
+            return gson.toJson(new StructuredResponse(status, message, googleToken));
          });
 
 
@@ -289,6 +288,7 @@ public class App {
 
 
     public static boolean validateGoogleToken(int clientId, String idTokenString, Database db) {
+       
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
                 // Specify the CLIENT_ID of the app that accesses the backend:
                 .setAudience(Collections.singletonList(CLIENT_ID))
