@@ -17,6 +17,7 @@ import com.google.gson.*;
  */
 public class App {
 
+    final static int TOKEN_ERROR = 1;
     static final int UPDATE_ERROR = -1;
     static Map<Integer, String> userIdToToken = new HashMap<>();
 
@@ -89,12 +90,12 @@ public class App {
             // NB: if gson.Json fails, Spark will reply with status 500 Internal 
             // Server Error
             MessageRequest req = gson.fromJson(request.body(), MessageRequest.class);
-
+            
             String status = "ok";
 
             //Validate token
             if(!validToken(req.userId, req.googleToken)) {
-                return gson.toJson(new StructuredMessageResponse("error", newId));
+                return gson.toJson(new StructuredMessageResponse("error", TOKEN_ERROR));
             }
 
             // NB: even on error, we return 200, but with a JSON object that
@@ -143,17 +144,10 @@ public class App {
             }
 
             response.status(200);
-<<<<<<< HEAD
-            // db.selectAll();
-           response.type("application/json"); 
-            return gson.toJson(new StructuredResponse("ok", null, gson.toJson(googleToken)));
-            });
-=======
 
             response.type("application/json");
             return gson.toJson(new StructuredResponse(status, msg, null));
         });
->>>>>>> f236d1bfe77c3297759f8a03590b2eef2c1d7af8
 
              //TAKES: Json object with fields "userID" and "plainPass"
          Spark.put("/login", (request, response) ->{
@@ -170,11 +164,7 @@ public class App {
                 status= "error";
                 message = "google token has issues";
             }
-<<<<<<< HEAD
-            return gson.toJson(new StructuredResponse(status, message, googleToken));
-=======
             return gson.toJson(new StructuredResponse(status, message, null));
->>>>>>> f236d1bfe77c3297759f8a03590b2eef2c1d7af8
          });
 
 
