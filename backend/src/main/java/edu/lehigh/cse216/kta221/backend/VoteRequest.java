@@ -8,9 +8,9 @@ package edu.lehigh.cse216.kta221.backend;
  *     do not need a constructor.
  */
 public class VoteRequest {
-    public int userId;
+    public String userId;
 
     public int msgId;
 
-    public String googleToken;
+    public String sessionToken;
 }

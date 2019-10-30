@@ -9,7 +9,7 @@ package edu.lehigh.cse216.kta221.backend;
  */
 public class MessageRequest {
 
-    public int senderId;
+    public String senderId;
 
     public String text;
 
@@ -19,5 +19,5 @@ public class MessageRequest {
 
     public String googleToken;
 
-    public int userId;
+    public String userId;
 }
