@@ -3,9 +3,9 @@
     "version": "1.0.0",
     "description": "Web Front-End",
     "dependencies": {
+        "@openid/openyolo": "^0.1.2",
         "@types/jest": "^24.0.21",
         "@types/jquery": "^3.3.31",
-<<<<<<< HEAD
         "bootstrap": "^3.4.1",
         "client-oauth2": "^4.2.5",
         "handlebars": "^4.4.3",
@@ -14,10 +14,5 @@
         "jquery": "^3.4.1",
         "php": "0.0.1",
         "typescript": "^3.6.4"
-=======
-        "jasmine-core": "^3.5.0",
-        "jquery": "^3.4.1",
-        "typescript": "^3.6.3"
->>>>>>> backend
     }
 }
