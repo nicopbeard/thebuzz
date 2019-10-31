@@ -1,28 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="utf-8" />
-    <meta name="format-detection" content="telephone=no" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-    <meta name="description" content="Front-End for Bootstrap Tutorial" />
-    <meta name="author" content="CSE 216 Student Name Goes Here" />
-    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-
-    <title>The Buzz</title>
-
-    <!-- <link href="bootstrap.min.css" rel="stylesheet"> -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-
-    <script src="jquery.min.js"></script>
-    <script src="handlebars.min.js"></script>
-    <!-- <script src="bootstrap.min.js"></script> -->
-    <script src="templates.js"></script>
-    <script src="app.js"></script>
-
-    <link href="https://fonts.googleapis.com/css?family=Fresca" rel="stylesheet">
-    <link rel="stylesheet" href="app.css" />
-    <?php
+<?php
       $googleClientID = '729841771303-h2118dlldms407v0jnbc7pfdadksf466.apps.googleusercontent.com';
       $googleClientSecret = 'AhuxzHdPho3QpAnsk55fRyHm';
       
@@ -159,23 +135,3 @@
       }      
 
 ?>
-
-</head>
-
-<body role="document">
-    <div class = "container">
-            <div class = "col-2"></div>
-            <div class = "col-8" id = "app-container">
-                <div class = "row" id = "navbar-container"></div>
-                <div class = "row" id = "profile-container"></div>
-                <div class = "row" id = "login-container"></div>
-                <div class = "row" id = "message-container"></div>
-                <div class = "row" id = "input-container"></div>
-            </div>
-            <div class = "col-2"></div>
-    </div>
-
-
-</body>
-
-</html>

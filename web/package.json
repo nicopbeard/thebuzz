@@ -3,13 +3,15 @@
     "version": "1.0.0",
     "description": "Web Front-End",
     "dependencies": {
-        "@types/jest": "^24.0.19",
+        "@types/jest": "^24.0.21",
         "@types/jquery": "^3.3.31",
         "bootstrap": "^3.4.1",
+        "client-oauth2": "^4.2.5",
         "handlebars": "^4.4.3",
         "http-server": "^0.11.1",
         "jasmine-core": "^3.5.0",
         "jquery": "^3.4.1",
+        "php": "0.0.1",
         "typescript": "^3.6.4"
     }
 }

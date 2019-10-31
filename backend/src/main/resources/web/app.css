@@ -4,32 +4,52 @@ body {
     margin: 0;
 }
 
-/* Make the button for adding a message hover in the top right */
-#showFormButton {
-    position: absolute;
-    top: 5px;
-    right: 5px;
+#app-container {
+    max-width: 100% !important;
 }
 
-/* make the form elements wide, and force a line break after each */
-input, label, textarea {
-    display: block;
-    width: 200px;
+#ElementList {
+    width: 100%;
+    margin-left: 5%;
+    margin-right: 5%;
 }
 
-/* put some space between textareas and the buttons that follow them */
-textarea {
-    margin-bottom: 5px;
+#message-container {
+    overflow: auto;
+    height: 800px !important; 
+    margin-bottom: 20px;
+    margin-top: 20px;
 }
 
-/* put some left space before form elements */
-label, input, textarea, #addButton, #editButton {
-    margin-left: 15px;
+#message-table {
+    background-color: lightgrey;
+    border-radius: 10px;
 }
 
-/* custom formatting for the span where we put the creation date */
-#editCreated {
-    display: block;
-    margin-bottom: 5px;
-    margin-left: 15px;
+#input-container {
+    background-color: grey;
+    border-radius: 10px;
+    padding: 10px;
 }
+
+
+
+#NewEntryForm{
+    width: 100%;
+    margin-left: 5%;
+    margin-right: 5%;
+}
+
+#NewEntryForm button {
+    background-color: lightgrey;
+}#navbar-container {
+    background-color: grey;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+#navbar-container button {
+    background-color: lightgrey;
+    margin-left: 1%;
+}
+
