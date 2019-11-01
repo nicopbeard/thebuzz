@@ -224,13 +224,14 @@ public class App {
 
         // DELETE route for removing a row from the DataStore
         Spark.delete("/like", (request, response) -> {
-           
-            VoteRequest req = gson.fromJson(request.body(), VoteRequest.class);
-
-            System.out.println("Attempting to delete like with userId: " + req.userId + " msgId: " + req.msgId);
             response.status(200);
             response.type("application/json");
 
+            VoteRequest req = gson.fromJson(request.body(), VoteRequest.class);
+
+            if(!validToken(req.userId, req.sessionToken)) {
+                //TODO do we even need this method?
+            }
 
             int res = db.deleteLike(req.userId, req.msgId);
             // NB: we won't concern ourselves too much with the quality of the 
@@ -302,6 +303,9 @@ public class App {
 
                 // Get profile information from payload
                 String email = payload.getEmail();
+                if(!email.contains("@lehigh.edu")) {
+                    return null;
+                }
                 boolean emailVerified = Boolean.valueOf(payload.getEmailVerified());
                 String name = (String) payload.get("name");
                 String pictureUrl = (String) payload.get("picture");
