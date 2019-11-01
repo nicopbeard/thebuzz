@@ -285,7 +285,8 @@ public class App {
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance())
 
                 // Specify the CLIENT_ID of the app that accesses the backend:
-                .setAudience(Collections.singletonList("729841771303-h2118dlldms407v0jnbc7pfdadksf466.apps.googleusercontent.com"))
+                .setAudience(Arrays.asList("134181037844-18emho3bt0dlqt83u92rrtkk0kfolha7.apps.googleusercontent.com",
+                        "134181037844-37lmk8rscmd0uqff6g1gu4b5q2su6f8i.apps.googleusercontent.com"))
                 .build();
 
     // (Receive idTokenString by HTTPS POST)
