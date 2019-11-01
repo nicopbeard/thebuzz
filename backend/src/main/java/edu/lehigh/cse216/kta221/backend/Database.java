@@ -320,7 +320,7 @@ public class Database {
         //TODO change db so userId is now a varchar
     boolean insertUser(String userID, String name, String email) {
         try {
-            getUserId.setInt(1, userID);
+            getUserId.setString(1, userID);
             getUserId.setString(2, name);
             getUserId.setString(3, "passHash");
             getUserId.setString(4, "tempUserName");
@@ -476,11 +476,11 @@ public class Database {
         return res;
     }
 
-    int deleteDislike(int userId, int msgId) {
+    int deleteDislike(String userId, int msgId) {
         System.out.println("Deleting index: " + userId + " " + msgId);
         int res = -1;
         try {
-            deleteMessageDislike.setInt(1, userId);
+            deleteMessageDislike.setString(1, userId);
             deleteMessageDislike.setInt(2, msgId);
             res = deleteMessageDislike.executeUpdate();
             System.out.println("Delete Dislike Result: " + res);

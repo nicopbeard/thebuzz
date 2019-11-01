@@ -313,6 +313,7 @@ public class App {
                 String locale = (String) payload.get("locale");
                 String familyName = (String) payload.get("family_name");
                 String givenName = (String) payload.get("given_name");
+                return userId;
             } else {
                 System.out.println("Invalid ID token.");
                 return null;
