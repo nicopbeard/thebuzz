@@ -12,6 +12,7 @@ class Login {
      * Track if the Singleton has been initialized
      */
     private static isInit = false;
+    static templates: any;
 
     /**
      * Initialize the NewEntryForm by creating its element in the DOM and 

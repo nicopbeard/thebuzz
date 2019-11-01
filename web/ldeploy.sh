@@ -17,10 +17,8 @@ mkdir $TARGETFOLDER
 
 # step 3: copy jQuery, Handlebars, and Bootstrap files
 #cp app.js $TARGETFOLDER
-cp google-yolo-iframe.html $TARGETFOLDER
 cp index.html $TARGETFOLDER
 cp app.css $TARGETFOLDER
-cp styles.css $TARGETFOLDER
 cp node_modules/jquery/dist/jquery.min.js $TARGETFOLDER/$WEBFOLDERNAME
 cp node_modules/handlebars/dist/handlebars.min.js $TARGETFOLDER/$WEBFOLDERNAME
 cp node_modules/bootstrap/dist/js/bootstrap.min.js $TARGETFOLDER/$WEBFOLDERNAME
