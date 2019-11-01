@@ -317,29 +317,25 @@ public class Database {
      * THIS WILL NEED TO BE CHANGED ONCE WE GET USERNAME/PASSWORD
      * @return A unique user id for the current session 
      */
-    int insertUser(int userID, String passHash) {
-        int userId = -1; 
-
+        //TODO change db so userId is now a varchar
+    boolean insertUser(String userID, String name, String email) {
         try {
             getUserId.setInt(1, userID);
-            getUserId.setString(2, "tempName");
-            getUserId.setString(3, passHash);
+            getUserId.setString(2, name);
+            getUserId.setString(3, "passHash");
             getUserId.setString(4, "tempUserName");
-            getUserId.setString(5, "tempEmail");
+            getUserId.setString(5, email);
 
            
             ResultSet rs = getUserId.executeQuery();
-            // MessageRow returnRow = new MessageRow(rs.getInt("id"), rs.getInt("senderID"), rs.getString("text"), rs.getString("tStamp"), rs.getInt("numUpVotes"), rs.getInt("numDownVotes"));
             while (rs.next()){
-                userId = rs.getInt("userId");
             };
             rs.close();
-            return userId;
-            // System.out.println("Database output: "+ subject + ":" + message);
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
         }
-        return userId;
     }
 
     /**
@@ -348,11 +344,11 @@ public class Database {
      * @param msgId messageId of the message whitch the user liked
      * @return Int value of the number of rows which were updated 
      */
-    int insertLike(int userId, int msgId){
+    int insertLike(String userId, int msgId){
         int res = -1;
         try {
             System.out.println("Searching for: " + userId + "and: "+ msgId);
-            likeMessage.setInt(1, userId);
+            likeMessage.setString(1, userId);
             likeMessage.setInt(2, msgId);
             res = likeMessage.executeUpdate();
             if(res == 1) {
@@ -374,11 +370,10 @@ public class Database {
      * @param msgId messageId of the message whitch the user liked
      * @return Int value of the number of rows which were updated 
      */
-    int insertDislike(int userId, int msgId){
-        int res = -1;
+    int insertDislike(String userId, int msgId){
+        int res = -1; //placeholder value -- doesn't mean anything
         try {
-            System.out.println("Searching for: " + userId + "and: "+ msgId);
-            dislikeMessage.setInt(1, userId);
+            dislikeMessage.setString(1, userId);
             dislikeMessage.setInt(2, msgId);
             res = dislikeMessage.executeUpdate();
             if(res == 1) {
@@ -394,37 +389,13 @@ public class Database {
         return res;
     }
 
-
-
-    /**
-     * Insert a row into the database
-     * 
-     * @param subject The subject for this new row
-     * @param message The message body for this new row
-     * 
-     * @return The number of rows that were inserted
-     */
-    int insertRow(String subject, String message) {
-        int count = 0;
-        try {
-            mInsertOne.setString(1, subject);
-            mInsertOne.setString(2, message);
-            count += mInsertOne.executeUpdate();
-            System.out.println("Database output: "+ subject + ":" + message);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return count;
-    }
-
-
-    int insertMessage(int senderID, String text, int nUpVotes, int nDownVotes) {
+    int insertMessage(String senderID, String text, int nUpVotes, int nDownVotes) {
         //LocalDateTime currTime = LocalDateTime.now();
         Date date = new Date();
         Timestamp currTime = new Timestamp(date.getTime());
         int id = -1;
         try {
-            mInsertOneMessage.setInt(1, senderID);
+            mInsertOneMessage.setString(1, senderID);
             mInsertOneMessage.setString(2, text);
             mInsertOneMessage.setTimestamp(3, currTime);
             mInsertOneMessage.setInt(4, nUpVotes);
@@ -441,26 +412,6 @@ public class Database {
             e.printStackTrace();
         }
         return id;
-    }
-
-    /**
-     * Query the database for a list of all subjects and their IDs
-     * 
-     * @return All rows, as an ArrayList
-     */
-    ArrayList<RowData> selectAll() {
-        ArrayList<RowData> res = new ArrayList<RowData>();
-        try {
-            ResultSet rs = mSelectAll.executeQuery();
-            while (rs.next()) {
-                res.add(new RowData(rs.getInt("id"), rs.getString("subject"), rs.getString("message")));
-            }
-            rs.close();
-            return res;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
         /**
@@ -483,34 +434,6 @@ public class Database {
         }
     }
 
-
-
-
-
-
-
-
-    /**
-     * Get all data for a specific row, by ID
-     * 
-     * @param id The id of the row being requested
-     * 
-     * @return The data for the requested row, or null if the ID was invalid
-     */
-    RowData selectOne(int id) {
-        RowData res = null;
-        try {
-            mSelectOne.setInt(1, id);
-            ResultSet rs = mSelectOne.executeQuery();
-            if (rs.next()) {
-                res = new RowData(rs.getInt("id"), rs.getString("subject"), rs.getString("message"));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return res;
-    }
-
     /**
      * Delete a row by ID
      * 
@@ -531,11 +454,11 @@ public class Database {
         return res;
     }
 
-    int deleteLike(int userId, int msgId) {
+    int deleteLike(String userId, int msgId) {
         System.out.println("Deleting index: " + userId + " " + msgId);
         int res = -1;
         try {
-            deleteMessageLike.setInt(1, userId);
+            deleteMessageLike.setString(1, userId);
             deleteMessageLike.setInt(2, msgId);
             res = deleteMessageLike.executeUpdate();
             System.out.println("Delete Like Result: " + res);
@@ -591,46 +514,13 @@ public class Database {
     
     // Creates a session key that will be put in the HashTable
     //Used when adding a new user
-     String createSessionKey(int userId)
+     String createSessionKey()
      {
          RandomStringUtils a = new RandomStringUtils();
          String token = a.randomAlphanumeric(10);
-         cache.put(userId, token);
-         System.out.println("ADDING TO THE CACHE"+cache.toString());
          return token;
      }
 
-     // Used during login to assign a new key to the Userid
-     // Makes sure user is only logged in on one place at a time
-     //Returns the new token if
-     String replaceKey(int userId)
-     {
-        RandomStringUtils a = new RandomStringUtils();
-         String token = a.randomAlphanumeric(10);
-         cache.replace(userId, token);
-         System.out.println("CACHE REPLACE TEST"+cache.toString());
-         return token;
-     }
-
-   Boolean tokenAuth(Integer userId, String token)
-   {
-       boolean doesMap = false;
-       String testToken = cache.get(userId);
-       if(testToken.equals(token))
-            doesMap = true;
-        
-        return (cache.contains(token) && doesMap);
-   }
-
-   Boolean hasKey(Integer userId)
-   {
-       return cache.containsKey(userId);
-   }
-
-   Boolean passwordAuth(String password)
-   {
-        return BCrypt.checkpw(password, passwordHasher(password) );
-   }
 
    String passwordHasher(String plain_password)
    {
@@ -638,36 +528,4 @@ public class Database {
        return hashed_password;
    }
 
-
-
-    /**
-     * Create tblData.  If it already exists, this will print an error
-     */
-    // void createTable() {
-    //     try {
-    //         mCreateTable.execute();
-    //     } catch (SQLException e) {
-    //         e.printStackTrace();
-    //     }
-    // }
-
-    // void createMessageTable() {
-    //     try {
-    //         mCreateMessageTable.execute();
-    //     } catch (SQLException e) {
-    //         e.printStackTrace();
-    //     }
-    // }
-
-    /**
-     * Remove tblData from the database.  If it does not exist, this will print
-     * an error.
-     */
-    void dropTable() {
-        try {
-            mDropTable.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 }
