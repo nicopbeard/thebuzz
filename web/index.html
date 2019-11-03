@@ -36,28 +36,6 @@
             </div>
             <div class = "col-2"></div>
     </div>
-    <script>
-        const {google} = require('googleapis');
-
-        const oauth2Client = new google.auth.OAuth2(
-        "729841771303-h2118dlldms407v0jnbc7pfdadksf466.apps.googleusercontent.com",
-        "AhuxzHdPho3QpAnsk55fRyHm",
-        "https://www.google.com"
-        );
-
-        // generate a url that asks permissions for Blogger and Google Calendar scopes
-        const scopes = [
-            // empty
-        ];
-
-        const url = oauth2Client.generateAuthUrl({
-        // 'online' (default) or 'offline' (gets refresh_token)
-        access_type: 'offline',
-
-        // If you only need one scope you can pass it as a string
-        scope: scopes
-        });
-    </script>
 
 </body>
 

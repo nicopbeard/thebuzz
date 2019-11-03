@@ -6,6 +6,9 @@
         "@openid/openyolo": "^0.1.2",
         "@types/jest": "^24.0.21",
         "@types/jquery": "^3.3.31",
+        "@types/node": "^12.12.5",
+        "@types/react-router": "^5.1.2",
+        "awesome-typescript-loader": "^5.2.1",
         "bootstrap": "^3.4.1",
         "client-oauth2": "^4.2.5",
         "googleapis": "^44.0.0",
@@ -14,6 +17,17 @@
         "jasmine-core": "^3.5.0",
         "jquery": "^3.4.1",
         "php": "0.0.1",
+        "source-map-loader": "^0.2.4",
+        "standard": "^14.3.1",
         "typescript": "^3.6.4"
+    },
+    "devDependencies": {
+        "@types/prompt-sync": "^4.1.0",
+        "json-loader": "^0.5.7",
+        "ts-loader": "^6.2.1",
+        "webpack": "^4.41.2"
+    },
+    "scripts": {
+        "build": "node_modules/.bin/webpack --config webpack.config.js"
     }
 }
