@@ -71,9 +71,9 @@ public class App {
 
             String status = OK;
 
-            if(!validToken(req.userId, req.googleToken)) {
-                status = ERROR;
-            }
+          //  if(!validToken(req.userId, req.googleToken)) {
+           //     status = ERROR;
+           // }
 
             ArrayList<Database.MessageRow> messages = db.messageAll();
             Hashtable<Integer, ArrayList<Database.Comment>> comments = db.commentAll();
