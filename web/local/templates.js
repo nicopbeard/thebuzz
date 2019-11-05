@@ -3,17 +3,29 @@
 templates['ElementList.hb'] = template({"1":function(container,depth0,helpers,partials,data) {
     var alias1=container.propertyIsEnumerable, alias2=container.lambda, alias3=container.escapeExpression;
 
+<<<<<<< HEAD
   return "            <tr>\r\n                <td class = \"ElementList-user-profile-button\" data-id = \""
     + alias3(alias2((depth0 != null ? depth0.senderId : depth0), depth0))
     + "\">"
+=======
+  return "            <tr>\n                <td>"
+>>>>>>> parent of 07726df... Fixed user profiles, waiting for API call to check
     + alias3(alias2((depth0 != null ? depth0.senderId : depth0), depth0))
     + "</td>\r\n                <td>"
     + alias3(alias2((depth0 != null ? depth0.text : depth0), depth0))
+<<<<<<< HEAD
     + "</td>\r\n                <td>\r\n                    <button type=\"button\" class=\"ElementList-upvotebtn btn-primary\" data-value=\""
     + alias3(alias2((depth0 != null ? depth0.id : depth0), depth0))
     + "\">\r\n                        <span class=\"glyphicon glyphicon-thumbs-up\"></span>\r\n                        Like\r\n                    </button>\r\n                </td>\r\n                <td>\r\n                    <button class=\"ElementList-downvotebtn btn-danger\" data-value=\""
     + alias3(alias2((depth0 != null ? depth0.id : depth0), depth0))
     + "\">\r\n                        <span class=\"glyphicon glyphicon-thumbs-down\"></span>\r\n                        Dislike\r\n                    </button>\r\n                </td>\r\n            </tr>\r\n";
+=======
+    + "</td>\n                <td><button type=\"button\" class=\"ElementList-upvotebtn btn-primary\" data-value=\""
+    + alias3(alias2((depth0 != null ? depth0.id : depth0), depth0))
+    + "\">\n                    <span class=\"glyphicon glyphicon-thumbs-up\"></span>\n                    Like</button></td>\n                <td><button class=\"ElementList-downvotebtn btn-danger\" data-value=\""
+    + alias3(alias2((depth0 != null ? depth0.id : depth0), depth0))
+    + "\">\n                    <span class=\"glyphicon glyphicon-thumbs-down\"></span>\n                    Dislike</button></td>\n            </tr>\n";
+>>>>>>> parent of 07726df... Fixed user profiles, waiting for API call to check
 },"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
     var stack1, alias1=container.propertyIsEnumerable;
 
@@ -54,6 +66,7 @@ templates['MyProfile.hb'] = template({"compiler":[8,">= 4.3.0"],"main":function(
     + "\"> </input> </div>\r\n            <div class = \"col-2\"> <button> Change Comment </button> </div>\r\n            <div class = \"col-6\"> </div>\r\n    </div>\r\n\r\n    <div class = \"row\" id = \"password-row\"> \r\n            <div class = \"col-2\">Password:</div>\r\n            <div class = \"col-2\"> \r\n                <input id=\"password-field\" placeholder = \"Enter new password\"> </input>\r\n                <input id=\"password-confirm-field\" placeholder = \"Confirm Password\"> </input>\r\n            \r\n            </div>\r\n            <div class = \"col-2\"> <button> Change Password </button> </div>\r\n            <div class = \"col-6\"> </div>\r\n    </div>\r\n\r\n</div>\r\n";
 },"useData":true});
 })();
+<<<<<<< HEAD
 (function() {
   var template = Handlebars.template, templates = Handlebars.templates = Handlebars.templates || {};
 templates['UserProfile.hb'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
@@ -68,3 +81,5 @@ templates['UserProfile.hb'] = template({"compiler":[8,">= 4.3.0"],"main":functio
     + "\"> </input> </div>\r\n            <div class = \"col-2\"> <button> Change Comment </button> </div>\r\n            <div class = \"col-6\"> </div>\r\n    </div>\r\n\r\n    <div class = \"row\" id = \"password-row\"> \r\n            <div class = \"col-2\">Password:</div>\r\n            <div class = \"col-2\"> \r\n                <input id=\"password-field\" placeholder = \"Enter new password\"> </input>\r\n                <input id=\"password-confirm-field\" placeholder = \"Confirm Password\"> </input>\r\n            \r\n            </div>\r\n            <div class = \"col-2\"> <button> Change Password </button> </div>\r\n            <div class = \"col-6\"> </div>\r\n    </div>\r\n\r\n</div>\r\n";
 },"useData":true});
 })();
+=======
+>>>>>>> parent of 07726df... Fixed user profiles, waiting for API call to check
