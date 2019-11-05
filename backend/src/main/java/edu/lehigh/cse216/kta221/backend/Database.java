@@ -424,7 +424,7 @@ public class Database {
         try {
             ResultSet rs = mSelectAllMessages.executeQuery();
             while (rs.next()) {
-                res.add(new MessageRow(rs.getInt("msgid"), rs.getInt("userid"), rs.getString("text"), rs.getString("tStamp"), rs.getInt("numUpVotes"), rs.getInt("numDownVotes") ));
+                res.add(new MessageRow(rs.getInt("msgid"), rs.getString("userid"), rs.getString("text"), rs.getString("tStamp"), rs.getInt("numUpVotes"), rs.getInt("numDownVotes") ));
             }
             rs.close();
             return res;
