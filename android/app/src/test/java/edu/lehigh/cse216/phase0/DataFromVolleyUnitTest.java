@@ -1,7 +1,5 @@
 package edu.lehigh.cse216.phase0;
 
-import android.os.Message;
-
 import org.junit.Test;
 
 import static org.junit.Assert.*;
