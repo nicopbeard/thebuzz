@@ -83,8 +83,8 @@ public class App {
                 }
             }
             for(Database.MessageRow msg: messages) {
-                System.out.println("Message id is: " + msg.id)
-                if(comments.contains(msg.id)){
+                System.out.println("Message id is: " + msg.id);
+                if(comments.containsKey(msg.id)){
                     msg.addComments(comments.get(msg.id));
                 }
             }
