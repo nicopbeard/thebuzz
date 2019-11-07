@@ -72,7 +72,7 @@ public class Database {
 
     public static class MessageRow {
         int id;
-        int senderId;
+        String senderId;
         String text;
         String tStamp;
         int nUpVotes;
@@ -82,7 +82,7 @@ public class Database {
         /**
          * Construct a MessageRow object by providing values for its fields
          */
-        public MessageRow(int id, int senderId, String text, String tStamp, int nUpVotes, int nDownVotes) {
+        public MessageRow(int id, String senderId, String text, String tStamp, int nUpVotes, int nDownVotes) {
             this.id = id; 
             this.senderId = senderId;
             this.text = text;
