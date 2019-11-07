@@ -1,7 +1,6 @@
 package edu.lehigh.cse216.phase0;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -28,15 +27,12 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-import edu.lehigh.cse216.phase0.R;
-
 
 public class MainActivity extends AppCompatActivity {
 
     private final ArrayList<MessageInfo> dataFromVolley = new ArrayList<>();
     private Button sendMsgButton;
     private EditText msgToSend;
-    public String username;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        setTitle("Message Board");
 
         sendMsgButton = findViewById(R.id.sendMessage);
         msgToSend = findViewById(R.id.messageToSend);
@@ -161,11 +158,5 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
         serverQueue.add(jsonObjReq);
-    }
-
-    public void goToProfile(View view)
-    {
-        Intent intent = new Intent(MainActivity.this, Profile_Activity.class);
-        startActivity(intent);
     }
 }

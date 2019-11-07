@@ -1,7 +1,6 @@
-package edu.lehigh.cse216.phase0.ui.login;
+package edu.lehigh.cse216.phase0;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.ViewModelProviders;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -23,11 +22,7 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
-import edu.lehigh.cse216.phase0.MainActivity;
-import edu.lehigh.cse216.phase0.R;
-
 public class LoginActivity extends AppCompatActivity {
-    private LoginViewModel loginViewModel;
     private Button signOut;
     private static final String TAG = "AndroidClarified";
     private GoogleSignInClient googleSignInClient;
@@ -39,8 +34,8 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         super.onCreate(savedInstanceState);
         MultiDex.install(this);
-        loginViewModel = ViewModelProviders.of(this, new LoginViewModelFactory())
-                .get(LoginViewModel.class);
+//        loginViewModel = ViewModelProviders.of(this, new LoginViewModelFactory())
+//                .get(LoginViewModel.class);
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken("755594120508-vajdss1hrkqi335sukhur5qaa70s5jji.apps.googleusercontent.com")
@@ -59,7 +54,9 @@ public class LoginActivity extends AppCompatActivity {
                     case R.id.sign_in_button:
                         signIn();
                         break;
-                    // ...
+                    case R.id.sign_out:
+                        signOut();
+                        break;
                 }
             }
         });
@@ -94,6 +91,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void handleSignInResult(@NonNull Task<GoogleSignInAccount> completedTask) {
         try {
+            Log.d("npb221", String.valueOf(completedTask.isComplete()));
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
             String idToken = account.getIdToken();
             System.out.println(idToken);
@@ -116,11 +114,22 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void signOut() {
-        googleSignInClient.signOut().addOnCompleteListener(this, new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                updateUI(null);
-            }
-        });
+        googleSignInClient.signOut()
+                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        // ...
+                    }
+                });
+    }
+
+    private void revokeAccess() {
+        googleSignInClient.revokeAccess()
+                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        // ...
+                    }
+                });
     }
 }

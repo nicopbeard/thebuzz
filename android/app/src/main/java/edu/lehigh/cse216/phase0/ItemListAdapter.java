@@ -1,6 +1,7 @@
 package edu.lehigh.cse216.phase0;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,14 +19,18 @@ import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONObject;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
-import edu.lehigh.cse216.phase0.R;
+import static android.content.ContentValues.TAG;
 
 class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHolder> {
 
+    private ArrayList<String> userInfo = new ArrayList<String>();
     private ArrayList<MessageInfo> dataFromVolley;
     private LayoutInflater mLayoutInflater;
+    private Context mContext;
+    private static String user;
 
     class ViewHolder extends RecyclerView.ViewHolder  implements View.OnClickListener {
         private final int INDEX_NOT_SET = -1;
@@ -49,13 +54,17 @@ class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHolder> {
 
             upvotes.setOnClickListener(this);
             downvotes.setOnClickListener(this);
+            sender.setOnClickListener(this);
+            msg.setOnClickListener(this);
+            msgNum.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View view) {
-            Button button = (Button) view;
-            switch (button.getId()){
+            Button button;
+            switch (view.getId()){
                 case R.id.listUpvotesButton:
+                    button = (Button) view;
                     if(indexInDataFromVolley == INDEX_NOT_SET) {
                         throw new RuntimeException("Index not set in ItemListAdapter");
                     }
@@ -65,15 +74,22 @@ class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHolder> {
                     ItemListAdapterHelper.incrementButtonCount(button);
                     break;
                 case R.id.listDownvotesButton:
+                    button = (Button) view;
                     if(indexInDataFromVolley == INDEX_NOT_SET) {
                         throw new RuntimeException("Index not set in ItemListAdapter");
                     }
 
                     //likeMessage(Integer.parseInt(dataFromVolley.get(indexInDataFromVolley).sender()), dataFromVolley.get(indexInDataFromVolley).msgNum(), false);
                     //Waiting on backend to allow for above line
-                    
+
                     dataFromVolley.get(indexInDataFromVolley).addDownvote();
                     ItemListAdapterHelper.incrementButtonCount(button);
+                    break;
+                default:
+                    Intent intent = new Intent(mContext, Profile_Activity.class);
+                    int position = getAdapterPosition();
+                    user = userInfo.get(position);
+                    mContext.startActivity(intent);
                     break;
             }
         }
@@ -82,6 +98,12 @@ class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHolder> {
     ItemListAdapter(Context context, ArrayList<MessageInfo> dataFromVolley) {
         this.dataFromVolley = dataFromVolley;
         mLayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        mContext = context;
+    }
+
+    public static String getUser()
+    {
+        return user;
     }
 
     @Override
@@ -96,7 +118,7 @@ class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHolder> {
         return new ViewHolder(view);
     }
 
-    //Puts data current data into each of the rows
+    //Puts current data into each of the rows
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         final MessageInfo info = this.dataFromVolley.get(position);
@@ -107,6 +129,7 @@ class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHolder> {
         holder.downvotes.setText(Integer.toString(info.downvotes()));
 
         //so we can update information in the list when user clicks upvote/downvote, ect
+        userInfo.add(info.sender());
         holder.indexInDataFromVolley = position;
     }
 

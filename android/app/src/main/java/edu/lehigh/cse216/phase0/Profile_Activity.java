@@ -3,12 +3,8 @@ package edu.lehigh.cse216.phase0;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -22,20 +18,20 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-import edu.lehigh.cse216.phase0.R;
-
 public class Profile_Activity extends AppCompatActivity {
-
     private final ArrayList<MessageInfo> dataFromVolley = new ArrayList<>();
+    private String user = ItemListAdapter.getUser();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile_);
+        setTitle(user);
 
-
-        String getMsgsServerURL = "https://clowns-who-code.herokuapp.com/messages";
         RequestQueue serverQueue = VolleySingleton.getInstance(this).getRequestQueue();
+        String getMsgsServerURL = "https://clowns-who-code.herokuapp.com/messages";
+        // Request a string response from the provided URL.
+
         StringRequest stringRequest = new StringRequest(Request.Method.GET, getMsgsServerURL,
                 new Response.Listener<String>() {
                     @Override
@@ -48,6 +44,7 @@ public class Profile_Activity extends AppCompatActivity {
                 Log.e("Error", "Trouble getting info from volley");
             }
         });
+
         serverQueue.add(stringRequest);
     }
 
@@ -63,14 +60,16 @@ public class Profile_Activity extends AppCompatActivity {
                 int numUpvotes = jsonObj.getInt("nUpVotes");
                 int numDownvotes = jsonObj.getInt("nDownVotes");
 
-                dataFromVolley.add(new MessageInfo(msgNum, sender, msg, numUpvotes, numDownvotes));
+                if(sender.equals(user)) {
+                    dataFromVolley.add(new MessageInfo(msgNum, sender, msg, numUpvotes, numDownvotes));
+                }
             }
         } catch (final JSONException e) {
             Log.d("ERROR", "Error parsing JSON file: " + e.getMessage());
             return;
         }
         Log.d("ERROR", "Successfully parsed JSON file.");
-        RecyclerView rv = findViewById(R.id.recyclerViewMsgs);
+        RecyclerView rv = (RecyclerView) findViewById(R.id.recyclerViewMsgs);
         rv.setLayoutManager(new LinearLayoutManager(this));
         final ItemListAdapter adapter = new ItemListAdapter(this, dataFromVolley);
         rv.setAdapter(adapter);
