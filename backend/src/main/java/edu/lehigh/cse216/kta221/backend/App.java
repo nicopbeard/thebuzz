@@ -77,7 +77,13 @@ public class App {
 
             ArrayList<Database.MessageRow> messages = db.messageAll();
             Hashtable<Integer, ArrayList<Database.Comment>> comments = db.commentAll();
+            for(ArrayList<Database.Comment> comment: comments.values()){
+                for(Database.Comment comm: comment) {
+                    System.out.println("comment id: " + comm.commentId + ". It's msgId is " + comm.msgId);
+                }
+            }
             for(Database.MessageRow msg: messages) {
+                System.out.println("Message id is: " + msg.id)
                 if(comments.contains(msg.id)){
                     msg.addComments(comments.get(msg.id));
                 }

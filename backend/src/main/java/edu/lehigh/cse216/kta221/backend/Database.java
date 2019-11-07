@@ -288,7 +288,7 @@ public class Database {
 
     Hashtable<Integer, ArrayList<Comment>> commentAll()
         {
-            Hashtable<Integer, ArrayList<Database.Comment>> commentHash = new Hashtable<Integer, ArrayList<Database.Comment>>();
+        Hashtable<Integer, ArrayList<Database.Comment>> commentHash = new Hashtable<Integer, ArrayList<Database.Comment>>();
         
         try {
             ResultSet rs = selectAllComments.executeQuery();
