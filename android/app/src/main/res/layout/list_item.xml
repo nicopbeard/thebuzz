@@ -11,7 +11,7 @@
 
     <TextView
         android:id="@+id/listSender"
-        android:layout_width="100dp"
+        android:layout_width="50dp"
         android:layout_height="wrap_content"
         android:textColor="@color/colorPink"
         android:textColorHighlight="@color/colorGreen"
@@ -20,9 +20,18 @@
 
     <TextView
         android:id="@+id/listMsg"
-        android:layout_width="220dp"
+        android:layout_width="210dp"
         android:layout_height="match_parent"
         android:textColor="@color/colorPurple"
+        />
+
+    <Button
+        android:id="@+id/comments"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:text="CM"
+        android:background="@color/colorPink"
+        android:layout_marginRight="10dp"
         />
 
     <Button

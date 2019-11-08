@@ -25,6 +25,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 
@@ -40,6 +41,8 @@ public class MainActivity extends AppCompatActivity {
         Log.d("kta221", "Debug Message from onCreate");
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
+        RecyclerView recycler = (RecyclerView) findViewById(R.id.recyclerViewMsgs);
+        recycler.setNestedScrollingEnabled(false);
         setSupportActionBar(toolbar);
         setTitle("Message Board");
 
@@ -87,22 +90,23 @@ public class MainActivity extends AppCompatActivity {
         try {
             String mData = getMdata(response);
             JSONArray jsonArr = new JSONArray(mData);
-            for (int i = 0; i < jsonArr.length() && i < 10; i++) {
+            for (int i = 0; i < jsonArr.length(); i++) {
                 JSONObject jsonObj = jsonArr.getJSONObject(i);
                 int msgNum = jsonObj.getInt("id");
                 String sender = Integer.toString(jsonObj.getInt("senderId"));
                 String msg = jsonObj.getString("text");
+                ArrayList<String> comments = getComments(jsonObj.getJSONArray("comments"));
                 int numUpvotes = jsonObj.getInt("nUpVotes");
                 int numDownvotes = jsonObj.getInt("nDownVotes");
 
-                dataFromVolley.add(new MessageInfo(msgNum, sender, msg, numUpvotes, numDownvotes));
+                dataFromVolley.add(new MessageInfo(msgNum, sender, msg, comments, numUpvotes, numDownvotes));
             }
         } catch (final JSONException e) {
             Log.d("ERROR", "Error parsing JSON file: " + e.getMessage());
             return;
         }
         Log.d("ERROR", "Successfully parsed JSON file.");
-        RecyclerView rv = (RecyclerView) findViewById(R.id.recyclerViewMsgs);
+        RecyclerView rv = findViewById(R.id.recyclerViewMsgs);
         rv.setLayoutManager(new LinearLayoutManager(this));
         final ItemListAdapter adapter = new ItemListAdapter(this, dataFromVolley);
         rv.setAdapter(adapter);
@@ -122,6 +126,22 @@ public class MainActivity extends AppCompatActivity {
                 imm.hideSoftInputFromWindow(msgToSend.getWindowToken(), 0);
             }
         });
+    }
+
+    private ArrayList<String> getComments(JSONArray jsonArray)
+    {
+        ArrayList<String> comments = new ArrayList<String>();
+        for(int i = 0; i < jsonArray.length(); i++)
+        {
+            try {
+                JSONObject object = jsonArray.getJSONObject(i);
+                String comment = object.getString("text");
+                comments.add(comment);
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return comments;
     }
 
     private String getMdata(String str){

@@ -28,6 +28,7 @@ class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHolder> {
 
     private ArrayList<String> userInfo = new ArrayList<String>();
     private ArrayList<MessageInfo> dataFromVolley;
+    private ArrayList<CommentInfo> commentFromVolley;
     private LayoutInflater mLayoutInflater;
     private Context mContext;
     private static String user;
@@ -38,6 +39,7 @@ class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHolder> {
         private final TextView msgNum;
         private final TextView sender;
         private final TextView msg;
+        private final Button comments;
         private final Button upvotes;
         private final Button downvotes;
 
@@ -49,12 +51,14 @@ class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHolder> {
             this.msgNum = itemView.findViewById(R.id.listMsgNum);
             this.sender = itemView.findViewById(R.id.listSender);
             this.msg = itemView.findViewById(R.id.listMsg);
+            this.comments = itemView.findViewById(R.id.comments);
             this.upvotes = itemView.findViewById(R.id.listUpvotesButton);
             this.downvotes = itemView.findViewById(R.id.listDownvotesButton);
 
             upvotes.setOnClickListener(this);
             downvotes.setOnClickListener(this);
             sender.setOnClickListener(this);
+            comments.setOnClickListener(this);
             msg.setOnClickListener(this);
             msgNum.setOnClickListener(this);
         }
@@ -62,6 +66,8 @@ class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHolder> {
         @Override
         public void onClick(View view) {
             Button button;
+            Intent intent;
+            int position;
             switch (view.getId()){
                 case R.id.listUpvotesButton:
                     button = (Button) view;
@@ -85,9 +91,15 @@ class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHolder> {
                     dataFromVolley.get(indexInDataFromVolley).addDownvote();
                     ItemListAdapterHelper.incrementButtonCount(button);
                     break;
+                case R.id.comments:
+                    button = (Button) view;
+                    intent = new Intent(mContext, Comments.class);
+                    position = getAdapterPosition();
+                    mContext.startActivity(intent);
+                    break;
                 default:
-                    Intent intent = new Intent(mContext, Profile_Activity.class);
-                    int position = getAdapterPosition();
+                    intent = new Intent(mContext, Profile_Activity.class);
+                    position = getAdapterPosition();
                     user = userInfo.get(position);
                     mContext.startActivity(intent);
                     break;
@@ -100,6 +112,12 @@ class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHolder> {
         mLayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mContext = context;
     }
+
+//    ItemListAdapter(Context context, ArrayList<CommentInfo> commentFromVolley) {
+//        this.commentFromVolley = commentFromVolley;
+//        mLayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+//        mContext = context;
+//    }
 
     public static String getUser()
     {
