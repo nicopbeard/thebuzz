@@ -6,20 +6,14 @@
         <tbody>
             {{#each mData}}
             <tr>
-                <td class = "ElementList-user-profile-button" data-id = "{{this.senderId}}">{{this.senderId}}</td>
+                <td>{{this.senderId}}</td>
                 <td>{{this.text}}</td>
-                <td>
-                    <button type="button" class="ElementList-upvotebtn btn-primary" data-value="{{this.id}}">
-                        <span class="glyphicon glyphicon-thumbs-up"></span>
-                        Like
-                    </button>
-                </td>
-                <td>
-                    <button class="ElementList-downvotebtn btn-danger" data-value="{{this.id}}">
-                        <span class="glyphicon glyphicon-thumbs-down"></span>
-                        Dislike
-                    </button>
-                </td>
+                <td><button type="button" class="ElementList-upvotebtn btn-primary" data-value="{{this.id}}">
+                    <span class="glyphicon glyphicon-thumbs-up"></span>
+                    Like</button></td>
+                <td><button class="ElementList-downvotebtn btn-danger" data-value="{{this.id}}">
+                    <span class="glyphicon glyphicon-thumbs-down"></span>
+                    Dislike</button></td>
             </tr>
             {{/each}}
         </tbody>

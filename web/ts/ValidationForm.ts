@@ -3,8 +3,10 @@
 /**
  * NewEntryForm encapsulates all of the code for the form for adding an entry
  */
+
 class ValidationForm {
 
+<<<<<<< HEAD
   /**
    * The name of the DOM entry associated with NewEntryForm
    */
@@ -28,6 +30,32 @@ class ValidationForm {
       //$("#" + ValidationForm.NAME + "-google").success(ValidationForm.onSignIn);
 
       ValidationForm.isInit = true;
+=======
+    /**
+     * The name of the DOM entry associated with NewEntryForm
+     */
+    private static readonly NAME = "ValidationForm";
+
+    /**
+     * Track if the Singleton has been initialized
+     */
+    private static isInit = false;
+
+    /**
+     * Initialize the NewEntryForm by creating its element in the DOM and 
+     * configuring its buttons.  This needs to be called from any public static 
+     * method, to ensure that the Singleton is initialized before use
+     */
+    private static init() {
+
+        if (!ValidationForm.isInit) {
+            //oauthSignIn();
+            $("#login-container").append(Handlebars.templates[ValidationForm.NAME + ".hb"]());
+            $("#" + ValidationForm.NAME + "-Register").click(ValidationForm.register);
+            $("#" + ValidationForm.NAME + "-Login").click(ValidationForm.login);
+            ValidationForm.isInit = true;
+        }
+>>>>>>> a42c41b5da28f861a20f5249c8d7cb8d0f690e32
     }
   }
 

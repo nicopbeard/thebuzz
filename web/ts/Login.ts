@@ -1,3 +1,5 @@
+import { oauthSignIn } from "./OAuth";
+
 /**
  * NewEntryForm encapsulates all of the code for the form for adding an entry
  */
@@ -12,6 +14,8 @@ class Login {
      * Track if the Singleton has been initialized
      */
     private static isInit = false;
+    static templates: any;
+
 
     /**
      * Initialize the NewEntryForm by creating its element in the DOM and 
@@ -20,6 +24,7 @@ class Login {
      */
     private static init() {
         if (!Login.isInit) {
+            oauthSignIn();
             $("#input-container").append(Login.templates[Login.NAME + ".hb"]());
             $("#" + Login.NAME + "-OK").click(Login.submitForm);
             $("#" + Login.NAME + "-Close").click(Login.hide);

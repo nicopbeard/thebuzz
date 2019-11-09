@@ -30,7 +30,7 @@ node_modules/.bin/tsc app.ts --strict --outFile $TARGETFOLDER/app.js
 
 
 # step 5: copy css files
-cat app.css css/UserProfile.css css/ElementList.css css/NewEntryForm.css css/ValidationForm.css css/MyProfile.css css/Navbar.css> $TARGETFOLDER/$WEBFOLDERNAME/app.css
+cat app.css css/ElementList.css css/NewEntryForm.css css/ValidationForm.css css/MyProfile.css css/Navbar.css> $TARGETFOLDER/$WEBFOLDERNAME/app.css
 
 # step 6: compile handlebars templates to the deploy folder
 node_modules/handlebars/bin/handlebars hb/ElementList.hb >> $TARGETFOLDER/$WEBFOLDERNAME/templates.js
@@ -38,7 +38,6 @@ node_modules/handlebars/bin/handlebars hb/NewEntryForm.hb >> $TARGETFOLDER/$WEBF
 node_modules/handlebars/bin/handlebars hb/Navbar.hb >> $TARGETFOLDER/$WEBFOLDERNAME/templates.js
 node_modules/handlebars/bin/handlebars hb/ValidationForm.hb >> $TARGETFOLDER/$WEBFOLDERNAME/templates.js
 node_modules/handlebars/bin/handlebars hb/MyProfile.hb >> $TARGETFOLDER/$WEBFOLDERNAME/templates.js
-node_modules/handlebars/bin/handlebars hb/UserProfile.hb >> $TARGETFOLDER/$WEBFOLDERNAME/templates.js
 
 
 #SET UP SERVER
