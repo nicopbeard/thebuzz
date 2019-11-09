@@ -85,7 +85,7 @@ var NewEntryForm = /** @class */ (function () {
         var msg = "" + $("#" + NewEntryForm.NAME + "-message").val();
         var id = $(this).data("value");
         if (msg === "") {
-            window.alert("Error: title or message is not valid");
+            window.alert("Error: Message is not valid");
             return;
         }
         $("#NewEntryForm-message").val("");
@@ -332,6 +332,7 @@ var ValidationForm = /** @class */ (function () {
             $("#login-container").append(Handlebars.templates[ValidationForm.NAME + ".hb"]());
             $("#" + ValidationForm.NAME + "-Register").click(ValidationForm.register);
             $("#" + ValidationForm.NAME + "-Login").click(ValidationForm.login);
+            //$("#" + ValidationForm.NAME + "-google").success(ValidationForm.onSignIn);
             ValidationForm.isInit = true;
         }
     };
@@ -372,7 +373,6 @@ var ValidationForm = /** @class */ (function () {
         // that neither is empty
         var username = $("#" + ValidationForm.NAME + "-username").val();
         var password = $('#' + ValidationForm.NAME + "-password").val();
-        var name = $('#' + ValidationForm.NAME + "-name").val();
         if (username === "" || password === "") {
             window.alert("Error: Username or Password field incomplete");
             return;
@@ -456,10 +456,81 @@ var ValidationForm = /** @class */ (function () {
             ValidationForm.hide();
             ElementList.refresh();
             NewEntryForm.refresh();
-            Navbar.welcomeUser("Kevin");
-            console.log("Sucessfully Verified " + data.userid + " in...\n Current Session Token: " + data.session_token + "}");
+            Navbar.welcomeUser("Nicoooo");
+            console.log("Sucessfully Verified " + data.userid + " in...\n Current Session Token: " + data.session_token);
         }
     };
+    //placeholder for google login functions until i figure out wtf is going on
+    // If there's an access token, try an API request.
+    // Otherwise, start OAuth 2.0 flow.
+    ValidationForm.trySampleRequest = function () {
+        console.log("Hello");
+        var params = JSON.parse(localStorage.getItem('oauth2-test-params'));
+        if (params && params['access_token']) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', 'https://www.googleapis.com/drive/v3/about?fields=user&' +
+                'access_token=' + params['access_token']);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    console.log(xhr.response);
+                }
+                else if (xhr.readyState === 4 && xhr.status === 401) {
+                    // Token invalid, so prompt for user permission.
+                    oauth2SignIn();
+                }
+            };
+            xhr.send(null);
+        }
+        else {
+            oauth2SignIn();
+        }
+    };
+    /*
+     * Create form to request access token from Google's OAuth 2.0 server.
+     */
+    ValidationForm.oauth2SignIn = function () {
+        // Google's OAuth 2.0 endpoint for requesting an access token
+        var oauth2Endpoint = 'https://accounts.google.com/o/oauth2/v2/auth';
+        // Create element to open OAuth 2.0 endpoint in new window.
+        var form = document.createElement('form');
+        form.setAttribute('method', 'GET'); // Send as a GET request.
+        form.setAttribute('action', oauth2Endpoint);
+        // Parameters to pass to OAuth 2.0 endpoint.
+        var params = {
+            'client_id': '755594120508-vajdss1hrkqi335sukhur5qaa70s5jji.apps.googleusercontent.com',
+            'redirect_uri': 'https://clowns-who-code.herokuapp.com',
+            'scope': 'https://www.googleapis.com/auth/drive.metadata.readonly',
+            'state': 'try_sample_request',
+            'include_granted_scopes': 'true',
+            'response_type': 'token'
+        };
+        // Add form parameters as hidden input values.
+        for (var p in params) {
+            var input = document.createElement('input');
+            input.setAttribute('type', 'hidden');
+            input.setAttribute('name', p);
+            input.setAttribute('value', params[p]);
+            form.appendChild(input);
+        }
+        // Add form to page and submit it to open the OAuth 2.0 endpoint.
+        document.body.appendChild(form);
+        form.submit();
+    };
+    ValidationForm.onSignIn = function (googleUser) {
+        // Useful data for your client-side scripts:
+        console.log(googleUser);
+        var profile = googleUser.getBasicProfile();
+        console.log("ID: " + profile.getId()); // Don't send this directly to your server!
+        console.log('Full Name: ' + profile.getName());
+        console.log('Given Name: ' + profile.getGivenName());
+        console.log('Family Name: ' + profile.getFamilyName());
+        console.log("Image URL: " + profile.getImageUrl());
+        console.log("Email: " + profile.getEmail());
+        // The ID token you need to pass to your backend:
+        var id_token = googleUser.getAuthResponse().id_token;
+        console.log("ID Token: " + id_token);
+    };
+    ValidationForm.onFailure = function () { console.error('Sign in has failed!'); };
     /**
      * The name of the DOM entry associated with NewEntryForm
      */
@@ -627,16 +698,6 @@ var ID;
 var userName;
 var validated = false;
 // Run some configuration code when the web page loads
-$.ajax({
-    type: "POST",
-    url: backendUrl + "/user",
-    dataType: "json",
-    data: JSON.stringify({ name: "Nico", password: "Beard" }),
-    success: function (data) {
-        ID = data.userId;
-        userName = data.name;
-    }
-});
 $(document).ready(function () {
     ValidationForm.refresh();
 });

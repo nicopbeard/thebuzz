@@ -3,13 +3,17 @@
     "version": "1.0.0",
     "description": "Web Front-End",
     "dependencies": {
-        "@types/jest": "^24.0.19",
+        "@types/jest": "^24.0.22",
         "@types/jquery": "^3.3.31",
         "bootstrap": "^3.4.1",
-        "handlebars": "^4.4.3",
+        "cors": "^2.8.5",
+        "handlebars": "^4.5.1",
         "http-server": "^0.11.1",
         "jasmine-core": "^3.5.0",
         "jquery": "^3.4.1",
-        "typescript": "^3.6.4"
+        "typescript": "^3.7.2"
+    },
+    "devDependencies": {
+        "@types/cors": "^2.8.6"
     }
 }
