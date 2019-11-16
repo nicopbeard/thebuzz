@@ -6,5 +6,6 @@
             <div id ="new-entry-input-footer">
                 <button type="button" class="btn btn-default" id="NewEntryForm-OK">OK</button>
                 <button type="button" class="btn btn-default" id="NewEntryForm-CLEAR">CLEAR</button>
+                <input type="file" id="docpicker" accept=".pdf">
             </div>
 </div>

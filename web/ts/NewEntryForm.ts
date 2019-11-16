@@ -63,25 +63,66 @@ class NewEntryForm {
         // that neither is empty
         let msg = "" + $("#" + NewEntryForm.NAME + "-message").val();
         let id = $(this).data("value");
+        
+        
+        //formData.append('senderId', id);
+        //formData.append('text', msg);
+        //formData.append('nUpVotes', '0');
+        //formData.append('nDownVotes', '0');
+
         if (msg === "") {
             window.alert("Error: title or message is not valid");
             return;
         }
+        
         $("#NewEntryForm-message").val("");
         // set up an AJAX post.  When the server replies, the result will go to
         // onSubmitResponse
-        $.ajax({
-            type: "POST",
-            url: backendUrl + "/messages",
-            dataType: "json",
-            data: JSON.stringify({ 
-                                    senderId: id, 
-                                    text: msg, 
-                                    nUpVotes: 0,
-                                    nDownVotes: 0}
-                                ),
-            success: NewEntryForm.onSubmitResponse
-        });
+        var fileData = null;
+        if((<HTMLInputElement>document.getElementById('docpicker')).files[0] != null){
+            var reader = new FileReader();
+            reader.readAsDataURL((<HTMLInputElement>document.getElementById('docpicker')).files[0]);
+            reader.onload = function() {
+
+                console.log("The data in the file is:");
+                console.log(reader.result);
+
+                $.ajax({
+                    type: "POST",
+                    url: backendUrl + "/messages",
+                    dataType: "json",
+                    data: JSON.stringify({ 
+                        senderId: id, 
+                        text: msg,
+                        nUpVotes: 0,
+                        nDownVotes: 0,
+                        fileName: 'fileName',
+                        file: reader.result
+                    }),
+                    processData: false,
+                    success: NewEntryForm.onSubmitResponse
+                });
+
+                (<HTMLInputElement>document.getElementById('docpicker')).value = '';
+            }
+        } else {
+
+            $.ajax({
+                type: "POST",
+                url: backendUrl + "/messages",
+                dataType: "json",
+                data: JSON.stringify({ 
+                    senderId: id, 
+                    text: msg,
+                    nUpVotes: 0,
+                    nDownVotes: 0,
+                    fileName: 'fileName',
+                    file: 'null'
+                }),
+                processData: false,
+                success: NewEntryForm.onSubmitResponse
+            });
+        }
     }
 
     /**

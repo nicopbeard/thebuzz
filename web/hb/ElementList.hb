@@ -7,6 +7,7 @@
             {{#each mData}}
             <tr>
                 <td>{{this.senderId}}</td>
+                <td>{{this.id}}</td>}
                 <td>{{this.text}}</td>
                 <td><button type="button" class="ElementList-upvotebtn btn-primary" data-value="{{this.id}}">
                     <span class="glyphicon glyphicon-thumbs-up"></span>
@@ -14,6 +15,9 @@
                 <td><button class="ElementList-downvotebtn btn-danger" data-value="{{this.id}}">
                     <span class="glyphicon glyphicon-thumbs-down"></span>
                     Dislike</button></td>
+                <td><button class="ElementList-linkMsgButton" data-value="{{this.linkMsg}}">
+                    <span class="glyphicon glyphicon-thumbs-down"></span>
+                    Link</button></td>
             </tr>
             {{/each}}
         </tbody>

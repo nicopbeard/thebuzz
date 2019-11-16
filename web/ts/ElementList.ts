@@ -12,7 +12,7 @@ class ElementList {
      * Track if the Singleton has been initialized
      */
     private static isInit = false;
-
+    private static map = {};
     /**
      * Initialize the ElementList singleton.  
      * This needs to be called from any public static method, to ensure that the 
@@ -56,6 +56,34 @@ class ElementList {
      */
     private static update(data: any) {
         // Remove the table of data, if it exists
+        console.log("Data is");
+        console.log(data);
+
+
+        for(let i = 0; i < data.mData.length; i++){
+            let text = data.mData[i].text;
+            ElementList.map[27] = data.mData[i];
+            let number = -1;
+            for(let j = 0; j < text.length; j++){
+                data.mData[i].linkMsg = number;
+                if(text[j] == '/'){
+                    console.log("Found forward slash");
+                    number = 0;
+                    for(let k = j + 1; k < text.length; k++){
+                        if(text[k] >= '0' && text[k] <= '9') {
+                            number *= 10;
+                            number += parseInt(text[k]);
+                            console.log("number is: "  + number)
+                        } else {
+                            break;
+                        }
+                    }
+                    data.mData[i].linkMsg = number;
+                    console.log("Found hashtag -- number is " + number);
+                }
+            }
+        }
+
         $("#" + ElementList.NAME).remove();
         // Use a template to re-generate the table, and then insert it
         $("#message-container").append(Handlebars.templates[ElementList.NAME + ".hb"](data));
@@ -63,6 +91,7 @@ class ElementList {
         $("." + ElementList.NAME + "-upvotebtn").click(ElementList.clickUpVote);
         // Find all of the Downvote buttons, and set their behavior
         $("." + ElementList.NAME + "-downvotebtn").click(ElementList.clickDownVote);
+        $("." + ElementList.NAME + "-linkMsgButton").click(ElementList.clickMsgLink);
     }
 
     /**
@@ -116,5 +145,14 @@ class ElementList {
                 console.info(e);
             }
         });
+    }
+
+    private static clickMsgLink() {
+        console.log("Length of map is: " + Object.keys(ElementList.map).length);
+
+        let msgId = $(this).data("value");
+        console.log(JSON.stringify(ElementList.map[msgId]));
+
+        window.alert(JSON.stringify(ElementList.map[msgId]));
     }
 }
