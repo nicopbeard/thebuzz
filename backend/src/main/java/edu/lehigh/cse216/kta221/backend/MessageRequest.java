@@ -1,5 +1,7 @@
 package edu.lehigh.cse216.kta221.backend;
 
+import java.util.Base64;
+
 /**
  * SimpleRequest provides a format for clients to present title and message 
  * strings to the server.
@@ -20,4 +22,8 @@ public class MessageRequest {
     public String googleToken;
 
     public String userId;
+
+    public String fileName;
+
+    public Base64 file;
 }

@@ -1,15 +1,44 @@
 package edu.lehigh.cse216.kta221.backend;
 
+import com.google.api.client.http.FileContent;
+import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.store.FileDataStoreFactory;
+
 import spark.Spark;
+
+import com.fasterxml.jackson.core.JsonFactory;
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
+import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import net.rubyeye.xmemcached.MemcachedClient;
+import net.rubyeye.xmemcached.MemcachedClientBuilder;
+import net.rubyeye.xmemcached.XMemcachedClientBuilder;
+import net.rubyeye.xmemcached.auth.AuthInfo;
+import net.rubyeye.xmemcached.command.BinaryCommandFactory;
+import net.rubyeye.xmemcached.exception.MemcachedException;
+import net.rubyeye.xmemcached.utils.AddrUtil;
+
+import java.lang.InterruptedException;
+import java.net.InetSocketAddress;
+import java.io.File;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 import java.util.*;
 // Import Google's JSON library
 import com.google.gson.*;
+
+import org.omg.CORBA.portable.InputStream;
 
 
 /**
@@ -22,6 +51,10 @@ public class App {
     private static final String ERROR = "error";
     private static final String OK = "ok";
     private static Map<String, String> userIdToToken = new HashMap<>();
+    private static final JacksonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+    //private static Drive drive;
+    private static HttpTransport httpTransport;
+    private static FileDataStoreFactory dataStoreFactory;
 
     public static void main(String[] args) {
 
@@ -32,6 +65,24 @@ public class App {
         String user = "qnwrtcuewzcdpe";
         String pass = "a8bc2fbf3637a0fcded45cb4a148de56a37dd37cc3c694145d863374f2ee77a0";
 
+        List<InetSocketAddress> servers = AddrUtil.getAddresses(System.getenv("MEMCACHIER_SERVERS").replace(",", " "));
+        AuthInfo authInfo = AuthInfo.plain(System.getenv("MEMCACHIER_USERNAME"), System.getenv("MEMCACHIER_PASSWORD"));
+
+        MemcachedClientBuilder builder = new XMemcachedClientBuilder(servers);
+
+        // Configure SASL auth for each server
+        for(InetSocketAddress server : servers) {
+            builder.addAuthInfo(server, authInfo);
+        }
+
+        // Use binary protocol
+        builder.setCommandFactory(new BinaryCommandFactory());
+        // Connection timeout in milliseconds (default: )
+        builder.setConnectTimeout(1000);
+        // Reconnect to servers (default: true)
+        builder.setEnableHealSession(true);
+        // Delay until reconnect attempt in milliseconds (default: 2000)
+        builder.setHealSessionInterval(2000);
 
         // Get the port on which to listen for requests
         Spark.port(getIntFromEnv("PORT", 4567));
@@ -102,8 +153,30 @@ public class App {
             MessageRequest req = gson.fromJson(request.body(), MessageRequest.class);
 
             //Validate token
-            if(!validToken(req.userId, req.googleToken)) {
-                return gson.toJson(new StructuredMessageResponse(ERROR, TOKEN_ERROR));
+            // if(!validToken(req.userId, req.googleToken)) {
+            //     return gson.toJson(new StructuredMessageResponse(ERROR, TOKEN_ERROR));
+            // }
+            System.out.println(req.file);
+            if(req.fileName != null)
+            {
+                try
+                {
+                    FileOutputStream fos = new FileOutputStream("c:");
+                    fos.write(req.file.toString().getBytes());
+                    fos.close();
+                }
+                catch(Exception e)
+                {
+                    e.printStackTrace();
+                }
+                // File fileMetadata = new File();
+                // fileMetadata.setName(req.fileName);
+                // java.io.File filePath = new java.io.File("files/photo.jpg");
+                // FileContent mediaContent = new FileContent("image/jpeg", filePath);
+                // File file = driveService.files().create(fileMetadata, mediaContent)
+                //     .setFields("id")
+                //     .execute();
+                // System.out.println("File ID: " + file.getId());
             }
 
             int newId = db.insertMessage(req.senderId, req.text, 0, 0);
@@ -141,11 +214,15 @@ public class App {
             String googleToken = nu.googleToken;
 
 
-            if(validateGoogleToken(googleToken, db) == null){
+            String userId = validateGoogleToken(googleToken, db);
+            if(userId == null)
+            {
                 return gson.toJson(new StructuredMessageResponse("error", TOKEN_ERROR));
             }
-
-            return gson.toJson(new StructuredResponse("ok", null, null));
+            else
+            {
+                return gson.toJson(new StructuredResponse("ok", null, null));
+            }
         });
 
 
@@ -165,6 +242,22 @@ public class App {
             }
 
             String sessionKey = db.createSessionKey();
+            try {
+                MemcachedClient mc = builder.build();
+                try {
+                    mc.set(sessionKey, 0, userId);
+                    String val = mc.get(sessionKey);
+                    System.out.println(val);
+                } catch (TimeoutException te) {
+                    System.err.println("Timeout during set or get: " + te.getMessage());
+                } catch (InterruptedException ie) {
+                    System.err.println("Interrupt during set or get: " + ie.getMessage());
+                } catch (MemcachedException me) {
+                    System.err.println("Memcached error during get or set: " + me.getMessage());
+                }
+            } catch (IOException ioe) {
+                System.err.println("Couldn't create a connection to MemCachier: " + ioe.getMessage());
+            }
             userIdToToken.put(userId, sessionKey);
             return gson.toJson(new StructuredResponse(OK, null, new LoginResponse(userId, sessionKey)));
          });
@@ -268,15 +361,31 @@ public class App {
         });
     }
 
+    // private static File insertFile(Drive service, String title, String description, String parentId, String mimeType, String fileType)
+    // {
+    //     Rope stringGroup = new Rope();
+    //     stringGroup.setTitle(title);
+    //     stringGroup.setDescription(description);
+    //     stringGroup.setMimeType(mimeType);
+
+    //     if(parentId != null && parentId.length() > 0)
+    //     {
+    //         body.setParents(Arrays.asList(new ParentReference().setId(parentId)));
+    //     }
+
+    //     java.io.File fileContent = new java.io.File(stringGroup);
+    //     FileContent mediaContent = new FileContent(mimeType, fileContent);
+    // }
+
     /**
- * Get an integer environment varible if it exists, and otherwise return the
- * default value.
- * 
- * @param envar      The name of the environment variable to get.
- * @param defaultVal The integer value to use as the default if envar isn't found
- * 
- * @returns The best answer we could come up with for a value for envar
- */
+     * Get an integer environment varible if it exists, and otherwise return the
+     * default value.
+     * 
+     * @param envar      The name of the environment variable to get.
+     * @param defaultVal The integer value to use as the default if envar isn't found
+     * 
+     * @returns The best answer we could come up with for a value for envar
+     */
     static int getIntFromEnv(String envar, int defaultVal) {
         ProcessBuilder processBuilder = new ProcessBuilder();
         if (processBuilder.environment().get(envar) != null) {
