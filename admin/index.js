@@ -90,7 +90,7 @@ function listFiles(auth) {
       }, (err, res) => {
         if (err) return console.log('The API returned an error: ' + err);
         const files = res.data.files;
-        console.log(files);
+        // console.log(files);
         if (files.length) {
           console.log('Files:');
           files.map((file) => {
@@ -119,7 +119,7 @@ function listFilesSize(auth) {
         }, (err, res) => {
           if (err) return console.log('The API returned an error: ' + err);
           const files = res.data.files;
-          console.log(files);
+        //   console.log(files);
           if (files.length) {
             files.map((file) => {
                 console.log(`[FILE NAME]: ${file.name}  (${file.id}) `);
