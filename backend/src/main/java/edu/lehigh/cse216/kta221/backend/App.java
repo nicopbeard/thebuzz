@@ -1,19 +1,25 @@
 package edu.lehigh.cse216.kta221.backend;
 
 import com.google.api.client.http.FileContent;
-import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.InputStreamContent;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
-
+import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.DriveScopes;
+import com.google.api.services.drive.model.File;
+import java.util.Base64;
 import spark.Spark;
+import java.io.InputStream;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
+import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientBuilder;
@@ -25,10 +31,10 @@ import net.rubyeye.xmemcached.utils.AddrUtil;
 
 import java.lang.InterruptedException;
 import java.net.InetSocketAddress;
-import java.io.File;
-import java.io.BufferedReader;
+import java.nio.charset.StandardCharsets;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
@@ -37,8 +43,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.*;
 // Import Google's JSON library
 import com.google.gson.*;
-
-import org.omg.CORBA.portable.InputStream;
 
 
 /**
@@ -51,10 +55,12 @@ public class App {
     private static final String ERROR = "error";
     private static final String OK = "ok";
     private static Map<String, String> userIdToToken = new HashMap<>();
+    //private static FileDataStoreFactory dataStoreFactory;
+    private static final List<String> SCOPES = Collections.singletonList(DriveScopes.DRIVE_METADATA_READONLY);
+    private static final String CREDENTIALS_FILE_PATH = "/src/main/resources/web/credentials.json";
+    private static final String APPLICATION_NAME = "Clowns-Who-Code";
     private static final JacksonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
-    //private static Drive drive;
-    private static HttpTransport httpTransport;
-    private static FileDataStoreFactory dataStoreFactory;
+    private static final String TOKENS_DIRECTORY_PATH = "tokens";
 
     public static void main(String[] args) {
 
@@ -161,22 +167,25 @@ public class App {
             {
                 try
                 {
-                    FileOutputStream fos = new FileOutputStream("c:");
-                    fos.write(req.file.toString().getBytes());
-                    fos.close();
+                    byte[] decodedBytes = Base64.getDecoder().decode((req.file).toString().getBytes(StandardCharsets.UTF_8));
+                    InputStream inputStream = new ByteArrayInputStream(decodedBytes);
+                    final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+                    Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+                        .setApplicationName(APPLICATION_NAME)
+                        .build();
+                    File fileMetadata = new File();
+                    String fileType = req.fileName.substring(req.fileName.lastIndexOf(".") + 1);
+                    fileMetadata.setName(req.fileName);
+                    InputStreamContent mediaContent = new InputStreamContent(fileType, inputStream);
+                    File file = service.files().create(fileMetadata, mediaContent)
+                        .setFields("id")
+                        .execute();
+                    System.out.println("File ID: " + file.getId());
                 }
                 catch(Exception e)
                 {
                     e.printStackTrace();
                 }
-                // File fileMetadata = new File();
-                // fileMetadata.setName(req.fileName);
-                // java.io.File filePath = new java.io.File("files/photo.jpg");
-                // FileContent mediaContent = new FileContent("image/jpeg", filePath);
-                // File file = driveService.files().create(fileMetadata, mediaContent)
-                //     .setFields("id")
-                //     .execute();
-                // System.out.println("File ID: " + file.getId());
             }
 
             int newId = db.insertMessage(req.senderId, req.text, 0, 0);
@@ -361,21 +370,68 @@ public class App {
         });
     }
 
-    // private static File insertFile(Drive service, String title, String description, String parentId, String mimeType, String fileType)
-    // {
-    //     Rope stringGroup = new Rope();
-    //     stringGroup.setTitle(title);
-    //     stringGroup.setDescription(description);
-    //     stringGroup.setMimeType(mimeType);
+    /**
+   * Insert new file.
+   *
+   * @param service Drive API service instance.
+   * @param title Title of the file to insert, including the extension.
+   * @param description Description of the file to insert.
+   * @param parentId Optional parent folder's ID.
+   * @param mimeType MIME type of the file to insert.
+   * @param filename Filename of the file to insert.
+   * @return Inserted file metadata if successful, {@code null} otherwise.
+   */
+    // private static File insertFile(Drive service, String title, String description, String parentId, String mimeType, String filename) {
+    //     // File's metadata.
+    //     File body = new File();
+    //     body.setTitle(title);
+    //     body.setDescription(description);
+    //     body.setMimeType(mimeType);
 
-    //     if(parentId != null && parentId.length() > 0)
-    //     {
+    //     // Set the parent folder.
+    //     if (parentId != null && parentId.length() > 0) {
     //         body.setParents(Arrays.asList(new ParentReference().setId(parentId)));
     //     }
 
-    //     java.io.File fileContent = new java.io.File(stringGroup);
+    //     // File's content.
+    //     java.io.File fileContent = new java.io.File(filename);
     //     FileContent mediaContent = new FileContent(mimeType, fileContent);
+    //     try {
+    //         File file = service.files().insert(body, mediaContent).execute();
+
+    //         // Uncomment the following line to print the File ID.
+    //         //System.out.println("File ID: " + file.getId());
+
+    //         return file;
+    //     } catch (IOException e) {
+    //         System.out.println("An error occurred: " + e);
+    //         return null;
+    //     }
     // }
+
+    /**
+     * Creates an authorized Credential object.
+     * @param HTTP_TRANSPORT The network HTTP Transport.
+     * @return An authorized Credential object.
+     * @throws IOException If the credentials.json file cannot be found.
+     */
+    private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
+        // Load client secrets.
+        InputStream in = (InputStream) App.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
+        if (in == null) {
+            throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
+        }
+        GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
+
+        // Build flow and trigger user authorization request.
+        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
+                HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
+                .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
+                .setAccessType("offline")
+                .build();
+        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
+        return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
+    }
 
     /**
      * Get an integer environment varible if it exists, and otherwise return the
