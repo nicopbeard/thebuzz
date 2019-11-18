@@ -18,6 +18,9 @@
                 <td><button class="ElementList-linkMsgButton" data-value="{{this.linkMsg}}">
                     <span class="glyphicon glyphicon-thumbs-down"></span>
                     Link</button></td>
+                <td><button class="ElementList-fileButton" data-value="{{this.linkMsg}}">
+                    <span class="glyphicon glyphicon-thumbs-down"></span>
+                    File</button></td>
             </tr>
             {{/each}}
         </tbody>

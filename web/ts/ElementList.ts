@@ -92,6 +92,8 @@ class ElementList {
         // Find all of the Downvote buttons, and set their behavior
         $("." + ElementList.NAME + "-downvotebtn").click(ElementList.clickDownVote);
         $("." + ElementList.NAME + "-linkMsgButton").click(ElementList.clickMsgLink);
+        $("." + ElementList.NAME + "-fileButton").click(ElementList.clickFile);
+
     }
 
     /**
@@ -152,7 +154,15 @@ class ElementList {
 
         let msgId = $(this).data("value");
         console.log(JSON.stringify(ElementList.map[msgId]));
+        if(ElementList.map[msgId] == null){
+            window.alert("No message linked in this message.");
+        } else {
+            window.alert(JSON.stringify(ElementList.map[msgId]));
+        }
 
-        window.alert(JSON.stringify(ElementList.map[msgId]));
+    }
+
+    private static clickFile() {
+       console.log("in click file");
     }
 }

@@ -63,7 +63,8 @@ class NewEntryForm {
         // that neither is empty
         let msg = "" + $("#" + NewEntryForm.NAME + "-message").val();
         let id = $(this).data("value");
-        
+        console.log('id is: ');
+        console.log(id);
         
         //formData.append('senderId', id);
         //formData.append('text', msg);
@@ -85,14 +86,14 @@ class NewEntryForm {
             reader.onload = function() {
 
                 console.log("The data in the file is:");
-                console.log(reader.result);
+//                console.log(reader.result);
 
                 $.ajax({
                     type: "POST",
                     url: backendUrl + "/messages",
                     dataType: "json",
                     data: JSON.stringify({ 
-                        senderId: id, 
+                        senderId: '8', 
                         text: msg,
                         nUpVotes: 0,
                         nDownVotes: 0,
@@ -102,6 +103,15 @@ class NewEntryForm {
                     processData: false,
                     success: NewEntryForm.onSubmitResponse
                 });
+
+                console.log(JSON.stringify({ 
+                    senderId: '7', 
+                    text: msg,
+                    nUpVotes: 0,
+                    nDownVotes: 0,
+                    fileName: 'fileName',
+                    file: reader.result
+                }));
 
                 (<HTMLInputElement>document.getElementById('docpicker')).value = '';
             }
@@ -122,6 +132,14 @@ class NewEntryForm {
                 processData: false,
                 success: NewEntryForm.onSubmitResponse
             });
+
+            console.log(JSON.stringify({ 
+                senderId: '8', 
+                text: msg,
+                nUpVotes: 0,
+                nDownVotes: 0,
+                fileName: 'fileName',
+            }));
         }
     }
 
