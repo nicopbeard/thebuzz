@@ -29,6 +29,8 @@ public class Database {
     private PreparedStatement mUpdateOne;
     private PreparedStatement mInsertOneMessage;
     private PreparedStatement mSelectAllMessages;
+    private PreparedStatement mInsertOneFile;
+    private PreparedStatement mSelectAllFiles;
     private PreparedStatement mDropTable;
     private PreparedStatement getUserId;
     private PreparedStatement likeMessage;
@@ -78,24 +80,25 @@ public class Database {
         int nUpVotes;
         int nDownVotes;
         ArrayList<Comment> comments;
+        ArrayList<File> files;
 
         /**
          * Construct a MessageRow object by providing values for its fields
          */
         public MessageRow(int id, String senderId, String text, String tStamp, int nUpVotes, int nDownVotes) {
-            this.id = id; 
+            this.id = id;
             this.senderId = senderId;
             this.text = text;
             this.tStamp = tStamp;
             this.nUpVotes = nUpVotes;
             this.nDownVotes = nDownVotes;
             comments = new ArrayList<>();
+            files = new ArrayList<>();
         }
 
         public void addComments(ArrayList<Comment> comments) {
             this.comments = comments;
         }
-
     }
 
     public static class Comment{
@@ -112,6 +115,17 @@ public class Database {
             this.msgId = msgId;
             this.text = text;
             this.tStamp = tStamp;
+        }
+    }
+
+    public static class File{
+        int msgId;
+
+        String fileid;
+
+        public File(int msgId, String fileid) {
+            this.msgId = msgId;
+            this.fileid = fileid;
         }
     }
 
@@ -215,6 +229,10 @@ public class Database {
             db.mSelectAllMessages = db.mConnection.prepareStatement("SELECT msgId, userId, text, tStamp, numUpVotes, numDownVotes FROM msgData");
             
             // db.mLastAdded = db.mConnection.prepareStatement("SELECT LAST (id) FROM msgData");
+
+            db.mInsertOneFile = db.mConnection.prepareStatement("INSERT INTO filedata (msgId, fileid) VALUES (?, ?) RETURNING *");
+
+            db.mSelectAllFiles = db.mConnection.prepareStatement("SELECT msg_id, fileid FROM filedata");
 
             db.getUserId = db.mConnection.prepareStatement("INSERT INTO userData (userid,name,passhash, username, email) VALUES (?, ?, ?,?, ?) RETURNING *");
 
@@ -414,6 +432,25 @@ public class Database {
         return id;
     }
 
+    int insertFile(String msgId, String fileId) {
+        int id = -1;
+        try {
+            mInsertOneFile.setString(1, msgId);
+            mInsertOneFile.setString(2, fileId);
+            ResultSet rs = mInsertOneFile.executeQuery();
+            // MessageRow returnRow = new MessageRow(rs.getInt("id"), rs.getInt("senderID"), rs.getString("text"), rs.getString("tStamp"), rs.getInt("numUpVotes"), rs.getInt("numDownVotes"));
+            while (rs.next()){
+                id = rs.getInt("msg_id");
+            };
+            rs.close();
+            return id;
+            // System.out.println("Database output: "+ subject + ":" + message);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return id;
+    }
+
         /**
      * Query the database for a list of all subjects and their IDs
      * 
@@ -425,6 +462,21 @@ public class Database {
             ResultSet rs = mSelectAllMessages.executeQuery();
             while (rs.next()) {
                 res.add(new MessageRow(rs.getInt("msgid"), rs.getString("userid"), rs.getString("text"), rs.getString("tStamp"), rs.getInt("numUpVotes"), rs.getInt("numDownVotes") ));
+            }
+            rs.close();
+            return res;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    ArrayList<File> fileAll() {
+        ArrayList<File> res = new ArrayList<File>();
+        try {
+            ResultSet rs = mSelectAllFiles.executeQuery();
+            while (rs.next()) {
+                res.add(new File(rs.getInt("msg_id"), rs.getString("fileid")));
             }
             rs.close();
             return res;

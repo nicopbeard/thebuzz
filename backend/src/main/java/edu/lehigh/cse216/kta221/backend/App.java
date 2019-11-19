@@ -1,16 +1,25 @@
 package edu.lehigh.cse216.kta221.backend;
 
-import com.google.api.client.http.InputStreamContent;
-import com.google.api.client.http.javanet.NetHttpTransport;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeoutException;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
-import com.google.api.services.drive.Drive;
-import com.google.api.services.drive.DriveScopes;
-import com.google.api.services.drive.model.File;
-import java.util.Base64;
-import spark.Spark;
-import java.io.InputStream;
-
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
@@ -18,8 +27,19 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.InputStreamContent;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.DriveScopes;
+import com.google.api.services.drive.model.File;
+import com.google.common.util.concurrent.Service;
+// Import Google's JSON library
+import com.google.gson.Gson;
+
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
@@ -27,20 +47,7 @@ import net.rubyeye.xmemcached.auth.AuthInfo;
 import net.rubyeye.xmemcached.command.BinaryCommandFactory;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.utils.AddrUtil;
-
-import java.lang.InterruptedException;
-import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
-import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.List;
-import java.util.concurrent.TimeoutException;
-
-import java.util.*;
-// Import Google's JSON library
-import com.google.gson.*;
+import spark.Spark;
 
 
 /**
@@ -54,10 +61,10 @@ public class App {
     private static final String OK = "ok";
     private static Map<String, String> userIdToToken = new HashMap<>();
     //private static FileDataStoreFactory dataStoreFactory;
-    private static final List<String> SCOPES = Collections.singletonList(DriveScopes.DRIVE_METADATA_READONLY);
-    private static final String CREDENTIALS_FILE_PATH = "/src/main/resources/web/credentials.json";
+    private static final List<String> SCOPES = Arrays.asList(DriveScopes.DRIVE);
+    private static final String CREDENTIALS_FILE_PATH = "/credentials.json";
     private static final String APPLICATION_NAME = "Clowns-Who-Code";
-    private static final JacksonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+    private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final String TOKENS_DIRECTORY_PATH = "tokens";
 
     public static void main(String[] args) {
@@ -132,6 +139,7 @@ public class App {
 
             ArrayList<Database.MessageRow> messages = db.messageAll();
             Hashtable<Integer, ArrayList<Database.Comment>> comments = db.commentAll();
+            ArrayList<Database.File> files = db.fileAll();
             for(ArrayList<Database.Comment> comment: comments.values()){
                 for(Database.Comment comm: comment) {
                     System.out.println("comment id: " + comm.commentId + ". It's msgId is " + comm.msgId);
@@ -142,6 +150,19 @@ public class App {
                 if(comments.containsKey(msg.id)){
                     msg.addComments(comments.get(msg.id));
                 }
+                if(files.contains(msg.id)) {
+                    try {
+                        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+                        Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT)).setApplicationName(APPLICATION_NAME).build();
+                        String fileId = files.get(msg.id).fileid;
+                        File file = service.files().get(fileId).execute();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            for(Database.File file: files) {
+                System.out.println("Message id is: " + file.msgId);
             }
 
             return gson.toJson(new StructuredResponse(status, null, status.equals(OK)? messages : null));
@@ -164,23 +185,25 @@ public class App {
             {
                 try
                 {
-                    byte[] decodedBytes = Base64.getDecoder().decode((req.file).toString().getBytes(StandardCharsets.UTF_8));
-                    InputStream inputStream = new ByteArrayInputStream(decodedBytes);
-                    final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-                    Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
-                        .setApplicationName(APPLICATION_NAME)
-                        .build();
-                    File fileMetadata = new File();
                     String fileType = req.fileName.substring(req.fileName.lastIndexOf(".") + 1);
+                    byte[] decodedBytes = Base64.getDecoder().decode(req.file.getBytes());
+                    System.out.println(decodedBytes);
+                    FileOutputStream fos = new FileOutputStream(req.fileName);
+                    fos.write(decodedBytes);
+                    fos.close();
+                    final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+                    Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT)).setApplicationName(APPLICATION_NAME).build();
+                    InputStream inputStream = new ByteArrayInputStream(decodedBytes);
+                    File fileMetadata = new File();
                     fileMetadata.setName(req.fileName);
                     InputStreamContent mediaContent = new InputStreamContent(fileType, inputStream);
-                    File file = service.files().create(fileMetadata, mediaContent)
-                        .setFields("id")
-                        .execute();
+                    File file = service.files().create(fileMetadata, mediaContent).setFields("id").execute();
                     System.out.println("File ID: " + file.getId());
+                    //db.insertFile(msgId, file.getId());
                 }
                 catch(Exception e)
                 {
+                    System.out.println(e);
                     e.printStackTrace();
                 }
             }

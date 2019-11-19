@@ -25,5 +25,5 @@ public class MessageRequest {
 
     public String fileName;
 
-    public Base64 file;
+    public String file;
 }
