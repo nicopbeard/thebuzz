@@ -80,7 +80,7 @@ public class Database {
         int nUpVotes;
         int nDownVotes;
         ArrayList<Comment> comments;
-        ArrayList<File> files;
+        com.google.api.services.drive.model.File file;
 
         /**
          * Construct a MessageRow object by providing values for its fields
@@ -93,11 +93,14 @@ public class Database {
             this.nUpVotes = nUpVotes;
             this.nDownVotes = nDownVotes;
             comments = new ArrayList<>();
-            files = new ArrayList<>();
         }
 
         public void addComments(ArrayList<Comment> comments) {
             this.comments = comments;
+        }
+
+        public void addFiles(com.google.api.services.drive.model.File file) {
+            this.file = file;
         }
     }
 
@@ -432,13 +435,12 @@ public class Database {
         return id;
     }
 
-    int insertFile(String msgId, String fileId) {
+    int insertFile(int msgId, String fileId) {
         int id = -1;
         try {
-            mInsertOneFile.setString(1, msgId);
+            mInsertOneFile.setInt(1, msgId);
             mInsertOneFile.setString(2, fileId);
             ResultSet rs = mInsertOneFile.executeQuery();
-            // MessageRow returnRow = new MessageRow(rs.getInt("id"), rs.getInt("senderID"), rs.getString("text"), rs.getString("tStamp"), rs.getInt("numUpVotes"), rs.getInt("numDownVotes"));
             while (rs.next()){
                 id = rs.getInt("msg_id");
             };

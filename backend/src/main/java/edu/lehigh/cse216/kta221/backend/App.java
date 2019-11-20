@@ -1,18 +1,17 @@
 package edu.lehigh.cse216.kta221.backend;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -29,14 +28,12 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.http.InputStreamContent;
+import com.google.api.client.http.FileContent;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
-import com.google.common.util.concurrent.Service;
 // Import Google's JSON library
 import com.google.gson.Gson;
 
@@ -49,7 +46,6 @@ import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 import spark.Spark;
 
-
 /**
  * For now, our app creates an HTTP server that can only get and add data.
  */
@@ -60,8 +56,8 @@ public class App {
     private static final String ERROR = "error";
     private static final String OK = "ok";
     private static Map<String, String> userIdToToken = new HashMap<>();
-    //private static FileDataStoreFactory dataStoreFactory;
-    private static final List<String> SCOPES = Arrays.asList(DriveScopes.DRIVE);
+    // private static FileDataStoreFactory dataStoreFactory;
+    private static final List<String> SCOPES = Collections.singletonList(DriveScopes.DRIVE_FILE);
     private static final String CREDENTIALS_FILE_PATH = "/credentials.json";
     private static final String APPLICATION_NAME = "Clowns-Who-Code";
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
@@ -71,7 +67,7 @@ public class App {
 
         Map<String, String> env = System.getenv();
         String ip = "ec2-174-129-220-12.compute-1.amazonaws.com";
-        //String ip = "localhost";
+        // String ip = "localhost";
         String port = "5432";
         String user = "qnwrtcuewzcdpe";
         String pass = "a8bc2fbf3637a0fcded45cb4a148de56a37dd37cc3c694145d863374f2ee77a0";
@@ -82,7 +78,7 @@ public class App {
         MemcachedClientBuilder builder = new XMemcachedClientBuilder(servers);
 
         // Configure SASL auth for each server
-        for(InetSocketAddress server : servers) {
+        for (InetSocketAddress server : servers) {
             builder.addAuthInfo(server, authInfo);
         }
 
@@ -97,17 +93,19 @@ public class App {
 
         // Get the port on which to listen for requests
         Spark.port(getIntFromEnv("PORT", 4567));
-        // NB: Gson is thread-safe.  See
+        // NB: Gson is thread-safe. See
         // https://stackoverflow.com/questions/10380835/is-it-ok-to-use-gson-instance-as-a-static-field-in-a-model-bean-reuse
         final Gson gson = new Gson();
 
         System.out.println(ip + " " + port + " " + user + " " + pass);
         Database db = Database.getDatabase(ip, port, user, pass);
-        if(db == null) { return; }
+        if (db == null) {
+            return;
+        }
         System.out.println("Connected to db");
 
-        // Set up the location for serving static files.  If the STATIC_LOCATION
-        // environment variable is set, we will serve from it.  Otherwise, serve
+        // Set up the location for serving static files. If the STATIC_LOCATION
+        // environment variable is set, we will serve from it. Otherwise, serve
         // from "/web"
         String static_location_override = System.getenv("STATIC_LOCATION");
         if (static_location_override == null) {
@@ -124,7 +122,7 @@ public class App {
             return "";
         });
 
-        //GET route for all messages and associated comments
+        // GET route for all messages and associated comments
         Spark.get("/messages", (request, response) -> {
             response.status(200);
             response.type("application/json");
@@ -133,43 +131,45 @@ public class App {
 
             String status = OK;
 
-          //  if(!validToken(req.userId, req.googleToken)) {
-           //     status = ERROR;
-           // }
+            // if(!validToken(req.userId, req.googleToken)) {
+            // status = ERROR;
+            // }
 
             ArrayList<Database.MessageRow> messages = db.messageAll();
             Hashtable<Integer, ArrayList<Database.Comment>> comments = db.commentAll();
             ArrayList<Database.File> files = db.fileAll();
-            for(ArrayList<Database.Comment> comment: comments.values()){
-                for(Database.Comment comm: comment) {
+            for (ArrayList<Database.Comment> comment : comments.values()) {
+                for (Database.Comment comm : comment) {
                     System.out.println("comment id: " + comm.commentId + ". It's msgId is " + comm.msgId);
                 }
             }
-            for(Database.MessageRow msg: messages) {
+            for (Database.MessageRow msg : messages) {
                 System.out.println("Message id is: " + msg.id);
-                if(comments.containsKey(msg.id)){
+                if (comments.containsKey(msg.id)) {
                     msg.addComments(comments.get(msg.id));
                 }
-                if(files.contains(msg.id)) {
+                if (files.contains(msg.id)) {
                     try {
                         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-                        Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT)).setApplicationName(APPLICATION_NAME).build();
+                        Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+                                .setApplicationName(APPLICATION_NAME).build();
                         String fileId = files.get(msg.id).fileid;
                         File file = service.files().get(fileId).execute();
+                        msg.addFiles(file);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
             }
-            for(Database.File file: files) {
+            for (Database.File file : files) {
                 System.out.println("Message id is: " + file.msgId);
             }
 
-            return gson.toJson(new StructuredResponse(status, null, status.equals(OK)? messages : null));
+            return gson.toJson(new StructuredResponse(status, null, status.equals(OK) ? messages : null));
         });
 
         // JSON from the body of the request, turn it into a SimpleRequest
-        // object, extract the title and message, insert them, and return the 
+        // object, extract the title and message, insert them, and return the
         // ID of the newly created row.
         Spark.post("/messages", (request, response) -> {
             response.status(200);
@@ -177,29 +177,31 @@ public class App {
 
             MessageRequest req = gson.fromJson(request.body(), MessageRequest.class);
 
-            //Validate token
+            int newId = db.insertMessage(req.senderId, req.text, 0, 0);
+
+            // Validate token
             // if(!validToken(req.userId, req.googleToken)) {
-            //     return gson.toJson(new StructuredMessageResponse(ERROR, TOKEN_ERROR));
+            // return gson.toJson(new StructuredMessageResponse(ERROR, TOKEN_ERROR));
             // }
-            if(req.fileName != null)
-            {
-                try
-                {
-                    String fileType = req.fileName.substring(req.fileName.lastIndexOf(".") + 1);
-                    byte[] decodedBytes = Base64.getDecoder().decode(req.file.getBytes());
-                    System.out.println(decodedBytes);
+            if (req.fileName != null) {
+                try {
+                    String encBytyes = req.file.substring(req.file.lastIndexOf(",") + 1);
+                    byte[] decodedBytes = Base64.getDecoder().decode(encBytyes.getBytes());
                     FileOutputStream fos = new FileOutputStream(req.fileName);
                     fos.write(decodedBytes);
                     fos.close();
                     final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
                     Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT)).setApplicationName(APPLICATION_NAME).build();
                     InputStream inputStream = new ByteArrayInputStream(decodedBytes);
+                    String mimeType = URLConnection.guessContentTypeFromStream(inputStream);
+                    System.out.println(mimeType);
                     File fileMetadata = new File();
                     fileMetadata.setName(req.fileName);
-                    InputStreamContent mediaContent = new InputStreamContent(fileType, inputStream);
+                    java.io.File filePath = new java.io.File(req.fileName);
+                    FileContent mediaContent = new FileContent(mimeType, filePath);
                     File file = service.files().create(fileMetadata, mediaContent).setFields("id").execute();
                     System.out.println("File ID: " + file.getId());
-                    //db.insertFile(msgId, file.getId());
+                    //db.insertFile(newId, file.getId());
                 }
                 catch(Exception e)
                 {
@@ -207,8 +209,6 @@ public class App {
                     e.printStackTrace();
                 }
             }
-
-            int newId = db.insertMessage(req.senderId, req.text, 0, 0);
 
             //NB: createEntry checks for null title and message
             if (newId == UPDATE_ERROR) {
@@ -405,8 +405,7 @@ public class App {
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
         // Build flow and trigger user authorization request.
-        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-                HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
+        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
                 .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
                 .setAccessType("offline")
                 .build();
