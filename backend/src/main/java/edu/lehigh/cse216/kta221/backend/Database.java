@@ -233,7 +233,7 @@ public class Database {
             
             // db.mLastAdded = db.mConnection.prepareStatement("SELECT LAST (id) FROM msgData");
 
-            db.mInsertOneFile = db.mConnection.prepareStatement("INSERT INTO filedata (msgId, fileid) VALUES (?, ?) RETURNING *");
+            db.mInsertOneFile = db.mConnection.prepareStatement("INSERT INTO filedata (msgid, fileid) VALUES (?, ?) RETURNING *");
 
             db.mSelectAllFiles = db.mConnection.prepareStatement("SELECT msg_id, fileid FROM filedata");
 
@@ -442,7 +442,7 @@ public class Database {
             mInsertOneFile.setString(2, fileId);
             ResultSet rs = mInsertOneFile.executeQuery();
             while (rs.next()){
-                id = rs.getInt("msg_id");
+                id = rs.getInt("msgid");
             };
             rs.close();
             return id;

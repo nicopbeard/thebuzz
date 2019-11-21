@@ -201,7 +201,7 @@ public class App {
                     FileContent mediaContent = new FileContent(mimeType, filePath);
                     File file = service.files().create(fileMetadata, mediaContent).setFields("id").execute();
                     System.out.println("File ID: " + file.getId());
-                    //db.insertFile(newId, file.getId());
+                    db.insertFile(newId, file.getId());
                 }
                 catch(Exception e)
                 {
