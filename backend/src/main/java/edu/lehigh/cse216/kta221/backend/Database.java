@@ -235,7 +235,7 @@ public class Database {
 
             db.mInsertOneFile = db.mConnection.prepareStatement("INSERT INTO filedata (msgid, fileid) VALUES (?, ?) RETURNING *");
 
-            db.mSelectAllFiles = db.mConnection.prepareStatement("SELECT msg_id, fileid FROM filedata");
+            db.mSelectAllFiles = db.mConnection.prepareStatement("SELECT msgid, fileid FROM filedata");
 
             db.getUserId = db.mConnection.prepareStatement("INSERT INTO userData (userid,name,passhash, username, email) VALUES (?, ?, ?,?, ?) RETURNING *");
 
@@ -478,7 +478,7 @@ public class Database {
         try {
             ResultSet rs = mSelectAllFiles.executeQuery();
             while (rs.next()) {
-                res.add(new File(rs.getInt("msg_id"), rs.getString("fileid")));
+                res.add(new File(rs.getInt("msgid"), rs.getString("fileid")));
             }
             rs.close();
             return res;

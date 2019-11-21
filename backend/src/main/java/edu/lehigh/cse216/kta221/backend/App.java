@@ -151,8 +151,7 @@ public class App {
                 if (files.contains(msg.id)) {
                     try {
                         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-                        Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
-                                .setApplicationName(APPLICATION_NAME).build();
+                        Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT)).setApplicationName(APPLICATION_NAME).build();
                         String fileId = files.get(msg.id).fileid;
                         File file = service.files().get(fileId).execute();
                         msg.addFiles(file);
@@ -183,6 +182,16 @@ public class App {
             // if(!validToken(req.userId, req.googleToken)) {
             // return gson.toJson(new StructuredMessageResponse(ERROR, TOKEN_ERROR));
             // }
+
+            //Template for sending a post with a file
+            //{
+                // "senderId":"19",
+                // "text":"hohoi",
+                // "nUpVotes":0,
+                // "nDownVotes":0,
+                // "fileName":"fileName.pdf",
+                // "file": ..
+            //}
             if (req.fileName != null) {
                 try {
                     String encBytyes = req.file.substring(req.file.lastIndexOf(",") + 1);
