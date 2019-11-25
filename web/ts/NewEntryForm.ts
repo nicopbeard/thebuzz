@@ -63,7 +63,6 @@ class NewEntryForm {
         // that neither is empty
         let msg = "" + $("#" + NewEntryForm.NAME + "-message").val();
         let id = $(this).data("value");
-        console.log('id is: ');
         console.log(id);
         
         //formData.append('senderId', id);
@@ -97,7 +96,7 @@ class NewEntryForm {
                         text: msg,
                         nUpVotes: 0,
                         nDownVotes: 0,
-                        fileName: 'fileName',
+                        fileName: (<HTMLInputElement>document.getElementById('docpicker')).value,
                         file: reader.result
                     }),
                     processData: false,
@@ -109,7 +108,7 @@ class NewEntryForm {
                     text: msg,
                     nUpVotes: 0,
                     nDownVotes: 0,
-                    fileName: 'fileName',
+                    fileName: (<HTMLInputElement>document.getElementById('docpicker')).value,
                     file: reader.result
                 }));
 
@@ -122,11 +121,10 @@ class NewEntryForm {
                 url: backendUrl + "/messages",
                 dataType: "json",
                 data: JSON.stringify({ 
-                    senderId: id, 
+                    senderId: '8', 
                     text: msg,
                     nUpVotes: 0,
                     nDownVotes: 0,
-                    fileName: 'fileName',
                     file: 'null'
                 }),
                 processData: false,
@@ -138,7 +136,6 @@ class NewEntryForm {
                 text: msg,
                 nUpVotes: 0,
                 nDownVotes: 0,
-                fileName: 'fileName',
             }));
         }
     }

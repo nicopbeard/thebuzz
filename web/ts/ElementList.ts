@@ -62,7 +62,7 @@ class ElementList {
 
         for(let i = 0; i < data.mData.length; i++){
             let text = data.mData[i].text;
-            ElementList.map[27] = data.mData[i];
+            ElementList.map[data.mData[i].id] = data.mData[i];
             let number = -1;
             for(let j = 0; j < text.length; j++){
                 data.mData[i].linkMsg = number;
