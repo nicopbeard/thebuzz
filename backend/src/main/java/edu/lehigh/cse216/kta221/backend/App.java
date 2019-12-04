@@ -148,7 +148,7 @@ public class App {
                 if (comments.containsKey(msg.id)) {
                     msg.addComments(comments.get(msg.id));
                 }
-                if (files.contains(msg.id)) {
+                if (files.get(msg.id) != null) {
                     try {
                         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
                         Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT)).setApplicationName(APPLICATION_NAME).build();
@@ -160,9 +160,9 @@ public class App {
                     }
                 }
             }
-            for (Database.File file : files) {
-                System.out.println("Message id is: " + file.msgId);
-            }
+            // for (Database.File file : files) {
+            //     System.out.println("Message id is: " + file.msgId);
+            // }
 
             return gson.toJson(new StructuredResponse(status, null, status.equals(OK) ? messages : null));
         });

@@ -28,6 +28,8 @@ public class Database {
     private PreparedStatement mInsertOne;
     private PreparedStatement mUpdateOne;
     private PreparedStatement mInsertOneMessage;
+    private PreparedStatement updateMsg;
+    private PreparedStatement deleteMessage;
     private PreparedStatement mSelectAllMessages;
     private PreparedStatement mInsertOneFile;
     private PreparedStatement mSelectAllFiles;
@@ -256,11 +258,13 @@ public class Database {
 
             db.deleteMessageDislike = db.mConnection.prepareStatement("DELETE FROM dislikeData WHERE userId = ? and msgId = ?");
 
-            
+            db.deleteMessage = db.mConnection.prepareStatement("DELETE FROM msgdata WHERE msgId = ?; DELETE FROM comments WHERE msgId = ?; DELETE FROM filedata WHERE msgId = ?; DELETE FROM likedata WHERE msgId = ?; DELETE FROM dislikedata WHERE msgId = ?");
+
             db.addLikeToMessage = db.mConnection.prepareStatement("UPDATE msgData SET numupvotes = numupvotes + 1 WHERE msgId = ?");
             db.removeLikeToMessage = db.mConnection.prepareStatement("UPDATE msgData SET numupvotes = numupvotes - 1 WHERE msgId = ?");
             db.addDislikeToMessage = db.mConnection.prepareStatement("UPDATE msgData SET numdownvotes = numdownvotes + 1 WHERE msgId = ?");
             db.removeDislikeToMessage = db.mConnection.prepareStatement("UPDATE msgData SET numdownvotes = numdownvotes - 1 WHERE msgId = ?");
+            db.updateMsg = db.mConnection.prepareStatement("UPDATE msgdata SET text = ? WHERE msgId = ?");
 
 
             // Standard CRUD operations
@@ -508,6 +512,23 @@ public class Database {
         return res;
     }
 
+    int deleteMsg(int msgId) {
+        System.out.println("Deleting msg: " + msgId);
+        int res = -1;
+        try {
+            deleteMessage.setInt(1, msgId);
+            deleteMessage.setInt(2, msgId);
+            deleteMessage.setInt(3, msgId);
+            deleteMessage.setInt(4, msgId);
+            deleteMessage.setInt(5, msgId);
+            res = deleteMessage.executeUpdate();
+            System.out.println("Delete Result: " + res);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return res;
+    }
+
     int deleteLike(String userId, int msgId) {
         System.out.println("Deleting index: " + userId + " " + msgId);
         int res = -1;
@@ -557,9 +578,19 @@ public class Database {
             mUpdateOne.setString(1, message);
             mUpdateOne.setString(2, subject);
             mUpdateOne.setInt(3, id);
-
-
             res = mUpdateOne.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return res;
+    }
+
+    int updateMsg(int msgId, String text) {
+        int res = -1;
+        try {
+            updateMsg.setString(1, text);
+            updateMsg.setInt(2, msgId);
+            res = updateMsg.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
