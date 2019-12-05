@@ -33,6 +33,8 @@ public class Database {
     private PreparedStatement mSelectAllMessages;
     private PreparedStatement mInsertOneFile;
     private PreparedStatement mSelectAllFiles;
+    private PreparedStatement getMsgId;
+    private PreparedStatement getFileId;
     private PreparedStatement mDropTable;
     private PreparedStatement getUserId;
     private PreparedStatement likeMessage;
@@ -238,6 +240,10 @@ public class Database {
             db.mInsertOneFile = db.mConnection.prepareStatement("INSERT INTO filedata (msgid, fileid) VALUES (?, ?) RETURNING *");
 
             db.mSelectAllFiles = db.mConnection.prepareStatement("SELECT msgid, fileid FROM filedata");
+
+            db.getMsgId = db.mConnection.prepareStatement("SELECT msgid FROM filedata WHERE msgid = ?");
+
+            db.getFileId = db.mConnection.prepareStatement("SELECT fileid FROM filedata WHERE msgid = ?");
 
             db.getUserId = db.mConnection.prepareStatement("INSERT INTO userData (userid,name,passhash, username, email) VALUES (?, ?, ?,?, ?) RETURNING *");
 
@@ -447,6 +453,40 @@ public class Database {
             ResultSet rs = mInsertOneFile.executeQuery();
             while (rs.next()){
                 id = rs.getInt("msgid");
+            };
+            rs.close();
+            return id;
+            // System.out.println("Database output: "+ subject + ":" + message);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return id;
+    }
+
+    int getMsgIdFromFile(int msgId) {
+        int id = -1;
+        try {
+            getMsgId.setInt(1, msgId);
+            ResultSet rs = getMsgId.executeQuery();
+            while (rs.next()){
+                id = rs.getInt("msgid");
+            };
+            rs.close();
+            return id;
+            // System.out.println("Database output: "+ subject + ":" + message);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return id;
+    }
+
+    String getFileId(int msgId) {
+        String id = null;
+        try {
+            getFileId.setInt(1, msgId);
+            ResultSet rs = getFileId.executeQuery();
+            while (rs.next()){
+                id = rs.getString("fileid");
             };
             rs.close();
             return id;

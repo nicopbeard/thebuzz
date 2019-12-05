@@ -15,8 +15,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.nio.file.Files;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
+import java.io.FileInputStream;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.client.auth.oauth2.Credential;
@@ -148,17 +150,22 @@ public class App {
                 if (comments.containsKey(msg.id)) {
                     msg.addComments(comments.get(msg.id));
                 }
-                if (files.get(msg.id) != null) {
-                    try {
-                        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-                        Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT)).setApplicationName(APPLICATION_NAME).build();
-                        String fileId = files.get(msg.id).fileid;
-                        File file = service.files().get(fileId).execute();
-                        msg.addFiles(file);
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                try {
+                    if (db.getMsgIdFromFile(msg.id) != -1) {
+                        try {
+                            final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+                            Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT)).setApplicationName(APPLICATION_NAME).build();
+                            String fileId = db.getFileId(msg.id);
+                            File file = service.files().get(fileId).execute();
+                            msg.addFiles(file);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
+                } catch(Exception e) {
+                    e.printStackTrace();
                 }
+                
             }
             // for (Database.File file : files) {
             //     System.out.println("Message id is: " + file.msgId);
