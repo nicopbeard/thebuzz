@@ -22,23 +22,32 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
+import androidx.annotation.Nullable;
+import android.widget.TextView;
+
+
 public class LoginActivity extends AppCompatActivity {
     private Button signOut;
     private static final String TAG = "AndroidClarified";
+    private static final String CLIENT_ID = "755594120508-dbkfkcfuo13jk4un0onvlob7lgie271h.apps.googleusercontent.com";
+    private static final String REDIRECT_URI = "";
+    private static final String REDIRECT_URI_ROOT = "";
+    private String code;
+
     private GoogleSignInClient googleSignInClient;
     private SignInButton googleSignInButton;
-    private static final int RC_SIGN_IN = 9003;
+    private static final int RC_SIGN_IN = 9001;  //Was 9003 before
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_login);
         super.onCreate(savedInstanceState);
-        MultiDex.install(this);
+//        MultiDex.install(this);
 //        loginViewModel = ViewModelProviders.of(this, new LoginViewModelFactory())
 //                .get(LoginViewModel.class);
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken("755594120508-vajdss1hrkqi335sukhur5qaa70s5jji.apps.googleusercontent.com")
+//                .requestIdToken(CLIENT_ID)
                 .requestEmail()
                 .build();
 
@@ -62,10 +71,6 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    public void signIn() {
-        Intent signInIntent = googleSignInClient.getSignInIntent();
-        startActivityForResult(signInIntent, RC_SIGN_IN);
-    }
 
     @Override
     public void onStart() {
@@ -84,6 +89,12 @@ public class LoginActivity extends AppCompatActivity {
         if (requestCode == RC_SIGN_IN) {
             // The Task returned from this call is always completed, no need to attach
             // a listener.
+            if(data != null) {
+                Log.d("kta221","onActivityResult: data = NOT NULL");
+            } else {
+                Log.d("kta221", "onActivityResult: data = NULL");
+            }
+
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             handleSignInResult(task);
         }
@@ -91,10 +102,11 @@ public class LoginActivity extends AppCompatActivity {
 
     private void handleSignInResult(@NonNull Task<GoogleSignInAccount> completedTask) {
         try {
-            Log.d("npb221", String.valueOf(completedTask.isComplete()));
+            Log.d("kta221", String.valueOf(completedTask.isComplete()));
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
             String idToken = account.getIdToken();
-            System.out.println(idToken);
+            Log.d("kta221", idToken);
+
             updateUI(account);
         } catch (Exception e) {
             e.printStackTrace();
@@ -104,21 +116,42 @@ public class LoginActivity extends AppCompatActivity {
 
     //Change UI according to user data.
     public void  updateUI(GoogleSignInAccount account){
-        if(account != null){
+        Log.d("kta221", "Made it to updateUI");
+
+
+        if(account != null ){
             Toast.makeText(this,"Sign in Successfull",Toast.LENGTH_LONG).show();
             startActivity(new Intent(this, MainActivity.class));
         }
         else {
+            Log.d("kta221", "GoogleSignInAccount account was passed as null");
+
             Toast.makeText(this,"Sign in Fail",Toast.LENGTH_LONG).show();
         }
     }
 
+    private void signIn() {
+        Intent signInIntent = googleSignInClient.getSignInIntent();
+        startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
+
+//    private void signOut() {
+//        googleSignInClient.signOut()
+//                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<Void> task) {
+//                        // ...
+//                    }
+//                });
+//    }
     private void signOut() {
         googleSignInClient.signOut()
                 .addOnCompleteListener(this, new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-                        // ...
+                        // [START_EXCLUDE]
+                        updateUI(null);
+                        // [END_EXCLUDE]
                     }
                 });
     }

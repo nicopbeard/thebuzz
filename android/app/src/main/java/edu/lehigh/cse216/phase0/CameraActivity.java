@@ -121,21 +121,21 @@ public class CameraActivity extends AppCompatActivity {
     }
 
 
-    ImageView imageView = (ImageView) findViewById(R.id.abc321);
-    public void onActivityResult(int requestCode,int resultCode,Intent data){
-        // Result code is RESULT_OK only if the user captures an Image
-        Uri uri = null;
-        if (data != null)
-        {
-            uri = data.getData();
-        }
-        if (resultCode == Activity.RESULT_OK)
-            if (requestCode == CAMERA_REQUEST_CODE){
-                    imageView.setImageURI(Uri.parse(Environment.DIRECTORY_PICTURES));
-            }
-        else
-            super.onActivityResult(requestCode, resultCode,data);
-    }
+//    ImageView imageView = (ImageView) findViewById(R.id.abc321);
+//    public void onActivityResult(int requestCode,int resultCode,Intent data){
+//        // Result code is RESULT_OK only if the user captures an Image
+//        Uri uri = null;
+//        if (data != null)
+//        {
+//            uri = data.getData();
+//        }
+//        if (resultCode == Activity.RESULT_OK)
+//            if (requestCode == CAMERA_REQUEST_CODE){
+//                    imageView.setImageURI(Uri.parse(Environment.DIRECTORY_PICTURES));
+//            }
+//        else
+//            super.onActivityResult(requestCode, resultCode,data);
+//    }
 
 
     static final int GALLERY_REQUEST_CODE =2;
