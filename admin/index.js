@@ -1,6 +1,7 @@
 const fs = require('fs');
 const readline = require('readline');
 const {google} = require('googleapis');
+const colors = require('colors');
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly',
                 'https://www.googleapis.com/auth/drive',
@@ -23,7 +24,16 @@ helpMessage();
 });
 
 
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
 
+function prompt() {
+  var arrow = '=> ', length = arrow.length;
+  rl.setPrompt(arrow.white, length);
+  rl.prompt();
+}
 
 
 /**
@@ -88,16 +98,16 @@ function listFiles(auth) {
         pageSize: 10,
         fields: 'nextPageToken, files(id, name)',
       }, (err, res) => {
-        if (err) return console.log('The API returned an error: ' + err);
+        if (err) return console.log('The API returned an error: '.red + err);
         const files = res.data.files;
         // console.log(files);
         if (files.length) {
-          console.log('Files:');
+          console.log('Files:'.brightMagenta.bold);
           files.map((file) => {
-            console.log(`[FILE NAME] ${file.name} (${file.id})`);
+            console.log(`[FILE NAME] ${file.name}`.brightCyan.bold +`(${file.id})`.brightCyan);
           });
         } else {
-          console.log('No files found.');
+          console.log('No files found.'.red);
         }
       });
   })
@@ -117,16 +127,18 @@ function listFilesSize(auth) {
         fields: '*',
         corpora: 'user'
         }, (err, res) => {
-          if (err) return console.log('The API returned an error: ' + err);
+          if (err) return console.log('The API returned an error: '.red + err);
           const files = res.data.files;
         //   console.log(files);
           if (files.length) {
+              console.log("Files: [With Sizes]".brightMagenta.bold)
             files.map((file) => {
-                console.log(`[FILE NAME]: ${file.name}  (${file.id}) `);
-                console.log(`\t File-size: (${file.size} bytes)`);
+                console.log(`[FILE NAME]: ${file.name}`.brightCyan.bold + ` (${file.id}) `.brightCyan);
+                console.log(`\t File-size: (${file.size} bytes)`.brightBlue);
             });
+            prompt();
           } else {
-            console.log('No files found.');
+            console.log('No files found.'.red);
           }
         });
     })
@@ -148,11 +160,13 @@ function listFilesModification(auth) {
           const files = res.data.files;
         //   console.log(files);
           if (files.length) {
+              console.log("Files: [With Last Modified User and Last Modification Date".brightMagenta.bold)
             files.map((file) => {
-                console.log(`[FILE NAME]: ${file.name}  (${file.id}) `);
-                console.log(`\tLast Modified By - [NAME]: ${file.lastModifyingUser.displayName} [EMAIL]: ${file.lastModifyingUser.emailAddress}`);
-                console.log(`\tLast Modified At: ${file.modifiedTime}`);
+                console.log(`[FILE NAME]: "${file.name}" `.brightCyan.bold +`(${file.id}) `.brightCyan);
+                console.log(`\tLast Modified By - [NAME]: ${file.lastModifyingUser.displayName} [EMAIL]: ${file.lastModifyingUser.emailAddress}`.brightBlue);
+                console.log(`\tLast Modified At: ${file.modifiedTime}`.brightBlue);
             });
+            prompt();
           } else {
             console.log('No files found.');
           }
@@ -166,8 +180,7 @@ function deleteFile(OAuth, fileId_toDelete) {
         fileId: fileId_toDelete
     }, (err, res) => {
         if (err) return console.log('The API returned an error: ' + err);
-        console.log(`Sucessfully deleted file: ${fileId_toDelete}`);
-        helpMessage();
+        console.log(`Sucessfully deleted file: ${fileId_toDelete}`.brightGreen);
     })
    
   }
@@ -175,61 +188,76 @@ function deleteFile(OAuth, fileId_toDelete) {
 
   
 function runCommand(auth){
-    const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-      });
 
+
+      prompt();
 
     rl.on('SIGINT', () => {
-        console.log('Exiting Clowns who Code Admin Interface');
+        console.log('Exiting Clowns who Code Admin Interface'.brightGreen);
         rl.close();
       });
 
     rl.on('SIGTSTP', () => {
-        console.log('Exiting Clowns who Code Admin Interface');
+        console.log('Exiting Clowns who Code Admin Interface'.brightGreen);
         rl.close();
       });
 
     rl.on('line', (input) => {
         input = input.trim();
-        if(input === "" || input === "-h" || input === "--help"){
+        args = input.split(" ");
+        input = args[0];
+        if(input === "" || input === "-h" || input === "--help" || input === "help"){
             helpMessage();
         }
-        if(input === "-l" || input === "--list"){
-            listFiles(auth).then((result) => { console.log("WORKED") });
+        else if(input === "-l" || input === "--list" || input === "l"){
+            listFiles(auth)
         }
-        if(input === "exit" || input === "quit"){
-            console.log("Thank you for using the clowns who code admin interface... exiting")
+        else if(input === "exit" || input === "quit" || input === "-q"){
+            console.log("Thank you for using the clowns who code admin interface... exiting".brightGreen)
             rl.close();
         }
-        if(input === "-ls" || input === "--listsize"){
+        else if(input === "-ls" || input === "--listsize" || input === "ls"){
             listFilesSize(auth);            
         }
-        if(input === "-d" || input === "delete"){
-            rl.question("Give file id to delete:", (answer) => {
-                answer = answer.trim();
-                deleteFile(authToken, answer);
-            });
+        else if(input === "-d" || input === "--delete" || input === "delete"){
+            if(args.length === 2){
+                deleteFile(authToken, args[1])
+            } else if (args.length > 2){
+              for(let i = 1; i < args.length; i++){
+                deleteFile(authToken, args[i]);
+              }
+              
+            }else {
+                rl.question("Give file id to delete:".brightMagenta, (answer) => {
+                    answer = answer.trim();
+                    deleteFile(authToken, answer);
+                });
+            }
+            prompt();
+            
         }
-        if(input === '-lm' || input === '--listmodification'){
+        else if(input === '-lm' || input === '--listmodification' || input === "lm"){
             listFilesModification(auth)
         } else {
-            console.log("Invalid command please type -h | --help to see valid commands");
+            console.log("Invalid command please type -h | --help to see valid commands".brightRed);
+            prompt();
         }
+        //prompt();
     });
 
 }
 
 
 function helpMessage(){
-    let ques = `[[ Welcome to the Clowns who Code Admin Interface ]]\n`;
-            ques += `  Please run one of the following commands:\n`;
-            ques += `  -l | --list:  Lists all current files hosted on the drive\n`;
-            ques += `  -h | --help:  Display help message\n`
-            ques += `  -d | --delete:  Delete a file\n`
-            ques += `  -ls | --listsize:  Lists the files with file size included\n`;
-            ques += `  -lm | --listmodification:  Lists user which last modified each file along with the time\n`;
-            ques += `  exit | quit:  Exit the Clowns who Code Command Line Interface`;
+    let ques = `\n[[ Welcome to the Clowns who Code Admin Interface ]]\n`.rainbow.bold.underline.italic;
+            ques += `  Please run one of the following commands:\n`.brightMagenta.bold;
+            ques += `  -h | --help:  Display help message\n`.brightCyan;
+            ques += `  -d | --delete:  Delete a file\n`.brightCyan;
+            ques += `  -l | --list:  Lists all current files hosted on the drive\n`.brightCyan;
+            ques += `  -ls | --listsize:  Lists the files with file size included\n`.brightCyan;
+            ques += `  -lm | --listmodification:  Lists user which last modified each file along with the time\n`.brightCyan;
+            ques += `  exit | quit:  Exit the Clowns who Code Command Line Interface`.brightCyan;
     console.log(ques);
+    prompt();
+
 }
