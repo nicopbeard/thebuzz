@@ -1,57 +1,48 @@
 package edu.lehigh.cse216.kta221.backend;
 
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import spark.Spark;
-import java.util.Map;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+
+import java.util.*;
 // Import Google's JSON library
 import com.google.gson.*;
-import java.util.ArrayList;
 
 
 /**
  * For now, our app creates an HTTP server that can only get and add data.
  */
 public class App {
+
+    private final static int TOKEN_ERROR = 1;
+    private static final int UPDATE_ERROR = -1;
+    private static final String ERROR = "error";
+    private static final String OK = "ok";
+    private static Map<String, String> userIdToToken = new HashMap<>();
+
     public static void main(String[] args) {
 
         Map<String, String> env = System.getenv();
-        String ip = env.get("POSTGRES_IP");
-        String port = env.get("POSTGRES_PORT");
-        String user = env.get("POSTGRES_USER");
-        String pass = env.get("POSTGRES_PASS");
+        String ip = "ec2-174-129-220-12.compute-1.amazonaws.com";
+        //String ip = "localhost";
+        String port = "5432";
+        String user = "qnwrtcuewzcdpe";
+        String pass = "a8bc2fbf3637a0fcded45cb4a148de56a37dd37cc3c694145d863374f2ee77a0";
 
 
-        // gson provides us with a way to turn JSON into objects, and objects
-        // into JSON
-        //
-        // NB: it must be final, so that it can be accessed from our lambdas
-        //
-        // NB: Gson is thread-safe.  See 
+        // Get the port on which to listen for requests
+        Spark.port(getIntFromEnv("PORT", 4567));
+        // NB: Gson is thread-safe.  See
         // https://stackoverflow.com/questions/10380835/is-it-ok-to-use-gson-instance-as-a-static-field-in-a-model-bean-reuse
         final Gson gson = new Gson();
 
-        // dataStore holds all of the data that has been provided via HTTP 
-        // requests
-        //
-        // NB: every time we shut down the server, we will lose all data, and 
-        //     every time we start the server, we'll have an empty dataStore,
-        //     with IDs starting over from 0.
-        final DataStore dataStore = new DataStore();
         System.out.println(ip + " " + port + " " + user + " " + pass);
         Database db = Database.getDatabase(ip, port, user, pass);
-        db.createTable();
-
-        // db.createTable(); 
-
-        if(db == null)
-            return;
+        if(db == null) { return; }
         System.out.println("Connected to db");
-
 
         // Set up the location for serving static files.  If the STATIC_LOCATION
         // environment variable is set, we will serve from it.  Otherwise, serve
@@ -62,8 +53,6 @@ public class App {
         } else {
             Spark.staticFiles.externalLocation(static_location_override);
         }
-
-
         // Set up the location for serving static files
         Spark.staticFileLocation("/web");
 
@@ -73,92 +62,131 @@ public class App {
             return "";
         });
 
-
-
-
-
-        // GET route that returns all message titles and Ids.  All we do is get 
-        // the data, embed it in a StructuredResponse, turn it into JSON, and 
-        // return it.  If there's no data, we return "[]", so there's no need 
-        // for error handling.
+        //GET route for all messages and associated comments
         Spark.get("/messages", (request, response) -> {
-            // ensure status 200 OK, with a MIME type of JSON
-            System.out.println(request);
-            ArrayList<Database.RowData> result = db.selectAll();
-            System.out.println(result);
-
-            System.out.println("GET RESULT LENGTH: " + result.size());
-
-
-
-            for(Database.RowData item : result) {
-                System.out.println("MESSAGE: " + item.mMessage);
-                System.out.println("SUBJECT: " + item.mSubject);
-                System.out.println("ID: " + item.mId);
-            }
-
-
-            System.out.println("GET MESSAGES");
-            response.status(200);
-            // db.selectAll();
-            response.type("application/json");
-            //NEED TO CONVERT STRING HERE
-            // return gson.toJson(new StructuredResponse("ok", null, gson.toJson(result)));
-            return gson.toJson(new StructuredResponse("ok", null, result));
-
-        });
-
-        // GET route that returns everything for a single row in the DataStore.
-        // The ":id" suffix in the first parameter to get() becomes 
-        // request.params("id"), so that we can get the requested row ID.  If 
-        // ":id" isn't a number, Spark will reply with a status 500 Internal
-        // Server Error.  Otherwise, we have an integer, and the only possible 
-        // error is that it doesn't correspond to a row with data.
-        Spark.get("/messages/:id", (request, response) -> {
-            int idx = Integer.parseInt(request.params("id"));
-            // ensure status 200 OK, with a MIME type of JSON
             response.status(200);
             response.type("application/json");
-            Database.RowData data = db.selectOne(idx);
-            // DataRow data = dataStore.readOne(idx);
-            if (data == null) {
-                return gson.toJson(new StructuredResponse("error", idx + " not found", null));
-            } else {
-                return gson.toJson(new StructuredResponse("ok", null, data));
+
+            MessageRequest req = gson.fromJson(request.body(), MessageRequest.class);
+
+            String status = OK;
+
+            if(!validToken(req.userId, req.googleToken)) {
+                status = ERROR;
             }
+
+            ArrayList<Database.MessageRow> messages = db.messageAll();
+            Hashtable<Integer, ArrayList<Database.Comment>> comments = db.commentAll();
+            for(Database.MessageRow msg: messages) {
+                if(comments.contains(msg.id)){
+                    msg.addComments(comments.get(msg.id));
+                }
+            }
+
+            return gson.toJson(new StructuredResponse(status, null, status.equals(OK)? messages : null));
         });
 
-        // POST route for adding a new element to the DataStore.  This will read
-        // JSON from the body of the request, turn it into a SimpleRequest 
+        // JSON from the body of the request, turn it into a SimpleRequest
         // object, extract the title and message, insert them, and return the 
         // ID of the newly created row.
         Spark.post("/messages", (request, response) -> {
-            // NB: if gson.Json fails, Spark will reply with status 500 Internal 
-            // Server Error
-            SimpleRequest req = gson.fromJson(request.body(), SimpleRequest.class);
-            System.out.println("SUBJECT: " + req.mTitle);
-            System.out.println("MESSAGE: "+ req.mMessage);
-            System.out.println("Request Body: "+ req.toString());
-
-            // ensure status 200 OK, with a MIME type of JSON
-            // NB: even on error, we return 200, but with a JSON object that
-            //     describes the error.
             response.status(200);
             response.type("application/json");
 
-            db.insertRow(req.mTitle, req.mMessage);
+            MessageRequest req = gson.fromJson(request.body(), MessageRequest.class);
 
-            // NB: createEntry checks for null title and message
-            int newId = dataStore.createEntry(req.mTitle, req.mMessage);
-            if (newId == -1) {
-                return gson.toJson(new StructuredResponse("error", "error performing insertion", null));
+            //Validate token
+            if(!validToken(req.userId, req.googleToken)) {
+                return gson.toJson(new StructuredMessageResponse(ERROR, TOKEN_ERROR));
+            }
+
+            int newId = db.insertMessage(req.senderId, req.text, 0, 0);
+
+            //NB: createEntry checks for null title and message
+            if (newId == UPDATE_ERROR) {
+                return gson.toJson(new StructuredMessageResponse(ERROR, newId));
             } else {
-                return gson.toJson(new StructuredResponse("ok", "" + newId, null));
+                return gson.toJson(new StructuredMessageResponse(OK, newId));
             }
         });
 
+        Spark.put("/like", (request, response) -> {
+            response.status(200);
+            response.type("application/json");
+
+            VoteRequest req = gson.fromJson(request.body(), VoteRequest.class);
+
+            if(!validToken(req.userId, req.sessionToken)) {
+                return gson.toJson(new StructuredMessageResponse("error", TOKEN_ERROR));
+            }
+
+            int result = db.insertLike(req.userId, req.msgId);
+            return result == UPDATE_ERROR? gson.toJson(new StructuredResponse(ERROR, "Element Already Added: ", result))
+                    :  gson.toJson(new StructuredResponse(OK, "Created Element: ", result));
+        });
+
+        //This route should never get hit anymore?
+        //TODO ask
+        Spark.put("/newUser", (request, response) ->{
+            response.status(200);
+            response.type("application/json");
+
+            NewUser nu = gson.fromJson(request.body(), NewUser.class);
+            String googleToken = nu.googleToken;
+
+
+            if(validateGoogleToken(googleToken, db) == null){
+                return gson.toJson(new StructuredMessageResponse("error", TOKEN_ERROR));
+            }
+
+            return gson.toJson(new StructuredResponse("ok", null, null));
+        });
+
+
+        //TAKES: Json object with fields "googleToken"
+        //TODO how do we send them back their userId
+         Spark.put("/login", (request, response) ->{
+            response.status(200);
+            response.type("application/json");
+
+             NewUser user_ = gson.fromJson(request.body(), NewUser.class);
+             String googleToken = user_.googleToken;
+
+             String userId;
+
+            if((userId = validateGoogleToken(googleToken, db)) == null) {
+                return gson.toJson(new StructuredResponse(ERROR, null, TOKEN_ERROR));
+            }
+
+            String sessionKey = db.createSessionKey();
+            userIdToToken.put(userId, sessionKey);
+            return gson.toJson(new StructuredResponse(OK, null, new LoginResponse(userId, sessionKey)));
+         });
+
+
         // PUT route for updating a row in the DataStore.  This is almost 
         // exactly the same as POST
+        //Takes in object with fields: "userId", "msgId", "sessionToken"
+        Spark.put("/dislike", (request, response) -> {
+            response.status(200);
+            response.type("application/json");
+
+            VoteRequest req = gson.fromJson(request.body(), VoteRequest.class);
+
+            if(!validToken(req.userId, req.sessionToken)) {
+                return gson.toJson(new StructuredMessageResponse(ERROR, TOKEN_ERROR));
+            }
+
+            int result = db.insertDislike(req.userId, req.msgId);
+            if (result == -1) {
+                return gson.toJson(new StructuredResponse(ERROR, "Element Already Added: ", result));
+            } else {
+                return gson.toJson(new StructuredResponse(OK, "Created Element: ", result));
+            }
+        });
+
+
+        //No functionality for current android system as of 10/27 so not making it compatable with OAuth2
         Spark.put("/messages/:id", (request, response) -> {
             // If we can't get an ID or can't parse the JSON, Spark will send
             // a status 500
@@ -176,7 +204,7 @@ public class App {
             }
         });
 
-        // DELETE route for removing a row from the DataStore
+        //No functionality for delete in current android system as of 10/27 so not making it compatable with OAuth2
         Spark.delete("/messages/:id", (request, response) -> {
             // If we can't get an ID, Spark will send a status 500
             int idx = Integer.parseInt(request.params("id"));
@@ -187,7 +215,6 @@ public class App {
             System.out.println("Deleted ID: " + idx);
             // NB: we won't concern ourselves too much with the quality of the 
             //     message sent on a successful delete
-            boolean result = dataStore.deleteOne(idx);
             if (res <= 0) {
                 return gson.toJson(new StructuredResponse("error", "unable to delete row " + idx, null));
             } else {
@@ -195,7 +222,109 @@ public class App {
             }
         });
 
+        // DELETE route for removing a row from the DataStore
+        Spark.delete("/like", (request, response) -> {
+            response.status(200);
+            response.type("application/json");
 
-        
+            VoteRequest req = gson.fromJson(request.body(), VoteRequest.class);
+
+            if(!validToken(req.userId, req.sessionToken)) {
+                //TODO do we even need this method?
+            }
+
+            int res = db.deleteLike(req.userId, req.msgId);
+            // NB: we won't concern ourselves too much with the quality of the 
+            //     message sent on a successful delete
+            if (res <= 0) {
+                return gson.toJson(new StructuredResponse("error", "Element not in table, cannot delete userID: " + req.userId + " msgID: " + req.msgId, null));
+            } else {
+                return gson.toJson(new StructuredResponse("ok", null, null));
+            }
+        });
+
+        // DELETE route for removing a row from the DataStore
+        Spark.delete("/dislike", (request, response) -> {
+    
+            VoteRequest req = gson.fromJson(request.body(), VoteRequest.class);
+
+            System.out.println("Attempting to delete like with userId: " + req.userId + " msgId: " + req.msgId);
+            response.status(200);
+            response.type("application/json");
+            int res = db.deleteDislike(req.userId, req.msgId);
+            // NB: we won't concern ourselves too much with the quality of the 
+            //     message sent on a successful delete
+            if (res <= 0) {
+                return gson.toJson(new StructuredResponse("error", "Element not in table, cannot delete userID: " + req.userId + " msgID: " + req.msgId, null));
+            } else {
+                return gson.toJson(new StructuredResponse("ok", null, null));
+            }
+        });
+    }
+
+    /**
+ * Get an integer environment varible if it exists, and otherwise return the
+ * default value.
+ * 
+ * @param envar      The name of the environment variable to get.
+ * @param defaultVal The integer value to use as the default if envar isn't found
+ * 
+ * @returns The best answer we could come up with for a value for envar
+ */
+    static int getIntFromEnv(String envar, int defaultVal) {
+        ProcessBuilder processBuilder = new ProcessBuilder();
+        if (processBuilder.environment().get(envar) != null) {
+            return Integer.parseInt(processBuilder.environment().get(envar));
+        }
+        return defaultVal;
+    }
+
+    //This method also updates the database for new users
+    public static String validateGoogleToken(String idTokenString, Database db) {
+
+        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance())
+
+                // Specify the CLIENT_ID of the app that accesses the backend:
+                .setAudience(Arrays.asList("134181037844-18emho3bt0dlqt83u92rrtkk0kfolha7.apps.googleusercontent.com",
+                        "134181037844-37lmk8rscmd0uqff6g1gu4b5q2su6f8i.apps.googleusercontent.com"))
+                .build();
+
+    // (Receive idTokenString by HTTPS POST)
+        try {
+            GoogleIdToken idToken = verifier.verify(idTokenString);
+            if (idToken != null) {
+                Payload payload = idToken.getPayload();
+
+                // Print user identifier
+                String userId = payload.getSubject();
+                System.out.println("User ID: " + userId);
+
+                //Always attempt to insert the user into the db -- worst case scenario, they're already in there
+                db.insertUser(userId, (String) payload.get("name"), payload.getEmail());
+
+                // Get profile information from payload
+                String email = payload.getEmail();
+                if(!email.contains("@lehigh.edu")) {
+                    return null;
+                }
+                boolean emailVerified = Boolean.valueOf(payload.getEmailVerified());
+                String name = (String) payload.get("name");
+                String pictureUrl = (String) payload.get("picture");
+                String locale = (String) payload.get("locale");
+                String familyName = (String) payload.get("family_name");
+                String givenName = (String) payload.get("given_name");
+                return userId;
+            } else {
+                System.out.println("Invalid ID token.");
+                return null;
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    static boolean validToken(String userId, String token) {
+        return userIdToToken.containsKey(userId) && userIdToToken.get(userId).equals(token);
     }
 }
