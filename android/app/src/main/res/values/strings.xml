@@ -15,6 +15,11 @@
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
     <string name="title_activity_comments">Comments</string>
-    <string name="server_client_id">755594120508-dbkfkcfuo13jk4un0onvlob7lgie271h.apps.googleusercontent.com</string>
+    <string name="signed_in_fmt">Signed in as: %s</string>
+
+    <!--
+        <string name="server_client_id">755594120508-dbkfkcfuo13jk4un0onvlob7lgie271h.apps.googleusercontent.com</string>
+    -->
+    <string name="server_client_id">755594120508-vajdss1hrkqi335sukhur5qaa70s5jji.apps.googleusercontent.com</string>
 
 </resources>

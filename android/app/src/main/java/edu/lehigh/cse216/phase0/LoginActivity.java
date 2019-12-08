@@ -26,17 +26,17 @@ import androidx.annotation.Nullable;
 import android.widget.TextView;
 
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity implements
+    View.OnClickListener {
     private Button signOut;
     private static final String TAG = "AndroidClarified";
-    private static final String CLIENT_ID = "755594120508-dbkfkcfuo13jk4un0onvlob7lgie271h.apps.googleusercontent.com";
     private static final String REDIRECT_URI = "";
     private static final String REDIRECT_URI_ROOT = "";
     private String code;
 
     private GoogleSignInClient googleSignInClient;
     private SignInButton googleSignInButton;
-    private static final int RC_SIGN_IN = 9001;  //Was 9003 before
+    private static final int RC_SIGN_IN = 9002;  //Was 9003 before
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -47,7 +47,7 @@ public class LoginActivity extends AppCompatActivity {
 //                .get(LoginViewModel.class);
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-//                .requestIdToken(CLIENT_ID)
+                .requestIdToken(getString(R.string.server_client_id))
                 .requestEmail()
                 .build();
 
@@ -55,31 +55,35 @@ public class LoginActivity extends AppCompatActivity {
 
         googleSignInClient = GoogleSignIn.getClient(this, gso);
         //findViewById(R.id.sign_in_button).setOnClickListener(this);
-        googleSignInButton = findViewById(R.id.sign_in_button);
-        googleSignInButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                switch (v.getId()) {
-                    case R.id.sign_in_button:
-                        signIn();
-                        break;
-                    case R.id.sign_out:
-                        signOut();
-                        break;
-                }
-            }
-        });
+//        googleSignInButton = findViewById(R.id.sign_in_button);
+        findViewById(R.id.sign_in_button).setOnClickListener(this);
+        findViewById(R.id.sign_out).setOnClickListener(this);
+
+
+//        googleSignInButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                switch (v.getId()) {
+//                    case R.id.sign_in_button:
+//                        signIn();
+//                        break;
+//                    case R.id.sign_out:
+//                        signOut();
+//                        break;
+//                }
+//            }
+//        });
     }
 
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        // Check for existing Google Sign In account, if the user is already signed in
-        // the GoogleSignInAccount will be non-null.
-        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
-        updateUI(account);
-    }
+//    @Override
+//    public void onStart() {
+//        super.onStart();
+//        // Check for existing Google Sign In account, if the user is already signed in
+//        // the GoogleSignInAccount will be non-null.
+//        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+//        updateUI(account);
+//    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -119,14 +123,30 @@ public class LoginActivity extends AppCompatActivity {
         Log.d("kta221", "Made it to updateUI");
 
 
-        if(account != null ){
-            Toast.makeText(this,"Sign in Successfull",Toast.LENGTH_LONG).show();
-            startActivity(new Intent(this, MainActivity.class));
+        if(account != null){
+                String idToken = account.getIdToken();
+
+                if(idToken != null) {
+
+                    Toast.makeText(this,"Logged in",Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(this, MainActivity.class);
+                    Log.d("kta221", "Passing token to intent"+ idToken);
+                    intent.putExtra("GOOGLE_SESSION_ID", idToken);
+                    startActivity(intent);
+
+//                    findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
+//                    findViewById(R.id.sign_out).setVisibility(View.VISIBLE);
+                } else {
+                    Log.d("kta221", "idToken from account is null");
+                    Toast.makeText(this,"Logged out",Toast.LENGTH_LONG).show();
+
+
+                }
         }
         else {
             Log.d("kta221", "GoogleSignInAccount account was passed as null");
 
-            Toast.makeText(this,"Sign in Fail",Toast.LENGTH_LONG).show();
+            Toast.makeText(this,"Logged out",Toast.LENGTH_LONG).show();
         }
     }
 
@@ -165,4 +185,18 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 });
     }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.sign_in_button:
+                signIn();
+                break;
+            case R.id.sign_out:
+                signOut();
+                break;
+        }
+    }
 }
+
+

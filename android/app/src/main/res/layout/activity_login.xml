@@ -26,21 +26,21 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <Button
-        android:id="@+id/sign_out"
-        android:layout_width="0dp"
-        android:layout_height="2dp"
-        android:layout_gravity="center"
-        android:layout_marginStart="205dp"
-        android:layout_marginTop="715dp"
-        android:layout_marginEnd="395dp"
-        android:text="Sign out"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/sign_in_button"
-        app:layout_constraintVertical_bias="0.2" />
+    <!--    <Button-->
+    <!--        android:id="@+id/sign_out"-->
+    <!--        android:layout_gravity="center"-->
+    <!--        android:layout_marginStart="205dp"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_marginTop="715dp"-->
+    <!--        android:layout_marginEnd="395dp"-->
+    <!--        android:text="Sign out"-->
+    <!--        android:visibility="gone"-->
+    <!--        app:layout_constraintBottom_toBottomOf="parent"-->
+    <!--        app:layout_constraintEnd_toEndOf="parent"-->
+    <!--        app:layout_constraintStart_toStartOf="parent"-->
+    <!--        app:layout_constraintTop_toBottomOf="@+id/sign_in_button"-->
+    <!--        app:layout_constraintVertical_bias="0.2" />-->
 
     <ImageView
         android:id="@+id/imageView"
@@ -57,5 +57,30 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.099" />
+
+    <Button
+        android:id="@+id/sign_out"
+        android:layout_width="130dp"
+        android:layout_height="46dp"
+        android:layout_marginStart="124dp"
+        android:layout_marginEnd="124dp"
+        android:layout_marginBottom="152dp"
+        android:background="@color/blue_grey_700"
+        android:text="Sign Out"
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.454"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="150dp"
+        android:text="Welcome to the ClownsWhoCode android Application, please sign in with a Lehigh Google Account to continue"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

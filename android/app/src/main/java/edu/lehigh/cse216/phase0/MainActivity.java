@@ -49,8 +49,39 @@ public class MainActivity extends AppCompatActivity {
         sendMsgButton = findViewById(R.id.sendMessage);
         msgToSend = findViewById(R.id.messageToSend);
 
+
         RequestQueue serverQueue = VolleySingleton.getInstance(this).getRequestQueue();
         String getMsgsServerURL = "https://clowns-who-code.herokuapp.com/messages";
+        String loginTokenUrl = "https://clowns-who-code.herokuapp.com/login";
+        String sessionId = getIntent().getStringExtra("GOOGLE_SESSION_ID");
+        Log.d("kta221", "Session ID:" + sessionId);
+
+
+
+        JSONObject postparams = new JSONObject();
+        try{
+            postparams.put("googleToken", sessionId);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        JsonObjectRequest jsonObjReq = new JsonObjectRequest(Request.Method.PUT,
+                loginTokenUrl, postparams,
+                new Response.Listener() {
+                    @Override
+                    public void onResponse(Object response) {
+                        Log.d("SUCCESS", "SUCCESS IN PUT REQ");
+                        Log.d("PUT REQUEST", response.toString());
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d("ERROR", "ERROR IN PUT REQUEST: " + error.toString() );
+                    }
+                });
+        serverQueue.add(jsonObjReq);
+
         // Request a string response from the provided URL.
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, getMsgsServerURL,
@@ -62,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.e("Error", "Trouble getting info from volley");
+                Log.e("Error", "Could not get token ID");
             }
         });
 
