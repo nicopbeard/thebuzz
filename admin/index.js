@@ -172,6 +172,37 @@ function deleteFile(OAuth, fileId_toDelete) {
    
   }
 
+  function uploadFile(OAuth, fileId_toUpload) {
+    const drive = google.drive({version: 'v3', auth: OAuth});
+    var mmm = require('mmmagic'),
+      Magic = mmm.Magic;
+
+    var magic = new Magic(mmm.MAGIC_MIME_TYPE);
+    magic.detectFile('node_modules/mmmagic/build/Release/magic.node', function(err, result) {
+        if (err) throw err;
+        console.log(result);
+    });
+    var fileMetadata = {
+      'name': 'photo.jpg'
+    };
+    var media = {
+      mimeType: 'image/jpeg',
+      body: fs.createReadStream(fileId_toUpload)
+    };
+    drive.files.create({
+      resource: fileMetadata,
+      media: media,
+      fields: 'id'
+    }, function (err, file) {
+      if (err) {
+        // Handle error
+        console.error(err);
+      } else {
+        console.log('File Id: ', file.id);
+      }
+    });
+  }
+
 
   
 function runCommand(auth){
@@ -212,6 +243,12 @@ function runCommand(auth){
                 deleteFile(authToken, answer);
             });
         }
+        if(input === "-u" || input === "upload"){
+          rl.question("Give file to upload:", (answer) => {
+              answer = answer.trim();
+              uploadFile(authToken, answer);
+          });
+      }
         if(input === '-lm' || input === '--listmodification'){
             listFilesModification(auth)
         } else {
@@ -228,6 +265,7 @@ function helpMessage(){
             ques += `  -l | --list:  Lists all current files hosted on the drive\n`;
             ques += `  -h | --help:  Display help message\n`
             ques += `  -d | --delete:  Delete a file\n`
+            ques += `  -u | --upload:  Upload a file\n`
             ques += `  -ls | --listsize:  Lists the files with file size included\n`;
             ques += `  -lm | --listmodification:  Lists user which last modified each file along with the time\n`;
             ques += `  exit | quit:  Exit the Clowns who Code Command Line Interface`;
