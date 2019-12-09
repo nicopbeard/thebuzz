@@ -291,6 +291,7 @@ function helpMessage(){
             ques += `  -h | --help:  Display help message\n`.brightCyan;
             ques += `  -d | --delete:  Delete a file\n`.brightCyan;
             ques += `  -l | --list:  Lists all current files hosted on the drive\n`.brightCyan;
+            ques += `  -u | --upload:  Uploads current file to the drive\n`.brightCyan;
             ques += `  -ls | --listsize:  Lists the files with file size included\n`.brightCyan;
             ques += `  -lm | --listmodification:  Lists user which last modified each file along with the time\n`.brightCyan;
             ques += `  exit | quit:  Exit the Clowns who Code Command Line Interface`.brightCyan;
