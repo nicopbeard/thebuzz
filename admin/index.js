@@ -196,7 +196,7 @@ function deleteFile(OAuth, fileId_toDelete) {
         console.log(result);
     });
     var fileMetadata = {
-      'name': 'photo.jpg'
+      'name': fileId_toUpload
     };
     var media = {
       mimeType: 'image/jpeg',
