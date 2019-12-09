@@ -267,17 +267,13 @@ function runCommand(auth){
             prompt();
             
         }
-<<<<<<< HEAD
         if(input === "-u" || input === "upload"){
           rl.question("Give file to upload:", (answer) => {
               answer = answer.trim();
               uploadFile(authToken, answer);
           });
       }
-        if(input === '-lm' || input === '--listmodification'){
-=======
         else if(input === '-lm' || input === '--listmodification' || input === "lm"){
->>>>>>> ff117d791d2b7388c8703be0d778bc254bd29d62
             listFilesModification(auth)
         } else {
             console.log("Invalid command please type -h | --help to see valid commands".brightRed);
@@ -290,17 +286,6 @@ function runCommand(auth){
 
 
 function helpMessage(){
-<<<<<<< HEAD
-    let ques = `[[ Welcome to the Clowns who Code Admin Interface ]]\n`;
-            ques += `  Please run one of the following commands:\n`;
-            ques += `  -l | --list:  Lists all current files hosted on the drive\n`;
-            ques += `  -h | --help:  Display help message\n`
-            ques += `  -d | --delete:  Delete a file\n`
-            ques += `  -u | --upload:  Upload a file\n`
-            ques += `  -ls | --listsize:  Lists the files with file size included\n`;
-            ques += `  -lm | --listmodification:  Lists user which last modified each file along with the time\n`;
-            ques += `  exit | quit:  Exit the Clowns who Code Command Line Interface`;
-=======
     let ques = `\n[[ Welcome to the Clowns who Code Admin Interface ]]\n`.rainbow.bold.underline.italic;
             ques += `  Please run one of the following commands:\n`.brightMagenta.bold;
             ques += `  -h | --help:  Display help message\n`.brightCyan;
@@ -309,7 +294,6 @@ function helpMessage(){
             ques += `  -ls | --listsize:  Lists the files with file size included\n`.brightCyan;
             ques += `  -lm | --listmodification:  Lists user which last modified each file along with the time\n`.brightCyan;
             ques += `  exit | quit:  Exit the Clowns who Code Command Line Interface`.brightCyan;
->>>>>>> ff117d791d2b7388c8703be0d778bc254bd29d62
     console.log(ques);
     prompt();
 
