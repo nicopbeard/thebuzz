@@ -8,6 +8,8 @@ class NewEntryForm {
      */
     private static readonly NAME = "NewEntryForm";
 
+    
+
     /**
      * Track if the Singleton has been initialized
      */
@@ -63,7 +65,17 @@ class NewEntryForm {
         // that neither is empty
         let msg = "" + $("#" + NewEntryForm.NAME + "-message").val();
         let id = $(this).data("value");
+        let lat;
+        let long;
+
+        navigator.geolocation.getCurrentPosition(function(position){
+        lat = position.coords.latitude;
+        long = position.coords.longitude;
+        
+
         console.log(id);
+        console.log(lat);
+        console.log(long);
         
         //formData.append('senderId', id);
         //formData.append('text', msg);
@@ -97,7 +109,10 @@ class NewEntryForm {
                         nUpVotes: 0,
                         nDownVotes: 0,
                         fileName: (<HTMLInputElement>document.getElementById('docpicker')).value,
-                        file: reader.result
+                        file: reader.result,
+                        latitude: lat,
+                        longitude: long
+
                     }),
                     processData: false,
                     success: NewEntryForm.onSubmitResponse
@@ -109,7 +124,9 @@ class NewEntryForm {
                     nUpVotes: 0,
                     nDownVotes: 0,
                     fileName: (<HTMLInputElement>document.getElementById('docpicker')).value,
-                    file: reader.result
+                    file: reader.result,
+                    latitude: lat,
+                    longitude: long
                 }));
 
                 (<HTMLInputElement>document.getElementById('docpicker')).value = '';
@@ -125,7 +142,9 @@ class NewEntryForm {
                     text: msg,
                     nUpVotes: 0,
                     nDownVotes: 0,
-                    file: 'null'
+                    file: 'null',
+                    latitude: lat,
+                    longitude: long
                 }),
                 processData: false,
                 success: NewEntryForm.onSubmitResponse
@@ -136,8 +155,12 @@ class NewEntryForm {
                 text: msg,
                 nUpVotes: 0,
                 nDownVotes: 0,
+                latitude: lat,
+                longitude: long
             }));
         }
+    });  // end of lambda for geolocation
+    
     }
 
     /**

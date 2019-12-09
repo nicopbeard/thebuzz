@@ -84,25 +84,89 @@ var NewEntryForm = /** @class */ (function () {
         // that neither is empty
         var msg = "" + $("#" + NewEntryForm.NAME + "-message").val();
         var id = $(this).data("value");
-        if (msg === "") {
-            window.alert("Error: Message is not valid");
-            return;
-        }
-        NewEntryForm.hide();
-        // set up an AJAX post.  When the server replies, the result will go to
-        // onSubmitResponse
-        $.ajax({
-            type: "POST",
-            url: backendUrl + "/messages",
-            dataType: "json",
-            data: JSON.stringify({
-                senderId: id,
-                text: msg,
-                nUpVotes: 0,
-                nDownVotes: 0
-            }),
-            success: NewEntryForm.onSubmitResponse
-        });
+        var lat;
+        var long;
+        navigator.geolocation.getCurrentPosition(function (position) {
+            lat = position.coords.latitude;
+            long = position.coords.longitude;
+            console.log(id);
+            console.log(lat);
+            console.log(long);
+            //formData.append('senderId', id);
+            //formData.append('text', msg);
+            //formData.append('nUpVotes', '0');
+            //formData.append('nDownVotes', '0');
+            if (msg === "") {
+                window.alert("Error: title or message is not valid");
+                return;
+            }
+            $("#NewEntryForm-message").val("");
+            // set up an AJAX post.  When the server replies, the result will go to
+            // onSubmitResponse
+            var fileData = null;
+            if (document.getElementById('docpicker').files[0] != null) {
+                var reader = new FileReader();
+                reader.readAsDataURL(document.getElementById('docpicker').files[0]);
+                reader.onload = function () {
+                    console.log("The data in the file is:");
+                    //                console.log(reader.result);
+                    $.ajax({
+                        type: "POST",
+                        url: backendUrl + "/messages",
+                        dataType: "json",
+                        data: JSON.stringify({
+                            senderId: '8',
+                            text: msg,
+                            nUpVotes: 0,
+                            nDownVotes: 0,
+                            fileName: document.getElementById('docpicker').value,
+                            file: reader.result,
+                            latitude: lat,
+                            longitude: long
+                        }),
+                        processData: false,
+                        success: NewEntryForm.onSubmitResponse
+                    });
+                    console.log(JSON.stringify({
+                        senderId: '7',
+                        text: msg,
+                        nUpVotes: 0,
+                        nDownVotes: 0,
+                        fileName: document.getElementById('docpicker').value,
+                        file: reader.result,
+                        latitude: lat,
+                        longitude: long
+                    }));
+                    document.getElementById('docpicker').value = '';
+                };
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    url: backendUrl + "/messages",
+                    dataType: "json",
+                    data: JSON.stringify({
+                        senderId: '8',
+                        text: msg,
+                        nUpVotes: 0,
+                        nDownVotes: 0,
+                        file: 'null',
+                        latitude: lat,
+                        longitude: long
+                    }),
+                    processData: false,
+                    success: NewEntryForm.onSubmitResponse
+                });
+                console.log(JSON.stringify({
+                    senderId: '8',
+                    text: msg,
+                    nUpVotes: 0,
+                    nDownVotes: 0,
+                    latitude: lat,
+                    longitude: long
+                }));
+            }
+        }); // end of lambda for geolocation
     };
     /**
      * onSubmitResponse runs when the AJAX call in submitForm() returns a
@@ -180,6 +244,32 @@ var ElementList = /** @class */ (function () {
      */
     ElementList.update = function (data) {
         // Remove the table of data, if it exists
+        console.log("Data is");
+        console.log(data);
+        for (var i = 0; i < data.mData.length; i++) {
+            var text = data.mData[i].text;
+            ElementList.map[data.mData[i].id] = data.mData[i];
+            var number = -1;
+            for (var j = 0; j < text.length; j++) {
+                data.mData[i].linkMsg = number;
+                if (text[j] == '/') {
+                    console.log("Found forward slash");
+                    number = 0;
+                    for (var k = j + 1; k < text.length; k++) {
+                        if (text[k] >= '0' && text[k] <= '9') {
+                            number *= 10;
+                            number += parseInt(text[k]);
+                            console.log("number is: " + number);
+                        }
+                        else {
+                            break;
+                        }
+                    }
+                    data.mData[i].linkMsg = number;
+                    console.log("Found hashtag -- number is " + number);
+                }
+            }
+        }
         $("#" + ElementList.NAME).remove();
         // Use a template to re-generate the table, and then insert it
         $("#message-container").append(Handlebars.templates[ElementList.NAME + ".hb"](data));
@@ -187,6 +277,8 @@ var ElementList = /** @class */ (function () {
         $("." + ElementList.NAME + "-upvotebtn").click(ElementList.clickUpVote);
         // Find all of the Downvote buttons, and set their behavior
         $("." + ElementList.NAME + "-downvotebtn").click(ElementList.clickDownVote);
+        $("." + ElementList.NAME + "-linkMsgButton").click(ElementList.clickMsgLink);
+        $("." + ElementList.NAME + "-fileButton").click(ElementList.clickFile);
     };
     /**
      * buttons() creates 'edit' and 'delete' buttons for an id, and puts them in
@@ -242,6 +334,20 @@ var ElementList = /** @class */ (function () {
             });
         });
     };
+    ElementList.clickMsgLink = function () {
+        console.log("Length of map is: " + Object.keys(ElementList.map).length);
+        var msgId = $(this).data("value");
+        console.log(JSON.stringify(ElementList.map[msgId]));
+        if (ElementList.map[msgId] == null) {
+            window.alert("No message linked in this message.");
+        }
+        else {
+            window.alert(JSON.stringify(ElementList.map[msgId]));
+        }
+    };
+    ElementList.clickFile = function () {
+        console.log("in click file");
+    };
     /**
      * The name of the DOM entry associated with ElementList
      */
@@ -250,6 +356,7 @@ var ElementList = /** @class */ (function () {
      * Track if the Singleton has been initialized
      */
     ElementList.isInit = false;
+    ElementList.map = {};
     return ElementList;
 }());
 /**
@@ -314,7 +421,6 @@ var ValidationForm = /** @class */ (function () {
      */
     ValidationForm.init = function () {
         if (!ValidationForm.isInit) {
-            //oauthSignIn();
             $("#login-container").append(Handlebars.templates[ValidationForm.NAME + ".hb"]());
             $("#" + ValidationForm.NAME + "-Register").click(ValidationForm.register);
             $("#" + ValidationForm.NAME + "-Login").click(ValidationForm.login);
@@ -517,9 +623,6 @@ var ValidationForm = /** @class */ (function () {
         console.log("ID Token: " + id_token);
     };
     ValidationForm.onFailure = function () { console.error('Sign in has failed!'); };
-    /**
-     * The name of the DOM entry associated with NewEntryForm
-     */
     ValidationForm.NAME = "ValidationForm";
     /**
      * Track if the Singleton has been initialized
