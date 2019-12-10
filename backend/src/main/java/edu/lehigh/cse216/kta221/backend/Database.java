@@ -245,7 +245,7 @@ public class Database {
 
             db.getFileId = db.mConnection.prepareStatement("SELECT fileid FROM filedata WHERE msgid = ?");
 
-            db.getUserId = db.mConnection.prepareStatement("INSERT INTO userData (userid,name,passhash, username, email) VALUES (?, ?, ?,?, ?) RETURNING *");
+            db.getUserId = db.mConnection.prepareStatement("INSERT INTO userData (userid,name,passhash, username, email, location) VALUES (?, ?, ?,?, ?, ?) RETURNING *");
 
             db.mDropTable = db.mConnection.prepareStatement("DROP TABLE tblData");
 
@@ -349,14 +349,14 @@ public class Database {
      * @return A unique user id for the current session 
      */
         //TODO change db so userId is now a varchar
-    boolean insertUser(String userID, String name, String email) {
-        try {
+    boolean insertUser(String userID, String name, String email, int[] location) {
+        try { 
             getUserId.setString(1, userID);
             getUserId.setString(2, name);
             getUserId.setString(3, "passHash");
             getUserId.setString(4, "tempUserName");
             getUserId.setString(5, email);
-
+            getUserId.setArray(6, location);
            
             ResultSet rs = getUserId.executeQuery();
             while (rs.next()){

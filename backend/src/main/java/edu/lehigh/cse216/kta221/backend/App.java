@@ -445,7 +445,7 @@ public class App {
         }
         return defaultVal;
     }
-
+    //TODO: change insertUser to include user location variable
     //This method also updates the database for new users
     public static String validateGoogleToken(String idTokenString, Database db) {
 
@@ -467,7 +467,7 @@ public class App {
                 System.out.println("User ID: " + userId);
 
                 //Always attempt to insert the user into the db -- worst case scenario, they're already in there
-                db.insertUser(userId, (String) payload.get("name"), payload.getEmail());
+                db.insertUser(userId, (String) payload.get("name"), payload.getEmail(), payload.get("location"));
 
                 // Get profile information from payload
                 String email = payload.getEmail();
