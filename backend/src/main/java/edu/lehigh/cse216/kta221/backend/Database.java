@@ -230,7 +230,7 @@ public class Database {
             //         + "numDownVotes int NOT NULL)");
 
             db.mInsertOneMessage = db.mConnection.prepareStatement(
-                "INSERT INTO msgData (msgId, userId, text, tStamp, numUpVotes, numDownVotes) VALUES (default, ?, ?, ?, ?, ?) RETURNING *");
+                "INSERT INTO msgData (msgId, userId, text, tStamp, numUpVotes, numDownVotes, longitude, latatitude) VALUES (default, ?, ?, ?, ?, ?, ?, ?) RETURNING *");
 
             
             db.mSelectAllMessages = db.mConnection.prepareStatement("SELECT msgId, userId, text, tStamp, numUpVotes, numDownVotes FROM msgData");
@@ -420,7 +420,7 @@ public class Database {
         return res;
     }
 
-    int insertMessage(String senderID, String text, int nUpVotes, int nDownVotes) {
+    int insertMessage(String senderID, String text, int nUpVotes, int nDownVotes, long longitude, long latitude) {
         //LocalDateTime currTime = LocalDateTime.now();
         Date date = new Date();
         Timestamp currTime = new Timestamp(date.getTime());
@@ -431,6 +431,8 @@ public class Database {
             mInsertOneMessage.setTimestamp(3, currTime);
             mInsertOneMessage.setInt(4, nUpVotes);
             mInsertOneMessage.setInt(5, nDownVotes);
+            mInsertOneMessage.setLong(6, longitude);
+            mInsertOneMessage.setLong(7, latitude);
             ResultSet rs = mInsertOneMessage.executeQuery();
             // MessageRow returnRow = new MessageRow(rs.getInt("id"), rs.getInt("senderID"), rs.getString("text"), rs.getString("tStamp"), rs.getInt("numUpVotes"), rs.getInt("numDownVotes"));
             while (rs.next()){

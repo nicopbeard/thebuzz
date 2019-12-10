@@ -183,7 +183,7 @@ public class App {
 
             MessageRequest req = gson.fromJson(request.body(), MessageRequest.class);
 
-            int newId = db.insertMessage(req.senderId, req.text, 0, 0);
+            int newId = db.insertMessage(req.senderId, req.text, 0, 0, req.longitude, req.latitude);
 
             // Validate token
             // if(!validToken(req.userId, req.googleToken)) {
