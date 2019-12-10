@@ -24,4 +24,8 @@ public class MessageRequest {
     public String fileName;
 
     public String file;
+
+    public long longitutde;
+
+    public long latitude;
 }
