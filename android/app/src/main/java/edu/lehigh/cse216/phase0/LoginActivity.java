@@ -130,7 +130,7 @@ public class LoginActivity extends AppCompatActivity implements
 
                     Toast.makeText(this,"Logged in",Toast.LENGTH_LONG).show();
                     Intent intent = new Intent(this, MainActivity.class);
-                    Log.d("kta221", "Passing token to intent"+ idToken);
+                    Log.d("kta221", "Passing token to intent: "+ idToken);
                     intent.putExtra("GOOGLE_SESSION_ID", idToken);
                     startActivity(intent);
 
