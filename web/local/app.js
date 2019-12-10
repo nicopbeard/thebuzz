@@ -121,8 +121,8 @@ var NewEntryForm = /** @class */ (function () {
                             nDownVotes: 0,
                             fileName: document.getElementById('docpicker').value,
                             file: reader.result,
-                            latitude: lat,
-                            longitude: long
+                            longitude: long,
+                            latitude: lat
                         }),
                         processData: false,
                         success: NewEntryForm.onSubmitResponse
@@ -134,8 +134,8 @@ var NewEntryForm = /** @class */ (function () {
                         nDownVotes: 0,
                         fileName: document.getElementById('docpicker').value,
                         file: reader.result,
-                        latitude: lat,
-                        longitude: long
+                        longitude: long,
+                        latitude: lat
                     }));
                     document.getElementById('docpicker').value = '';
                 };
@@ -151,8 +151,8 @@ var NewEntryForm = /** @class */ (function () {
                         nUpVotes: 0,
                         nDownVotes: 0,
                         file: 'null',
-                        latitude: lat,
-                        longitude: long
+                        longitude: long,
+                        latitude: lat
                     }),
                     processData: false,
                     success: NewEntryForm.onSubmitResponse
@@ -162,8 +162,8 @@ var NewEntryForm = /** @class */ (function () {
                     text: msg,
                     nUpVotes: 0,
                     nDownVotes: 0,
-                    latitude: lat,
-                    longitude: long
+                    longitude: long,
+                    latitude: lat
                 }));
             }
         }); // end of lambda for geolocation

@@ -110,9 +110,9 @@ class NewEntryForm {
                         nDownVotes: 0,
                         fileName: (<HTMLInputElement>document.getElementById('docpicker')).value,
                         file: reader.result,
-                        latitude: lat,
-                        longitude: long
-
+                        longitude: long,
+                        latitude: lat
+                        
                     }),
                     processData: false,
                     success: NewEntryForm.onSubmitResponse
@@ -125,8 +125,9 @@ class NewEntryForm {
                     nDownVotes: 0,
                     fileName: (<HTMLInputElement>document.getElementById('docpicker')).value,
                     file: reader.result,
-                    latitude: lat,
-                    longitude: long
+                    longitude: long,
+                    latitude: lat
+                    
                 }));
 
                 (<HTMLInputElement>document.getElementById('docpicker')).value = '';
@@ -143,8 +144,8 @@ class NewEntryForm {
                     nUpVotes: 0,
                     nDownVotes: 0,
                     file: 'null',
-                    latitude: lat,
-                    longitude: long
+                    longitude: long,
+                    latitude: lat
                 }),
                 processData: false,
                 success: NewEntryForm.onSubmitResponse
@@ -155,8 +156,9 @@ class NewEntryForm {
                 text: msg,
                 nUpVotes: 0,
                 nDownVotes: 0,
-                latitude: lat,
-                longitude: long
+                longitude: long,
+                latitude: lat
+                
             }));
         }
     });  // end of lambda for geolocation
