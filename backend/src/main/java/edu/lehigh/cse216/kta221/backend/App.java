@@ -467,7 +467,7 @@ public class App {
                 System.out.println("User ID: " + userId);
 
                 //Always attempt to insert the user into the db -- worst case scenario, they're already in there
-                db.insertUser(userId, (String) payload.get("name"), payload.getEmail());
+                db.insertUser(userId, (String) payload.get("name"), payload.getEmail(), 0, 0);
 
                 // Get profile information from payload
                 String email = payload.getEmail();
