@@ -83,19 +83,23 @@ public class Database {
         String tStamp;
         int nUpVotes;
         int nDownVotes;
+        float longitude;
+        float latitude;
         ArrayList<Comment> comments;
         com.google.api.services.drive.model.File file;
 
         /**
          * Construct a MessageRow object by providing values for its fields
          */
-        public MessageRow(int id, String senderId, String text, String tStamp, int nUpVotes, int nDownVotes) {
+        public MessageRow(int id, String senderId, String text, String tStamp, int nUpVotes, int nDownVotes, float longitude, float latitude) {
             this.id = id;
             this.senderId = senderId;
             this.text = text;
             this.tStamp = tStamp;
             this.nUpVotes = nUpVotes;
             this.nDownVotes = nDownVotes;
+            this.longitude = longitude;
+            this.latitude = latitude;
             comments = new ArrayList<>();
         }
 
@@ -233,7 +237,7 @@ public class Database {
                 "INSERT INTO msgData (msgId, userId, text, tStamp, numUpVotes, numDownVotes, longitude, latatitude) VALUES (default, ?, ?, ?, ?, ?, ?, ?) RETURNING *");
 
             
-            db.mSelectAllMessages = db.mConnection.prepareStatement("SELECT msgId, userId, text, tStamp, numUpVotes, numDownVotes FROM msgData");
+            db.mSelectAllMessages = db.mConnection.prepareStatement("SELECT msgId, userId, text, tStamp, numUpVotes, numDownVotes, longitude, latitude FROM msgData");
             
             // db.mLastAdded = db.mConnection.prepareStatement("SELECT LAST (id) FROM msgData");
 
@@ -349,15 +353,15 @@ public class Database {
      * @return A unique user id for the current session 
      */
         //TODO change db so userId is now a varchar
-    boolean insertUser(String userID, String name, String email, long longitude, long latitude) {
+    boolean insertUser(String userID, String name, String email, float longitude, float latitude) {
         try { 
             getUserId.setString(1, userID);
             getUserId.setString(2, name);
             getUserId.setString(3, "passHash");
             getUserId.setString(4, "tempUserName");
             getUserId.setString(5, email);
-            getUserId.setLong(6, longitude);
-            getUserId.setLong(7, latitude);
+            getUserId.setFloat(6, longitude);
+            getUserId.setFloat(7, latitude);
            
             ResultSet rs = getUserId.executeQuery();
             while (rs.next()){
@@ -421,7 +425,7 @@ public class Database {
         return res;
     }
 
-    int insertMessage(String senderID, String text, int nUpVotes, int nDownVotes, long longitude, long latitude) {
+    int insertMessage(String senderID, String text, int nUpVotes, int nDownVotes, float longitude, float latitude) {
         //LocalDateTime currTime = LocalDateTime.now();
         Date date = new Date();
         Timestamp currTime = new Timestamp(date.getTime());
@@ -432,8 +436,8 @@ public class Database {
             mInsertOneMessage.setTimestamp(3, currTime);
             mInsertOneMessage.setInt(4, nUpVotes);
             mInsertOneMessage.setInt(5, nDownVotes);
-            mInsertOneMessage.setLong(6, longitude);
-            mInsertOneMessage.setLong(7, latitude);
+            mInsertOneMessage.setFloat(6, longitude);
+            mInsertOneMessage.setFloat(7, latitude);
             ResultSet rs = mInsertOneMessage.executeQuery();
             // MessageRow returnRow = new MessageRow(rs.getInt("id"), rs.getInt("senderID"), rs.getString("text"), rs.getString("tStamp"), rs.getInt("numUpVotes"), rs.getInt("numDownVotes"));
             while (rs.next()){
@@ -510,7 +514,7 @@ public class Database {
         try {
             ResultSet rs = mSelectAllMessages.executeQuery();
             while (rs.next()) {
-                res.add(new MessageRow(rs.getInt("msgid"), rs.getString("userid"), rs.getString("text"), rs.getString("tStamp"), rs.getInt("numUpVotes"), rs.getInt("numDownVotes") ));
+                res.add(new MessageRow(rs.getInt("msgid"), rs.getString("userid"), rs.getString("text"), rs.getString("tStamp"), rs.getInt("numUpVotes"), rs.getInt("numDownVotes"), rs.getFloat("longitude"), rs.getFloat("latitude") ));
             }
             rs.close();
             return res;

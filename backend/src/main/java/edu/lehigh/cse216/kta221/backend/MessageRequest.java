@@ -25,7 +25,7 @@ public class MessageRequest {
 
     public String file;
 
-    public long longitude;
+    public float longitude;
 
-    public long latitude;
+    public float latitude;
 }
